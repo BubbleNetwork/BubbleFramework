@@ -1,0 +1,5 @@
+name: BubbleFramework
+main: com.bubblenetwork.api.framework.BubbleNetwork
+version: 1.0
+description: 'A framework for all bubblenetwork plugins'
+authors: ["JAC0B"]

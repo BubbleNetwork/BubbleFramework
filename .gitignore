@@ -45,3 +45,15 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.xml
+*.class
+out/production/BubbleFramework/META-INF/MANIFEST.MF
+*.iml
+.idea/.name
+*.MF
+out/artifacts/BubbleFramework_jar/BubbleFramework.jar
+*.idea
+*.ipl
+.idea/*
+out/*
+out
