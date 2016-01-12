@@ -6,6 +6,7 @@ import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
 import com.thebubblenetwork.api.framework.plugin.BubblePluginLoader;
 import com.thebubblenetwork.api.framework.plugin.PluginDescriptionFile;
 import com.thebubblenetwork.api.framework.ranks.Rank;
+import com.thebubblenetwork.api.framework.util.files.PropertiesFile;
 import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
@@ -33,21 +34,19 @@ public class BubbleNetwork extends JavaPlugin {
     protected static List<BubblePlugin> pluginList = new ArrayList<>();
     private static BubbleNetwork instance;
     private static Random random = new Random();
+    private static final File PROPERTIES = new File("bubblenetwork.properties");
     private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
             ChatColor.BLUE + "] " + ChatColor.GRAY;
-    private static String SQLHOST = "localhost", SQLPORT = "3306", SQLNAME = "root", SQLPASS = null, SQLDB
-            = "bubbleserver";
+    private static String SQLHOST ,SQLPORT ,SQLNAME ,SQLPASS ,SQLDB;
     private static String chatFormat = "{prefix}{name}{suffix}{message}";
     private BubbleBarAPI api;
     private VersionUTIL util;
     private MenuManager manager = new MenuManager();
-    private SQLConnection connection = new SQLConnection(SQLHOST, SQLPORT, SQLDB, SQLNAME, SQLPASS);
+    private SQLConnection connection;
+    private PropertiesFile file;
 
     public BubbleNetwork() {
         super();
-        instance = this;
-        api = new BubbleBarAPI();
-        util = new VersionUTIL();
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
         Map<PluginDescriptionFile, File> loaderList = new HashMap<>();
@@ -142,10 +141,36 @@ public class BubbleNetwork extends JavaPlugin {
     }
 
     public void onEnable() {
+        instance = this;
+        api = new BubbleBarAPI();
+        util = new VersionUTIL();
+        try {
+            file = new PropertiesFile(PROPERTIES);
+            SQLHOST = file.getString("database-ip");
+            SQLPORT = file.getString("database-port");
+            SQLDB = file.getString("database-name");
+            SQLNAME = file.getString("database-user");
+            SQLPASS = file.getString("database-password");
+        } catch (Exception e) {
+            //Automatic Catch Statement
+            e.printStackTrace();
+            getLogger().severe("Could not load properties file, Plugin is disabling");
+            try {
+                PropertiesFile.generateFresh(PROPERTIES,
+                                             new String[]{"database-ip","database-port","database-name","database-user","database-password"},
+                                             new String[]{"localhost","3306","bubble","root",null});
+            } catch (Exception e1) {
+                //Automatic Catch Statement
+                e1.printStackTrace();
+            } getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        connection = new SQLConnection(SQLHOST, SQLPORT, SQLDB, SQLNAME, SQLPASS.equals("null") ? null : SQLPASS);;
         try {
             startConnection();
         } catch (Exception ex) {
-            new Exception("Could not load SQL, Plugin is disabling", ex).printStackTrace();
+            ex.printStackTrace();
+            getLogger().severe("Could not load SQL, Plugin is disabling");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
