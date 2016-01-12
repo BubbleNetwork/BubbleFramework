@@ -33,7 +33,7 @@ import java.util.*;
 public class BubbleNetwork extends JavaPlugin {
     protected static List<BubblePlugin> pluginList = new ArrayList<>();
     private static BubbleNetwork instance;
-    private static Random random = new Random();
+    private static final Random random = new Random();
     private static final File PROPERTIES = new File("bubblenetwork.properties");
     private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
             ChatColor.BLUE + "] " + ChatColor.GRAY;
