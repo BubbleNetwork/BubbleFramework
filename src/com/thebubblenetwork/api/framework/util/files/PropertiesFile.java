@@ -22,6 +22,26 @@ import java.util.Map;
  * Project: BubbleFramework
  */
 public class PropertiesFile {
+    public static void generateFresh(File write,String[] variables,String[] values) throws Exception{
+        if(variables.length != values.length)throw new Exception("Variables and values are not the same size");
+        if(write.exists())write.delete();
+        write.createNewFile();
+        FileWriter writer = new FileWriter(write);
+        BufferedWriter bufferedWriter = new BufferedWriter(writer);
+        for(int i = 0;i < variables.length;i++){
+            try {
+                bufferedWriter.write(variables[i] + ": " + values[i] + "\n");
+            }
+            catch(Exception ex){
+                bufferedWriter.close();
+                writer.close();
+                throw new Exception("Error while writing",ex);
+            }
+        }
+        bufferedWriter.close();
+        writer.close();
+    }
+
     private Map<String,String> data = new HashMap<>();
     public PropertiesFile(File config) throws Exception{
         if(!config.exists()){
