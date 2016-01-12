@@ -59,13 +59,15 @@ public class PropertiesFile {
         try {
             while ((nextline = bufferedReader.readLine()) != null){
                 if(!nextline.startsWith("#")){
-                    String[] properties = nextline.split(":");
+                    String[] properties = nextline.split(": ");
                     if(properties.length != 2)throw new Exception("Invalid configuration \'" + nextline + "\'");
                     data.put(properties[0],properties[1]);
                 }
             }
         }
         catch (IOException ex){
+            bufferedReader.close();
+            reader.close();
             throw new IOException("An internal error has occurred",ex);
         }
     }
@@ -75,6 +77,6 @@ public class PropertiesFile {
     }
 
     public Number getNumber(String s)throws ParseException{
-        return NumberFormat.getInstance().parse(s);
+        return NumberFormat.getInstance().parse(getString(s));
     }
 }
