@@ -44,7 +44,7 @@ public class TitleMessanger {
 
             packetinjectorconstructor = ReflectionUTIL.getConstructor(packetinjector, true, packetaction,
                                                                       ichatbasecomponent);
-            packetplayoutchatconstructor = ReflectionUTIL.getConstructor(packetplayoutchat, true, ichatbasecomponent);
+            packetplayoutchatconstructor = ReflectionUTIL.getConstructor(packetplayoutchat, true, ichatbasecomponent,int.class);
             packettitletimesconstructor = ReflectionUTIL.getConstructor(packetinjector, true, packetaction, int
                     .class, int.class, int.class);
         } catch (Exception ex) {
@@ -120,7 +120,7 @@ public class TitleMessanger {
     private static Object createAction(Object o) throws Throwable {
 
         try {
-            return packetplayoutchatconstructor.newInstance(o);
+            return packetplayoutchatconstructor.newInstance(o,2);
         } catch (InstantiationException e) {
             throw e.getCause();
         } catch (IllegalAccessException e) {
