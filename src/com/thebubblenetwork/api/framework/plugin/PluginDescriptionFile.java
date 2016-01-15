@@ -80,30 +80,6 @@ public final class PluginDescriptionFile {
         this.main = mainClass;
     }
 
-    private static List<String> makePluginNameList(Map<?, ?> map, String key) throws InvalidDescriptionException {
-        Object value = map.get(key);
-        if (value == null) {
-            return ImmutableList.of();
-        }
-        else {
-            com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
-
-            try {
-                Iterator var5 = ((Iterable) value).iterator();
-
-                while (var5.hasNext()) {
-                    Object ex = var5.next();
-                    builder.add(ex.toString().replace(' ', '_'));
-                }
-            } catch (ClassCastException var6) {
-                throw new InvalidDescriptionException(var6, key + " is of wrong type");
-            } catch (NullPointerException var7) {
-                throw new InvalidDescriptionException(var7, "invalid " + key + " format");
-            }
-
-            return builder.build();
-        }
-    }
 
     public static org.bukkit.plugin.PluginDescriptionFile asMirror(PluginDescriptionFile f) {
         return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getVersion(), f.getMain());
