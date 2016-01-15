@@ -106,7 +106,7 @@ public final class PluginDescriptionFile {
     }
 
     public static org.bukkit.plugin.PluginDescriptionFile asMirror(PluginDescriptionFile f) {
-        return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getDescription(), f.getMain());
+        return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getVersion(), f.getMain());
     }
 
     public String getName() {
