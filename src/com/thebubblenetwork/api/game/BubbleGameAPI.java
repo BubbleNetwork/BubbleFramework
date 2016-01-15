@@ -44,19 +44,48 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             "Tokens", site = "thebubblenetwork",playerneed = "Players needed", Starting = "Starting in";
     private static BubbleGameAPI instance;
 
-    private static BoardPreset LOBBY = new BoardPreset("Lobby", new BoardModuleBuilder("Playing", 12).withDisplay
-            (playingtitle).build(), new BoardModuleBuilder("PlayingValue", 11).withRandomDisplay().build(), new
-            BoardModuleBuilder("Spacer1", 10).withRandomDisplay().build(), new BoardModuleBuilder("Rank", 9)
-            .withDisplay(ranktitle).build(), new BoardModuleBuilder("RankValue", 8).withRandomDisplay().build(), new
-            BoardModuleBuilder("Spacer2", 7).withRandomDisplay().build(), new BoardModuleBuilder("Tokens", 6)
-            .withDisplay(tokenstitle).build(), new BoardModuleBuilder("TokensValue", 5).withRandomDisplay().build(),
-                                                       new BoardModuleBuilder("Spacer3", 4).withRandomDisplay().build
-                                                               (), new BoardModuleBuilder("Status", 3).withDisplay
-            (ChatColor.BLUE.toString() + ChatColor.BOLD.toString()).build(), new BoardModuleBuilder("StatusValue", 2)
-                                                               .withRandomDisplay().build(), new BoardModuleBuilder
-                                                               ("Spacer4", 1).withRandomDisplay().build(), new
-                                                               BoardModuleBuilder("site", 0).withDisplay(site).build
-            ()) {
+    private static BoardPreset LOBBY =
+            new BoardPreset("Lobby",
+                            new BoardModuleBuilder("Playing", 12)
+                                    .withDisplay(playingtitle)
+                                    .build(),
+                            new BoardModuleBuilder("PlayingValue", 11)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Spacer1", 10)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Rank", 9)
+                                    .withDisplay(ranktitle)
+                                    .build(),
+                            new BoardModuleBuilder("RankValue", 8)
+                                    .withRandomDisplay().
+                                    build(),
+                            new BoardModuleBuilder("Spacer2", 7)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Tokens", 6)
+                                    .withDisplay(tokenstitle)
+                                    .build(),
+                            new BoardModuleBuilder("TokensValue", 5)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Spacer3", 4)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Status", 3)
+                                    .withDisplay(ChatColor.BLUE.toString() + ChatColor.BOLD.toString())
+                                    .build()
+                    , new BoardModuleBuilder("StatusValue", 2)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("Spacer4", 1)
+                                    .withRandomDisplay()
+                                    .build(),
+                            new BoardModuleBuilder("site", 0)
+                                    .withDisplay(site)
+                                    .build()
+            ) {
 
         public void onEnable(BubbleBoardAPI board) {
             BubblePlayer player = BubblePlayer.get(Bukkit.getPlayer(board.getName()));
