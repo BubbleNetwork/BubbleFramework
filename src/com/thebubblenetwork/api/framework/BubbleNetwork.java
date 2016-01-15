@@ -47,6 +47,7 @@ public class BubbleNetwork extends JavaPlugin {
 
     public BubbleNetwork() {
         super();
+        instance = this;
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
         Map<PluginDescriptionFile, File> loaderList = new HashMap<>();
@@ -141,7 +142,6 @@ public class BubbleNetwork extends JavaPlugin {
     }
 
     public void onEnable() {
-        instance = this;
         api = new BubbleBarAPI();
         util = new VersionUTIL();
         try {
