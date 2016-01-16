@@ -180,32 +180,31 @@ public abstract class BubbleGameAPI extends BubblePlugin {
                 break Change;
             }
             try {
-                DownloadUtil.download(tempzip,LOBBYMAP);
+                DownloadUtil.download(tempzip, LOBBYMAP);
             } catch (Exception e) {
                 //Automatic Catch Statement
                 e.printStackTrace();
                 break Change;
             }
-            FileUTIL.setPermissions(tempzip,true,true,true);
+            FileUTIL.setPermissions(tempzip, true, true, true);
             File temp = new File("temp");
             try {
-                FileUTIL.unZip(tempzip.getPath(),temp.getPath());
+                FileUTIL.unZip(tempzip.getPath(), temp.getPath());
             } catch (IOException e) {
                 //Automatic Catch Statement
                 e.printStackTrace();
                 break Change;
             }
             tempzip.delete();
-            FileUTIL.setPermissions(temp,true,true,true);
+            FileUTIL.setPermissions(temp, true, true, true);
             try {
-                FileUTIL.copy(new File(temp + File.separator + "world"),worldfolder);
+                FileUTIL.copy(new File(temp + File.separator + "world"), worldfolder);
             } catch (IOException e) {
                 //Automatic Catch Statement
                 e.printStackTrace();
                 break Change;
             }
             FileUTIL.deleteDir(temp);
-            FileUTIL.setPermissions(worldfolder,true,true,true);
         }
         if (newstate == State.LOADING) {
             GameMap.doMaps();
