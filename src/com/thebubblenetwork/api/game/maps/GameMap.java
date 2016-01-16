@@ -111,7 +111,7 @@ public abstract class GameMap {
             //Automatic Catch Statement
             e.printStackTrace();
         } try {
-            FileUTIL.copy(new File(temp + File.separator + map.getZipped()), mapto);
+            FileUTIL.copy(new File(temp + File.separator + "world"), mapto);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -158,15 +158,6 @@ public abstract class GameMap {
     public MapData getData() {
         return data;
     }
-
-    public String getZipped() {
-        try {
-            return getData().getString(MapData.ZIPPEDID);
-        } catch (InvalidBaseException e) {
-            return getName();
-        }
-    }
-
 
     public String[] getDescription() {
         try {
