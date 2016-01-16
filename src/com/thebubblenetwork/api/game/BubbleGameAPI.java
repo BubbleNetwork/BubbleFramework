@@ -155,11 +155,10 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             GregorianCalendar now = new GregorianCalendar();
             now.add(Calendar.SECOND,10);
             api.timer = new GameTimer(20,now.getTimeInMillis()) {
-                int i = 10;
                 public void run() {
-                    if(i <= 3 || i % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(i),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
+                    long seconds = DateUtil.getDateDiff(new Date(getCurrent()), new Date(getEnd()), TimeUnit.SECONDS);
+                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
                     for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
-                    i--;
                 }
 
                 public void end() {
@@ -330,12 +329,11 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         setInstance(null);
     }
 
-    private static int WAIT = 30;
 
     public void startWaiting(){
         if(timer != null)return;
         GregorianCalendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.SECOND,WAIT);
+        calendar.add(Calendar.SECOND,30);
         final BoardPreset preset = LOBBY;
         BoardModule module = preset.getModule("Status");
         for(GameBoard board:GameBoard.getBoards()){
@@ -350,6 +348,8 @@ public abstract class BubbleGameAPI extends BubblePlugin {
                     BoardScore score = board.getScore(preset,module);
                     score.getTeam().setSuffix(String.valueOf(seconds));
                 }
+                if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),"",new Messages.TitleTiming(5,10,2));
+                for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
             }
 
             public void end(){
