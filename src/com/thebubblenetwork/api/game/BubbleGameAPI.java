@@ -154,10 +154,10 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             api.teleportPlayers(api.chosenmap, api.chosen);
             GregorianCalendar now = new GregorianCalendar();
             now.add(Calendar.SECOND,10);
-            api.timer = new GameTimer(20,now.getTimeInMillis()) {
+            api.timer = new GameTimer(5,now.getTimeInMillis()) {
                 public void run(int seconds) {
                     seconds += 1;
-                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
+                    Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
                     for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
                 }
 
