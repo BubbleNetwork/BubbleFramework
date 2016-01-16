@@ -137,8 +137,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     }
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (newstate.getPreset() != null)
+        if (newstate.getPreset() != null) for (Player p : Bukkit.getOnlinePlayers()) {
                 GameBoard.getBoard(p).enable(newstate.getPreset());
         }
         if (newstate == State.LOBBY && oldstate != State.HIDDEN && oldstate != State.LOADING) {
