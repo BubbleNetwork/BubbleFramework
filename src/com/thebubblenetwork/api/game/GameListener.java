@@ -124,22 +124,6 @@ public class GameListener implements Listener {
                 .getState() != BubbleGameAPI.State.ENDGAME);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onWorldInit(WorldLoadEvent e) {
-        World w = e.getWorld();
-        if (w.getName().equals("world")) {
-            w.getPopulators().clear();
-            if (craftworld.isInstance(w)) {
-                chunkgeneratorfield.setAccessible(true);
-                try {
-                    chunkgeneratorfield.set(w, VoidWorldGenerator.getGenerator());
-                } catch (IllegalAccessException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-    }
-
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDropItems(PlayerDropItemEvent e) {
         if (canDefault())
