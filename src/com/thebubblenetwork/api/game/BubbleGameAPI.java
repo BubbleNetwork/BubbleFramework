@@ -155,11 +155,9 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             GregorianCalendar now = new GregorianCalendar();
             now.add(Calendar.SECOND,10);
             api.timer = new GameTimer(20,now.getTimeInMillis()) {
-                int seconds = (int)DateUtil.getDateDiff(new Date(getStart()), new Date(getEnd()), TimeUnit.SECONDS)+1;
-                public void run() {
-                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
+                public void run(int seconds) {
+                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds+1),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
                     for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
-                    seconds--;
                 }
 
                 public void end() {
@@ -341,16 +339,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             score.getTeam().setSuffix(Starting);
         }
         timer = new GameTimer(20,calendar.getTimeInMillis()) {
-            int seconds = (int)DateUtil.getDateDiff(new Date(getStart()), new Date(getEnd()), TimeUnit.SECONDS)+1;
-            public void run() {
+            public void run(int seconds) {
                 BoardModule module = preset.getModule("StatusValue");
                 for(GameBoard board:GameBoard.getBoards()){
                     BoardScore score = board.getScore(preset,module);
                     score.getTeam().setSuffix(String.valueOf(seconds));
                 }
-                if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),"",new Messages.TitleTiming(5,10,2));
+                if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds+1),"",new Messages.TitleTiming(5,10,2));
                 for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
-                seconds--;
             }
 
             public void end(){
