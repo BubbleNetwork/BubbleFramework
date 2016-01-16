@@ -206,6 +206,8 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             FileUTIL.deleteDir(temp);
         }
         if (newstate == State.LOADING) {
+            World w = Bukkit.getWorld("world");
+            w.setAutoSave(false);
             GameMap.doMaps();
             api.setState(State.LOBBY);
         }
