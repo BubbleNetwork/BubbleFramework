@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * Created by Jacob on 04/01/2016.
  */
 public abstract class GameTimer{
-    private long start = System.currentTimeMillis();
+    private long start;
     private long end;
     private BukkitTask runnable;
     private int left;
@@ -20,6 +20,7 @@ public abstract class GameTimer{
     public GameTimer(int interval, final long end) {
         this.end = end;
         final GameTimer instance = this;
+        start = System.currentTimeMillis() + (interval * (1000 / 20));
         left = (int)((DateUtil.getDateDiff(new Date(getStart()), new Date(getEnd()), TimeUnit.MILLISECONDS) / (long)(1000 / 20))/interval);
         runnable = new BukkitRunnable() {
             private Date enddate = new Date(end);
@@ -34,15 +35,16 @@ public abstract class GameTimer{
                     }.runTask(BubbleNetwork.getInstance());
                     instance.cancel();
                 }
-                else
+                else {
+                    left--;
                     new BukkitRunnable() {
                         public void run() {
                             if (!instance.isCancelled()) {
                                 instance.run(left);
-                                instance.left--;
                             }
                         }
                     }.runTask(BubbleNetwork.getInstance());
+                }
             }
         }.runTaskTimerAsynchronously(BubbleNetwork.getInstance(), (long) interval, (long) interval);
     }
