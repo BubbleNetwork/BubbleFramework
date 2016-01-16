@@ -156,7 +156,8 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             now.add(Calendar.SECOND,10);
             api.timer = new GameTimer(20,now.getTimeInMillis()) {
                 public void run(int seconds) {
-                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds+1),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
+                    seconds += 1;
+                    if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
                     for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
                 }
 
@@ -345,7 +346,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
                     BoardScore score = board.getScore(preset,module);
                     score.getTeam().setSuffix(String.valueOf(seconds));
                 }
-                if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds+1),"",new Messages.TitleTiming(5,10,2));
+                if(seconds <= 3 || seconds % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),"",new Messages.TitleTiming(5,10,2));
                 for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
             }
 
