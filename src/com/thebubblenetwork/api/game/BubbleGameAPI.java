@@ -381,6 +381,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             getVotes().get(u).setVote(vote);
     }
 
+    public void win(Player p){
+        if(getState() != State.INGAME)return;
+        p.playSound(p.getLocation().getBlock().getLocation(),Sound.LEVEL_UP,5F,5F);
+        Messages.broadcastMessageTitle(ChatColor.BLUE + p.getName(),ChatColor.AQUA + "Has won the game",
+                                       new Messages.TitleTiming(5,20,20));
+        setState(State.ENDGAME);
+    }
+
     public abstract void onStateChange(State oldstate, State newstate);
 
     public abstract Kit getDefaultKit();
