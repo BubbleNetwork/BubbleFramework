@@ -32,7 +32,6 @@ public class FileUTIL {
         if (src.isDirectory()) {
             if (!dest.exists()) {
                 dest.mkdir();
-                //System.out.println("Directory copied from " + src + "  to " + dest);
             }
             String[] files = src.list();
             for (String file : files) {
@@ -67,43 +66,39 @@ public class FileUTIL {
         }
     }
 
-    public static void unZip(String zipFile, String extractFolder) {
-        try {
-            int BUFFER = 2048;
-            File file = new File(zipFile);
+    public static void unZip(String zipFile, String extractFolder) throws IOException{
+        int BUFFER = 2048;
+        File file = new File(zipFile);
 
-            ZipFile zip = new ZipFile(file);
-            String newPath = extractFolder;
+        ZipFile zip = new ZipFile(file);
+        String newPath = extractFolder;
 
-            new File(newPath).mkdir();
-            Enumeration zipFileEntries = zip.entries();
-            while (zipFileEntries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
-                String currentEntry = entry.getName();
+        new File(newPath).mkdir();
+        Enumeration zipFileEntries = zip.entries();
+        while (zipFileEntries.hasMoreElements()) {
+            ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+            String currentEntry = entry.getName();
 
-                File destFile = new File(newPath, currentEntry);
+            File destFile = new File(newPath, currentEntry);
 
-                File destinationParent = destFile.getParentFile();
+            File destinationParent = destFile.getParentFile();
 
-                destinationParent.mkdirs();
-                if (!entry.isDirectory()) {
-                    BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
+            destinationParent.mkdirs();
+            if (!entry.isDirectory()) {
+                BufferedInputStream is = new BufferedInputStream(zip.getInputStream(entry));
 
-                    byte[] data = new byte[BUFFER];
+                byte[] data = new byte[BUFFER];
 
-                    FileOutputStream fos = new FileOutputStream(destFile);
-                    BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
-                    int currentByte;
-                    while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
-                        dest.write(data, 0, currentByte);
-                    }
-                    dest.flush();
-                    dest.close();
-                    is.close();
+                FileOutputStream fos = new FileOutputStream(destFile);
+                BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
+                int currentByte;
+                while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+                    dest.write(data, 0, currentByte);
                 }
+                dest.flush();
+                dest.close();
+                is.close();
             }
-        } catch (Exception e) {
-            //System.out.println("ERROR: " + e.getMessage());
         }
     }
 }

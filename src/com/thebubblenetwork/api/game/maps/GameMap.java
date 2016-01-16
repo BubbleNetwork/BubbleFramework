@@ -105,8 +105,12 @@ public abstract class GameMap {
         if (mapto.exists())
             return;
         File temp = new File("temp");
-        FileUTIL.unZip(map.getZip().getPath(), temp.getPath());
         try {
+            FileUTIL.unZip(map.getZip().getPath(), temp.getPath());
+        } catch (IOException e) {
+            //Automatic Catch Statement
+            e.printStackTrace();
+        } try {
             FileUTIL.copy(new File(temp + File.separator + map.getZipped()), mapto);
         } catch (IOException e) {
             e.printStackTrace();
