@@ -6,6 +6,8 @@ import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
 import com.thebubblenetwork.api.framework.ranks.Rank;
 import com.thebubblenetwork.api.framework.util.files.FileUTIL;
+import com.thebubblenetwork.api.framework.util.http.DownloadUtil;
+import com.thebubblenetwork.api.framework.util.http.SSLUtil;
 import com.thebubblenetwork.api.framework.util.java.DateUtil;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
@@ -24,6 +26,7 @@ import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +34,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +47,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             ChatColor.BLUE + "" + ChatColor.BOLD + "Rank", tokenstitle = ChatColor.BLUE + "" + ChatColor.BOLD +
             "Tokens", site = "thebubblenetwork",playerneed = "Players needed", Starting = "Starting in";
     private static BubbleGameAPI instance;
+    private static final String LOBBYMAP = "https://www.dropbox.com/s/0f6o78rpvd2oka3/world.zip?dl=1";
 
     private static BoardPreset LOBBY =
             new BoardPreset("Lobby",
@@ -113,6 +118,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     };
 
     private World chosen = null;
+    private GameMap chosenmap = null;
     private Map<UUID, Vote> votes = new HashMap<UUID, Vote>();
     private GameListener listener;
     private VoteInventory voteInventory;
@@ -130,7 +136,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         BubbleGameAPI.instance = instance;
     }
 
-    private static void stateChange(BubbleGameAPI api, State oldstate, State newstate) {
+    private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (newstate.getPreset() != null)
                 GameBoard.getBoard(p).enable(newstate.getPreset());
@@ -139,19 +145,67 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             api.cleanup();
         }
         if (newstate == State.PREGAME) {
-            GameMap map = calculateMap(api);
-            api.chosen = Bukkit.getWorld(map.getName());
+            api.chosenmap = calculateMap(api);
+            api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             for (World w : Bukkit.getWorlds()) {
-                if (!w.getName().equals("world") && !w.getName().equals(map.getName()))
+                if (!w.getName().equals("world") && !w.getName().equals(api.chosenmap.getName()))
                     Bukkit.unloadWorld(w, false);
             }
-            api.teleportPlayers(calculateMap(api), api.chosen);
+            api.teleportPlayers(api.chosenmap, api.chosen);
+            GregorianCalendar now = new GregorianCalendar();
+            now.add(Calendar.SECOND,10);
+            api.timer = new GameTimer(20,now.getTimeInMillis()) {
+                int i = 10;
+                public void run() {
+                    if(i <= 3 || i % 5 == 0)Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(i),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
+                    for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
+                    i--;
+                }
+
+                public void end() {
+                    api.setState(State.INGAME);
+                }
+            };
         }
 
-        if (newstate == State.HIDDEN && oldstate == null) {
+        Change:if (newstate == State.HIDDEN && oldstate == null) {
             File worldfolder = new File("world");
             FileUTIL.deleteDir(worldfolder);
-            //TODO - DOWNLOADING THE WORLD
+            File tempzip = new File("temp.zip");
+            try {
+                SSLUtil.allowAnySSL();
+            } catch (Exception e) {
+                //Automatic Catch Statement
+                e.printStackTrace();
+                break Change;
+            }
+            try {
+                DownloadUtil.download(tempzip,LOBBYMAP);
+            } catch (Exception e) {
+                //Automatic Catch Statement
+                e.printStackTrace();
+                break Change;
+            }
+            FileUTIL.setPermissions(tempzip,true,true,true);
+            File temp = new File("temp");
+            try {
+                FileUTIL.unZip(tempzip.getPath(),temp.getPath());
+            } catch (IOException e) {
+                //Automatic Catch Statement
+                e.printStackTrace();
+                break Change;
+            }
+            tempzip.delete();
+            FileUTIL.setPermissions(temp,true,true,true);
+            try {
+                FileUTIL.copy(new File(temp + File.separator + "world"),worldfolder);
+            } catch (IOException e) {
+                //Automatic Catch Statement
+                e.printStackTrace();
+                break Change;
+            }
+            FileUTIL.deleteDir(temp);
+            FileUTIL.setPermissions(worldfolder,true,true,true);
         }
         if (newstate == State.LOADING) {
             GameMap.doMaps();
@@ -216,7 +270,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     }
 
     public GameMap getChosenGameMap() {
-        return GameMap.getMap(chosen.getName());
+        return chosenmap;
     }
 
     public World getChosen() {
