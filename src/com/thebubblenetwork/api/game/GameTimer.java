@@ -40,10 +40,10 @@ public abstract class GameTimer{
                         public void run() {
                             if (!instance.isCancelled()) {
                                 instance.run(left);
+                                left--;
                             }
                         }
                     }.runTask(BubbleNetwork.getInstance());
-                    left--;
                 }
             }
         }.runTaskTimerAsynchronously(BubbleNetwork.getInstance(), (long) interval, (long) interval);
