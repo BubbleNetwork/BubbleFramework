@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class MapData extends DataObject {
     public static String DOWNLOADBASE = "download", DOWNLOADZIP = DOWNLOADBASE + ".zip", DOWNLOADYML = DOWNLOADBASE +
-            ".yml", DESCRIPTION = "description", ZIPPEDID = "zipped";
+            ".yml", DESCRIPTION = "description", ZIPPEDID = DOWNLOADBASE + ".zipped";
     public static String maptable = "maps";
 
     public MapData(Map data) {
