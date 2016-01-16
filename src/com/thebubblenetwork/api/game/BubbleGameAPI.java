@@ -331,14 +331,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
 
     public void startWaiting(){
         if(timer != null)return;
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.SECOND,30);
         final BoardPreset preset = LOBBY;
         BoardModule module = preset.getModule("Status");
         for(GameBoard board:GameBoard.getBoards()){
             BoardScore score = board.getScore(preset,module);
             score.getTeam().setSuffix(Starting);
         }
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.SECOND,30);
         timer = new GameTimer(20,calendar.getTimeInMillis()) {
             public void run(int seconds) {
                 seconds+= 1;
