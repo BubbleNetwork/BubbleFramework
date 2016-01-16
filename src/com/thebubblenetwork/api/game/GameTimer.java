@@ -17,11 +17,11 @@ public abstract class GameTimer{
     private BukkitTask runnable;
     private int left;
 
-    public GameTimer(int interval, final long end) {
-        this.end = end;
+    public GameTimer(int interval, int times) {
         final GameTimer instance = this;
-        start = System.currentTimeMillis() + (interval * (1000 / 20));
-        left = (int)((DateUtil.getDateDiff(new Date(getStart()), new Date(getEnd()), TimeUnit.MILLISECONDS) / (long)(1000 / 20))/interval);
+        start = System.currentTimeMillis();
+        end = getStart() + (times * interval * (1000/20));
+        left = times;
         runnable = new BukkitRunnable() {
             private Date enddate = new Date(end);
 
@@ -36,7 +36,6 @@ public abstract class GameTimer{
                     instance.cancel();
                 }
                 else {
-                    left--;
                     new BukkitRunnable() {
                         public void run() {
                             if (!instance.isCancelled()) {
@@ -44,6 +43,7 @@ public abstract class GameTimer{
                             }
                         }
                     }.runTask(BubbleNetwork.getInstance());
+                    left--;
                 }
             }
         }.runTaskTimerAsynchronously(BubbleNetwork.getInstance(), (long) interval, (long) interval);

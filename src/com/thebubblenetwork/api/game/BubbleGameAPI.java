@@ -152,9 +152,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
                     Bukkit.unloadWorld(w, false);
             }
             api.teleportPlayers(api.chosenmap, api.chosen);
-            GregorianCalendar now = new GregorianCalendar();
-            now.add(Calendar.SECOND,5);
-            api.timer = new GameTimer(20,now.getTimeInMillis()) {
+            api.timer = new GameTimer(20,5) {
                 public void run(int seconds) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds),ChatColor.AQUA + "The game is starting",new Messages.TitleTiming(5,10,2));
                     for(Player p:Bukkit.getOnlinePlayers())p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS,1f,1f);
@@ -340,7 +338,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         }
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.add(Calendar.SECOND,30);
-        timer = new GameTimer(20,calendar.getTimeInMillis()) {
+        timer = new GameTimer(20,20) {
             public void run(int seconds) {
                 BoardModule module = preset.getModule("StatusValue");
                 for(GameBoard board:GameBoard.getBoards()){
