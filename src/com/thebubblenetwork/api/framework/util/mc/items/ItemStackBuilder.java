@@ -164,6 +164,6 @@ public class ItemStackBuilder implements Cloneable {
 
     @Override
     public ItemStackBuilder clone() {
-        return new ItemStackBuilder(ITEM_STACK);
+        return new ItemStackBuilder(build());
     }
 }
