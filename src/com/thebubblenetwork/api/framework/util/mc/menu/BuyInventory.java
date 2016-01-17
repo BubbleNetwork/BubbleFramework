@@ -15,11 +15,19 @@ import java.util.List;
  * Created by Jacob on 13/12/2015.
  */
 public abstract class BuyInventory extends Menu {
-    private static ItemStackBuilder backgrounddefault = new ItemStackBuilder(Material.STAINED_GLASS_PANE).withAmount
-            (1).withColor(DyeColor.GRAY), yesitemdefault = new ItemStackBuilder(Material.EMERALD_BLOCK).withAmount(1)
-            , noitemdefault = new ItemStackBuilder(Material.REDSTONE_BLOCK).withAmount(1);
+    private static ItemStackBuilder
+            backgrounddefault = new ItemStackBuilder(Material.STAINED_GLASS_PANE)
+            .withAmount(1)
+            .withColor(DyeColor.GRAY)
+            .withName(ChatColor.DARK_GRAY + "()"),
+            yesitemdefault = new ItemStackBuilder(Material.EMERALD_BLOCK)
+                    .withAmount(1)
+                    .withName(ChatColor.GREEN + "Yes"),
+            noitemdefault = new ItemStackBuilder(Material.REDSTONE_BLOCK)
+                    .withAmount(1)
+                    .withName(ChatColor.RED + "No");
 
-    private static int[] yesslotsdefault = new int[]{9 * 2 + 3}, noslotsdefault = new int[]{9 * 2 + 5};
+    private static int[] yesslotsdefault = new int[]{(9 * 2) + 3}, noslotsdefault = new int[]{(9 * 2) + 5};
     private static int defaultsize = 9 * 5;
     private String name;
     private List<Integer> yesslots, noslots;
