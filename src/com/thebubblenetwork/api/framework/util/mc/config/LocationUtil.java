@@ -73,6 +73,18 @@ public class LocationUtil {
             this.yaw = yaw;
         }
 
+        public void add(double x,double y,double z){
+            setX(getX() + x);
+            setY(getY() + y);
+            setZ(getZ() + z);
+        }
+
+        public void subtract(double x,double y,double z){
+            setX(getX() - x);
+            setY(getY() - y);
+            setZ(getZ() - z);
+        }
+
         public Location toLocation(World w) {
             return new Location(w, getX(), getY(), getZ(), getPitch(), getYaw());
         }
