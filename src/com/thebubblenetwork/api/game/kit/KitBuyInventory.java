@@ -1,6 +1,8 @@
 package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.BubblePlayer;
+import com.thebubblenetwork.api.framework.data.PlayerData;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -27,6 +29,6 @@ public class KitBuyInventory extends BuyInventory {
     @Override
     public void onAllow(Player player) {
         player.closeInventory();
-        KitSelection.openMenu(player);
+        //TODO - Kit buyingKitSelection.openMenu(player);
     }
 }

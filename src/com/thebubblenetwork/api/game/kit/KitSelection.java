@@ -1,6 +1,7 @@
 package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.BubblePlayer;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
 import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
@@ -23,7 +24,7 @@ import java.util.UUID;
  * Created by Jacob on 13/12/2015.
  */
 public class KitSelection extends Menu {
-    private static Sound selectkit = Sound.LEVEL_UP;
+    private static Sound selectkit = Sound.LEVEL_UP,buykit = Sound.NOTE_BASS;
     private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected the "
                                                                                                     + "kit ")
             .withColor(ChatColor.BLUE);
@@ -124,17 +125,20 @@ public class KitSelection extends Menu {
     public void click(Player player, int slot, ItemStack itemStack) {
         if (slot < KitManager.getKits().size()) {
             Kit k = KitManager.getKits().get(slot);
-            //if(hasKit){
-            player.playSound(player.getLocation(), selectkit, 1f, 1f);
-            this.kit = k;
-            update();
-            MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(KitSelection.description);
-            for (String s : k.getDescription())
-                description.append(s);
-            player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent
-                                                                                                                  .Action.SHOW_TEXT, description.build())).build());
-            //}
-
+            BubblePlayer bubblePlayer = BubblePlayer.get(player);
+            if(bubblePlayer.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getName()) && k != BubbleGameAPI.getInstance().getDefaultKit()) {
+                player.playSound(player.getLocation(), selectkit, 1f, 1f);
+                this.kit = k;
+                update();
+                MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(KitSelection.description);
+                for (String s : k.getDescription())
+                    description.append(s);
+                player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+            }
+            else{
+                player.playSound(player.getLocation(), buykit, 1f, 1f);
+                k.getBuyInventory().show(player);
+            }
         }
     }
 }
