@@ -20,8 +20,8 @@ import java.util.List;
 public class CommandPlugin implements Listener {
     private static boolean featureEnabled = true;
     private static List<BubbleCommand> cmds = new ArrayList<BubbleCommand>();
-    private static String cmdNotFound = ChatColor.RED + "" + ChatColor.BOLD + "Command not found";
-    private static String nopermission = ChatColor.RED + "" + ChatColor.BOLD + "You do not have permission for this command";
+    private static String cmdNotFound = ChatColor.DARK_AQUA + "This command has not been found";
+    private static String nopermission = ChatColor.DARK_PURPLE + "You do not have permission for this command";
 
     public static List<BubbleCommand> getCmds() {
         return cmds;
