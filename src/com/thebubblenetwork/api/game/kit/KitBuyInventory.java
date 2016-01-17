@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 public class KitBuyInventory extends BuyInventory {
     public KitBuyInventory(Kit kit) {
         super(ChatColor.DARK_GRAY + "Buy " + ChatColor.GOLD + kit.getNameClear() + ChatColor.DARK_GRAY + " for " +
-                      ChatColor.GREEN + String.valueOf(kit.getPrice()), "kit_" + kit.getNameClear(), "Yes", "Cancel");
+                      ChatColor.GREEN + String.valueOf(kit.getPrice()), "kit_" + kit.getNameClear());
     }
 
     public static KitBuyInventory getViaMap(String name) {
