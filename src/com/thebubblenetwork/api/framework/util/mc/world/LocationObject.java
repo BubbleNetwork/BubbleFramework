@@ -70,6 +70,19 @@ public class LocationObject implements Cloneable{
         this.yaw = yaw;
     }
 
+    public LocationObject add(double x,double y,double z){
+        setX(getX() + x);
+        setY(getY() + y);
+        setZ(getZ() + z);
+        return this;
+    }
+
+    public LocationObject subtract(double x,double y,double z){
+        setX(getX() - x);
+        setY(getY() - y);
+        setZ(getZ() - z);
+        return this;
+    }
 
     public Location toLocation(World w) {
         return new Location(w, getX(), getY(), getZ(), getPitch(), getYaw());
