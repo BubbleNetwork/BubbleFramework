@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,19 +17,11 @@ import java.util.List;
 /**
  * Created by Jacob on 11/12/2015.
  */
-public class CommandPlugin extends BubblePlugin implements Listener {
+public class CommandPlugin implements Listener {
     private static boolean featureEnabled = true;
     private static List<BubbleCommand> cmds = new ArrayList<BubbleCommand>();
     private static String cmdNotFound = ChatColor.RED + "" + ChatColor.BOLD + "Command not found";
-    private static String nopermission = ChatColor.RED + "" + ChatColor.BOLD + "You do not have permission for this " +
-            "command";
-
-    static {
-        CommandPlugin cmd = new CommandPlugin();
-        BubbleNetwork.register(cmd);
-    }
-
-    private File f = new File(getDataFolder() + File.separator + "Plugins");
+    private static String nopermission = ChatColor.RED + "" + ChatColor.BOLD + "You do not have permission for this command";
 
     public static List<BubbleCommand> getCmds() {
         return cmds;
@@ -42,15 +35,8 @@ public class CommandPlugin extends BubblePlugin implements Listener {
         CommandPlugin.featureEnabled = featureEnabled;
     }
 
-    public void onLoad() {
-        if (!getDataFolder().exists())
-            getDataFolder().mkdir();
-        if (!f.exists())
-            f.mkdir();
-    }
-
-    public void onEnable() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);
+    public void register(Plugin plugin) {
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

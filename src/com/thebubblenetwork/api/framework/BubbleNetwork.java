@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework;
 
+import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.data.PlayerData;
 import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
@@ -44,10 +45,12 @@ public class BubbleNetwork extends JavaPlugin {
     private MenuManager manager = new MenuManager();
     private SQLConnection connection;
     private PropertiesFile file;
+    private CommandPlugin plugin;
 
     public BubbleNetwork() {
         super();
         instance = this;
+        plugin = new CommandPlugin();
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
         Map<PluginDescriptionFile, File> loaderList = new HashMap<>();
@@ -143,6 +146,7 @@ public class BubbleNetwork extends JavaPlugin {
 
     public void onEnable() {
         api = new BubbleBarAPI();
+        plugin.register(this);
         util = new VersionUTIL();
         try {
             file = new PropertiesFile(PROPERTIES);
