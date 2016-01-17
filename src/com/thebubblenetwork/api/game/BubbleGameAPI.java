@@ -358,10 +358,9 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         if(timer == null)return;
         timer.cancel();
         timer = null;
-        final BoardPreset preset = LOBBY;
-        BoardModule module = preset.getModule("Status");
+        BoardModule module = LOBBY.getModule("Status");
         for(GameBoard board:GameBoard.getBoards()){
-            BoardScore score = board.getScore(preset,module);
+            BoardScore score = board.getScore(LOBBY,module);
             score.getTeam().setSuffix(playerneed);
         }
     }
@@ -387,6 +386,11 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         Messages.broadcastMessageTitle(ChatColor.BLUE + p.getName(),ChatColor.AQUA + "Has won the game",
                                        new Messages.TitleTiming(5,20,20));
         setState(State.ENDGAME);
+        for(Player t:Bukkit.getOnlinePlayers()){
+            if(t != p)t.teleport(p);
+        }
+        p.setAllowFlight(true);
+        p.setFlying(true);
     }
 
     public abstract void onStateChange(State oldstate, State newstate);
