@@ -81,7 +81,7 @@ public class KitSelection extends Menu {
     }
 
 
-    private ItemStack[] getKits() {
+    public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getInventory().getSize()];
         int i = 0;
         for (Kit k : KitManager.getKits()) {
@@ -117,23 +117,19 @@ public class KitSelection extends Menu {
         return is;
     }
 
-    public void update() {
-        getInventory().setContents(getKits());
-    }
-
     @Override
     public void click(Player player, int slot, ItemStack itemStack) {
         if (slot < KitManager.getKits().size()) {
             Kit k = KitManager.getKits().get(slot);
             BubblePlayer bubblePlayer = BubblePlayer.get(player);
-            if(bubblePlayer.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getName()) && k != BubbleGameAPI.getInstance().getDefaultKit()) {
+            if(bubblePlayer.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getName()) || k == BubbleGameAPI.getInstance().getDefaultKit()) {
                 player.playSound(player.getLocation(), selectkit, 1f, 1f);
                 this.kit = k;
-                update();
                 MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(KitSelection.description);
                 for (String s : k.getDescription())
                     description.append(s);
                 player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+                update();
             }
             else{
                 player.playSound(player.getLocation(), buykit, 1f, 1f);

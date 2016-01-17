@@ -62,7 +62,7 @@ public class VoteInventory extends Menu {
         }
     }
 
-    protected ItemStack[] generateDisplay() {
+    public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getInventory().getSize()];
         Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
         int i = 0;
@@ -72,9 +72,5 @@ public class VoteInventory extends Menu {
             i++;
         }
         return is;
-    }
-
-    public void update() {
-        getInventory().setContents(generateDisplay());
     }
 }

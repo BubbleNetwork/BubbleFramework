@@ -43,8 +43,8 @@ public abstract class BuyInventory extends Menu {
         this.yesitem = yesitem;
         this.noitem = noitem;
         this.background = background;
-        BubbleNetwork.getInstance().getManager().addMenu(indentifier, this);
         update();
+        BubbleNetwork.getInstance().getManager().addMenu(indentifier, this);
     }
 
     public BuyInventory(String name, Object indentifier, String yes, String no) {
@@ -113,9 +113,9 @@ public abstract class BuyInventory extends Menu {
         return background;
     }
 
-    private ItemStack[] generate() {
+    public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getInventory().getSize()];
-        for (int i = 0; i > is.length; i++) {
+        for (int i = 0; i < is.length; i++) {
             ItemStack item;
             if (yesslots.contains(i)) {
                 item = yesitem.build();
@@ -127,10 +127,6 @@ public abstract class BuyInventory extends Menu {
             is[i] = item;
         }
         return is;
-    }
-
-    public void update() {
-        getInventory().setContents(generate());
     }
 
     public void click(Player p, int slot, ItemStack is) {

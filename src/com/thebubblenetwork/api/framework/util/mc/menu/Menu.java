@@ -49,6 +49,12 @@ public abstract class Menu implements InventoryHolder {
         return inventory;
     }
 
+    public final void update(){
+        getInventory().setContents(generate());
+    }
+
+    public abstract ItemStack[] generate();
+
     public int getSize() {
         return size;
     }
