@@ -36,6 +36,7 @@ public abstract class BuyInventory extends Menu {
         this.noitem = noitem;
         this.background = background;
         BubbleNetwork.getInstance().getManager().addMenu(indentifier, this);
+        update();
     }
 
     public BuyInventory(String name, Object indentifier, String yes, String no) {
@@ -110,7 +111,7 @@ public abstract class BuyInventory extends Menu {
             else if (noslots.contains(i)) {
                 item = noitem.build();
             }
-            item = background.build();
+            else item = background.build();
             is[i] = item;
         }
         return is;
