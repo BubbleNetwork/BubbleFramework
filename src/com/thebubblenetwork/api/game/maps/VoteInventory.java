@@ -13,6 +13,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
@@ -25,7 +26,7 @@ public class VoteInventory extends Menu {
     private static final String display = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Vote";
     private static final String chance = ChatColor.BLUE + "Chance " + ChatColor.AQUA + "%chance%" + "%";
     private static final DecimalFormat format = new DecimalFormat("0.00");
-    private static final Sound click = Sound.NOTE_BASS;
+    private static final Sound click = Sound.SUCCESSFUL_HIT;
     private static final ItemStackBuilder builder = new ItemStackBuilder(Material.EMPTY_MAP);
 
     private static VoteInventory inventory;
@@ -47,18 +48,34 @@ public class VoteInventory extends Menu {
     }
 
     @Override
-    public void click(Player player, int slot, ItemStack itemStack) {
+    public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (itemStack != null && slot < GameMap.getMaps().size()) {
             GameMap map = GameMap.getMaps().get(slot);
-            if (BubbleGameAPI.getInstance().getVotes().containsKey(player.getUniqueId()) && BubbleGameAPI.getInstance
-                    ().getVotes().get(player.getUniqueId()).getMap().equals(map))
+            if (BubbleGameAPI.getInstance().getVotes().containsKey(player.getUniqueId())
+                    && BubbleGameAPI.getInstance().getVotes().get(player.getUniqueId()).getMap().equals(map)) {
                 BubbleGameAPI.getInstance().resetVotes(player.getUniqueId());
-            else
+                player.spigot().sendMessage(
+                        new MessageUtil.MessageBuilder("You cancelled your voted for ")
+                                                    .withColor(ChatColor.BLUE)
+                                                    .append(map.getName())
+                                                    .withColor(ChatColor.GRAY)
+                                                    .withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                                                              TextComponent.fromLegacyText(Joiner.on("\n").join(map.getDescription()))))
+                                                    .build());
+            }
+            else {
                 BubbleGameAPI.getInstance().addVote(player.getUniqueId(), map);
-            player.playSound(player.getLocation(), click, 1F, 1F);
+                player.spigot().sendMessage(
+                        new MessageUtil.MessageBuilder("You have voted for ")
+                                .withColor(ChatColor.BLUE)
+                                .append(map.getName())
+                                .withColor(ChatColor.GRAY)
+                                .withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                                          TextComponent.fromLegacyText(Joiner.on("\n").join(map.getDescription()))))
+                                .build());
+            }
+            player.playSound(player.getLocation(), click, 1f, 1f);
             update();
-            player.spigot().sendMessage(new MessageUtil.MessageBuilder("You have voted for ").withColor(ChatColor
-                                                                                                                .BLUE).append(map.getName()).withColor(ChatColor.GRAY).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n").join(map.getDescription())))).build());
         }
     }
 

@@ -15,7 +15,9 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
@@ -24,21 +26,23 @@ import java.util.UUID;
  * Created by Jacob on 13/12/2015.
  */
 public class KitSelection extends Menu {
-    private static Sound selectkit = Sound.LEVEL_UP,buykit = Sound.NOTE_BASS;
-    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected the "
-                                                                                                    + "kit ")
+    private static Sound selectkit = Sound.LEVEL_UP,buykit = Sound.NOTE_BASS,noaccess = Sound.BLAZE_DEATH;
+    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ")
             .withColor(ChatColor.BLUE);
+    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ")
+            .withColor(ChatColor.RED);
     private static String description = ChatColor.UNDERLINE + "Description";
 
 
     private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
     private UUID uuid;
+    private BubblePlayer player;
     private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
 
     public KitSelection(Player p) {
         super(inventoryname, MenuManager.getRoundedInventorySize(KitManager.getKits().size()));
         this.uuid = p.getUniqueId();
-        update();
+        this.player = BubblePlayer.get(p);
         BubbleNetwork.getInstance().getManager().addMenu(p.getUniqueId(), this);
     }
 
@@ -48,7 +52,7 @@ public class KitSelection extends Menu {
 
     public static KitSelection openMenu(Player p) {
         KitSelection k = getSelection(p);
-        p.openInventory(k.getInventory());
+        k.show(p);
         return k;
     }
 
@@ -91,23 +95,40 @@ public class KitSelection extends Menu {
             if (k == BubbleGameAPI.getInstance().getDefaultKit()) {
                 builder.withLore(ChatColor.GRAY + "" + "      Default Kit");
             }
+            String rightclick = ChatColor.DARK_AQUA + "Right Click -> ";
+            String leftclick = ChatColor.DARK_PURPLE + "Left Click -> ";
             String status = ChatColor.GREEN + "       Status: ";
             if (k == kit) {
                 status += ChatColor.AQUA + "" + ChatColor.BOLD + "Equipped";
+                if(player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear()))
+                    builder.withLore(ChatColor.GREEN + "Level: " + ChatColor.GRAY +
+                                             String.valueOf(player.getKits(BubbleGameAPI.getInstance().getName()).get(k.getNameClear())));
+                leftclick = null;
+                if(k.getLevel(player) < k.getMaxlevel())rightclick += "Upgrade this kit";
+                else rightclick = ChatColor.GOLD + "You have mastered this kit";
             }
-            else if (true) {
+            else if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear())) {
                 status += ChatColor.GRAY + "Unselected";
+                builder.withLore(ChatColor.GREEN + "Level: " + ChatColor.GRAY +
+                                         String.valueOf(player.getKits(BubbleGameAPI.getInstance().getName()).get(k.getNameClear())));
+                leftclick += "Select this kit";
+                if(k.getLevel(player) < k.getMaxlevel())rightclick += "Upgrade this kit";
+                else rightclick = ChatColor.GOLD + "You have mastered this kit";
             }
             else {
                 status += ChatColor.RED + "You have not bought this kit";
                 builder.withLore(ChatColor.GREEN + "Cost: " + ChatColor.GRAY + String.valueOf(k.getPrice()));
+                leftclick = null;
+                rightclick += "Buy this kit";
             }
             builder.withLore(status);
             builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ", "");
             builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ");
             for (String s : k.getDescription())
                 builder.withLore(ChatColor.GRAY + "" + ChatColor.ITALIC + s);
-            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ");
+            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ","");
+            if(leftclick != null)builder.withLore(leftclick);
+            builder.withLore(rightclick);
             ItemStack item = builder.build();
             if (k == kit)
                 EnchantGlow.addGlow(item);
@@ -118,23 +139,41 @@ public class KitSelection extends Menu {
     }
 
     @Override
-    public void click(Player player, int slot, ItemStack itemStack) {
+    public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (slot < KitManager.getKits().size()) {
             Kit k = KitManager.getKits().get(slot);
             BubblePlayer bubblePlayer = BubblePlayer.get(player);
-            if(bubblePlayer.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getName()) || k == BubbleGameAPI.getInstance().getDefaultKit()) {
-                player.playSound(player.getLocation(), selectkit, 1f, 1f);
-                this.kit = k;
-                MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(KitSelection.description);
+            if(type == ClickType.LEFT) {
+                MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(k.getName()).append("\n").append("\n");
                 for (String s : k.getDescription())
-                    description.append(s);
-                player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
-                update();
+                    description.append(s).withColor(ChatColor.GRAY).append("\n");
+                if (k.isOwned(bubblePlayer)) {
+                    player.playSound(player.getLocation().getBlock().getLocation(), selectkit, 1f, 1f);
+                    this.kit = k;
+                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+                    update();
+                }
+                else{
+                    player.playSound(player.getLocation().getBlock().getLocation(), noaccess,1f,1f);
+                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+                }
             }
-            else{
-                player.playSound(player.getLocation(), buykit, 1f, 1f);
-                k.getBuyInventory().show(player);
+            else if(type == ClickType.RIGHT){
+                player.playSound(player.getLocation().getBlock().getLocation(),buykit,1f,1f);
+                if(k.isOwned(bubblePlayer)){
+                    KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k,k.getLevelUpcost(bubblePlayer),k.getLevel(bubblePlayer)+1,player);
+                    kitLevelUpInventory.show(player);
+                }
+                else{
+                    k.getBuyInventory().show(player);
+                }
             }
         }
+    }
+
+    @Override
+    public void show(Player p){
+        update();
+        p.openInventory(getInventory());
     }
 }

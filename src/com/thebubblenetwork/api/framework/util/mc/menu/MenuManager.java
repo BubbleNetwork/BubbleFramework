@@ -64,7 +64,7 @@ public class MenuManager implements Listener {
             if (menu.getInventory().equals(inv)) {
                 e.setCancelled(true);
                 if (e.getClickedInventory().equals(inv))
-                    menu.click(player, e.getSlot(), e.getCurrentItem());
+                    menu.click(player,e.getClick(),e.getSlot(), e.getCurrentItem());
             }
         }
     }

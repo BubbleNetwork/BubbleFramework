@@ -3,6 +3,7 @@ package com.thebubblenetwork.api.game.kit;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BubblePlayer;
 import com.thebubblenetwork.api.framework.data.PlayerData;
+import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -18,12 +19,12 @@ public class KitBuyInventory extends BuyInventory {
 
 
     public KitBuyInventory(Kit kit) {
-        super(ChatColor.DARK_GRAY + "Buy " + ChatColor.GOLD + kit.getNameClear() + ChatColor.DARK_GRAY + " for " +
-                      ChatColor.GREEN + String.valueOf(kit.getPrice()), "kit_" + kit.getNameClear());
+        super(ChatColor.DARK_GRAY + "Buy " + ChatColor.GOLD + kit.getNameClear() + ChatColor.DARK_GRAY + " T" +
+                      ChatColor.GREEN + String.valueOf(kit.getPrice()), "kit_buy_" + kit.getNameClear());
     }
 
     public static KitBuyInventory getViaMap(String name) {
-        return (KitBuyInventory) BubbleNetwork.getInstance().getManager().getMenu("kit_" + name);
+        return (KitBuyInventory) BubbleNetwork.getInstance().getManager().getMenu("kit_buy_" + ChatColorAppend.wipe(name));
     }
 
     @Override

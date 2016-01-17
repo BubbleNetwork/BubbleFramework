@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -129,7 +130,8 @@ public abstract class BuyInventory extends Menu {
         return is;
     }
 
-    public void click(Player p, int slot, ItemStack is) {
+    public void click(Player p, ClickType type, int slot, ItemStack is) {
+        if(type != ClickType.LEFT)return;
         if (yesslots.contains(slot))
             onAllow(p);
         else if (noslots.contains(slot))

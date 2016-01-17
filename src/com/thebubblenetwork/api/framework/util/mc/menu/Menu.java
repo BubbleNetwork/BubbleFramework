@@ -8,6 +8,7 @@ import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -26,10 +27,10 @@ public abstract class Menu implements InventoryHolder {
     }
 
     public void show(Player player) {
-        player.openInventory(inventory);
+        player.openInventory(getInventory());
     }
 
-    public abstract void click(Player player, int slot, ItemStack itemStack);
+    public abstract void click(Player player, ClickType type, int slot, ItemStack itemStack);
 
     protected String getFriendlyName(ItemStack itemStack) {
         if (itemStack == null) {

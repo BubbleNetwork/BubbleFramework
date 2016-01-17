@@ -52,7 +52,12 @@ public class BubblePlayer {
     }
 
     public static BubblePlayer get(Player p) {
-        return playerMap.get(p.getUniqueId());
+        return get(p.getUniqueId());
+    }
+
+    @Deprecated
+    public static BubblePlayer get(UUID p) {
+        return playerMap.get(p);
     }
 
     public static void register(Plugin plugin) {
