@@ -48,9 +48,13 @@ public abstract class BuyInventory extends Menu {
     }
 
     public BuyInventory(String name, Object indentifier, String yes, String no) {
-        this(getDefaultsize(), name, indentifier, getYesslotsdefault(), getNoslotsdefault(), getYesitemdefault()
-                .withName(ChatColor.GREEN + yes), getNoitemdefault().withName(ChatColor.RED + no),
-             getBackgrounddefault());
+        this(getDefaultsize(), name, indentifier, getYesslotsdefault().clone(), getNoslotsdefault().clone(),
+             getYesitemdefault().clone().withName(ChatColor.GREEN + yes), getNoitemdefault().clone().withName(ChatColor.RED + no),
+             getBackgrounddefault().clone());
+    }
+
+    public BuyInventory(String name,Object indentifier){
+        this(defaultsize,name,indentifier,getYesslotsdefault().clone(),getNoslotsdefault().clone(),getYesitemdefault().clone(),getNoitemdefault().clone(),getBackgrounddefault().clone());
     }
 
     public static int[] getYesslotsdefault() {
