@@ -100,24 +100,27 @@ public class KitSelection extends Menu {
             String status = ChatColor.GREEN + "       Status: ";
             if (k == kit) {
                 status += ChatColor.AQUA + "" + ChatColor.BOLD + "Equipped";
-                if(player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear()))
-                    builder.withLore(ChatColor.GREEN + "Level: " + ChatColor.GRAY +
-                                             String.valueOf(player.getKits(BubbleGameAPI.getInstance().getName()).get(k.getNameClear())));
+                int level = k.getLevel(player);
+                builder.withLore(ChatColor.GREEN + "       Level: " +
+                                         (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED  : ChatColor.GRAY)
+                                         + String.valueOf(level));
                 leftclick = null;
                 if(k.getLevel(player) < k.getMaxlevel())rightclick += "Upgrade this kit";
                 else rightclick = ChatColor.GOLD + "You have mastered this kit";
             }
             else if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear())) {
                 status += ChatColor.GRAY + "Unselected";
-                builder.withLore(ChatColor.GREEN + "Level: " + ChatColor.GRAY +
-                                         String.valueOf(player.getKits(BubbleGameAPI.getInstance().getName()).get(k.getNameClear())));
+                int level = k.getLevel(player);
+                builder.withLore(ChatColor.GREEN + "       Level: " + 
+                                         (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED  : ChatColor.GRAY)
+                                         + String.valueOf(level));
                 leftclick += "Select this kit";
                 if(k.getLevel(player) < k.getMaxlevel())rightclick += "Upgrade this kit";
                 else rightclick = ChatColor.GOLD + "You have mastered this kit";
             }
             else {
                 status += ChatColor.RED + "You have not bought this kit";
-                builder.withLore(ChatColor.GREEN + "Cost: " + ChatColor.GRAY + String.valueOf(k.getPrice()));
+                builder.withLore(ChatColor.GREEN + "       Cost: " + ChatColor.GRAY + String.valueOf(k.getPrice()));
                 leftclick = null;
                 rightclick += "Buy this kit";
             }
