@@ -12,53 +12,21 @@ import java.util.concurrent.TimeUnit;
  * Created by Jacob on 04/01/2016.
  */
 public abstract class GameTimer{
-    private long start;
-    private long end;
     private BukkitTask runnable;
     private int left;
 
     public GameTimer(int interval, int times) {
-        final GameTimer instance = this;
-        start = System.currentTimeMillis();
-        end = getStart() + (times * interval * (1000/20));
         left = times;
         runnable = new BukkitRunnable() {
-            private Date enddate = new Date(end);
-
             public void run() {
-                if (new Date(getCurrent()).after(enddate)) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            end();
-                        }
-                    }.runTask(BubbleNetwork.getInstance());
-                    instance.cancel();
-                }
-                else {
-                    new BukkitRunnable() {
-                        public void run() {
-                            if (!instance.isCancelled()) {
-                                instance.run(left);
-                                left--;
-                            }
-                        }
-                    }.runTask(BubbleNetwork.getInstance());
+                GameTimer.this.run(getLeft());
+                left--;
+                if(getLeft() == 0){
+                    GameTimer.this.cancel();
+                    end();
                 }
             }
-        }.runTaskTimerAsynchronously(BubbleNetwork.getInstance(), (long) interval, (long) interval);
-    }
-
-    public long getStart() {
-        return start;
-    }
-
-    public long getCurrent() {
-        return System.currentTimeMillis();
-    }
-
-    public long getEnd() {
-        return end;
+        }.runTaskTimer(BubbleNetwork.getInstance(), 0L, (long) interval);
     }
 
     public int getLeft(){
@@ -76,7 +44,6 @@ public abstract class GameTimer{
     public void cancel() {
         runnable.cancel();
         runnable = null;
-        end = getCurrent();
         left = 0;
     }
 }
