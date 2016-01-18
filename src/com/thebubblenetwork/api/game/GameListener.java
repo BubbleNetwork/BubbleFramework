@@ -3,14 +3,15 @@ package com.thebubblenetwork.api.game;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.packets.PlayerGhost;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
+import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.spectator.SpectatorCheck;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -21,17 +22,18 @@ import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.LazyMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
@@ -62,54 +64,67 @@ public class GameListener implements Listener {
         return is;
     }
 
-    private static List<UUID> spectators = new ArrayList<>();
-    //private static Map<InventoryHolder,Inventory> chests = new HashMap<>();
+    private List<UUID> spectators = new ArrayList<>();
+    private Map<Location,Inventory> chests = new HashMap<>();
 
-    public static boolean isSpectating(Player p){
+    public boolean isSpectating(Player p){
         return isSpectating(p.getUniqueId());
     }
 
     @Deprecated
-    public static boolean isSpectating(UUID u){
+    public boolean isSpectating(UUID u){
         return spectators.contains(u);
     }
 
-    public static Collection<Player> getSpectators(){
-        List<Player> players = new ArrayList<>();
-        for(Player p:Bukkit.getOnlinePlayers())if(isSpectating(p))players.add(p);
-        return players;
+    public boolean isSpectatingAsync(UUID u){
+        UUID other = null;
+        for(Iterator<UUID> iterator = spectators.iterator();iterator.hasNext();other = iterator.next()){
+            if(other == u)return true;
+        }
+        return false;
     }
 
-    public static void setSpectating(Player p,boolean spectating){
+    public void setSpectating(Player p,boolean spectating){
         if(spectating)enableSpectate(p);
         else disableSpectate(p);
     }
 
-    private static Team setupTeam(Player p){
-        Team t = p.getScoreboard().registerNewTeam(ghostteam);
-        t.setCanSeeFriendlyInvisibles(true);
+    private void startGhost(Player p){
+        Scoreboard board = p.getScoreboard();
+        Team t = board.getTeam(ghostteam);
+        if(t != null)t.unregister();;
+        t = board.registerNewTeam(ghostteam);
         t.setPrefix(ChatColor.RED.toString());
-        for(Player target:getSpectators())t.addPlayer(target);
-        return t;
+        t.setCanSeeFriendlyInvisibles(true);
+        t.setAllowFriendlyFire(false);
+        for(Player other:Bukkit.getOnlinePlayers()){
+            if(isSpectatingAsync(other.getUniqueId())) {
+                t.addPlayer(other);
+                other.getScoreboard().getTeam(ghostteam).addPlayer(p);
+            }
+        }
     }
 
-    private static Team addToTeam(Player p,Player target){
-        Team t = target.getScoreboard().getTeam(ghostteam);
-        if(t == null)t = setupTeam(target);
-        else t.addPlayer(p);
-        return t;
+    private void endGhost(Player p){
+        Scoreboard board = p.getScoreboard();
+        Team t = board.getTeam(ghostteam);
+        t.unregister();
+        for(Player other:Bukkit.getOnlinePlayers()){
+            if(isSpectatingAsync(other.getUniqueId())){
+                other.getScoreboard().getTeam(ghostteam).removePlayer(p);
+            }
+        }
     }
 
-    private static Team removeFromTeam(Player p,Player target){
-        Team t = target.getScoreboard().getTeam(ghostteam);
-        if(t == null)t = setupTeam(target);
-        else t.removePlayer(p);
-        return t;
-    }
-
-    private static void enableSpectate(Player p){
+    private void enableSpectate(final Player p){
         if(isSpectating(p))return;
         spectators.add(p.getUniqueId());
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                startGhost(p);
+            }
+        }.runTaskAsynchronously(BubbleGameAPI.getInstance());
         Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
         for (Iterator<Entity> iterator = p.getNearbyEntities(100d,100d,100d).iterator();iterator.hasNext();temp = iterator.next()) {
@@ -121,15 +136,13 @@ public class GameListener implements Listener {
             }
         }
         for(Player target:Bukkit.getOnlinePlayers()){
-            if(target != p) {
-                if(!isSpectating(target)){
-                    target.hidePlayer(p);
-                }
-                else{
-                    addToTeam(p,target);
-                }
-                p.showPlayer(target);
+            if(isSpectating(target)){
+                target.showPlayer(p);
             }
+            else{
+                target.hidePlayer(p);
+            }
+            p.showPlayer(target);
         }
         if(p.isDead())p.spigot().respawn();
         p.getInventory().setContents(new ItemStack[4*9]);
@@ -147,22 +160,26 @@ public class GameListener implements Listener {
         Messages.sendMessageTitle(p,"",ChatColor.AQUA + "You are now spectating",new Messages.TitleTiming(10,30,20));
     }
 
-    private static void disableSpectate(Player p){
+    private void disableSpectate(final Player p){
         if(!isSpectating(p))return;
         spectators.remove(p.getUniqueId());
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                startGhost(p);
+            }
+        }.runTaskAsynchronously(BubbleGameAPI.getInstance());
         p.spigot().setCollidesWithEntities(true);
-        Team t = p.getScoreboard().getTeam("ghosts");
+        Team t = p.getScoreboard().getTeam(ghostteam);
         if(t != null){
             t.unregister();
         }
         for(Player target:Bukkit.getOnlinePlayers()){
-            if(p != target){
-                if(isSpectating(target)){
-                    p.hidePlayer(target);
-                    removeFromTeam(p,target);
-                }
-                target.showPlayer(p);
+            if(isSpectating(target)){
+                p.hidePlayer(target);
             }
+            else p.showPlayer(target);
+            target.showPlayer(p);
         }
         p.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
@@ -175,12 +192,6 @@ public class GameListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerMetaSet(PlayerJoinEvent e){
         Player p = e.getPlayer();
-        try {
-            PlayerGhost.setup(p);
-        } catch (Throwable throwable) {
-            //Automatic Catch Statement
-            throwable.printStackTrace();
-        }
         p.setMetadata("spectating",new LazyMetadataValue(BubbleGameAPI.getInstance(),LazyMetadataValue.CacheStrategy.NEVER_CACHE,new SpectatorCheck(p)));
         p.setMetadata("vanished",new LazyMetadataValue(BubbleGameAPI.getInstance(),LazyMetadataValue.CacheStrategy.NEVER_CACHE,new SpectatorCheck(p)));
         for(Player t:Bukkit.getOnlinePlayers()){
@@ -191,6 +202,11 @@ public class GameListener implements Listener {
                 else p.showPlayer(t);
             }
         }
+    }
+
+    @EventHandler
+    public void onSpectatorFoodLevelChange(FoodLevelChangeEvent e){
+        if(e.getEntity() instanceof Player && isSpectating((Player)e.getEntity()))e.setFoodLevel(20);
     }
 
     @EventHandler
@@ -242,94 +258,109 @@ public class GameListener implements Listener {
             e.setCancelled(true);
             Block clicked = e.getClickedBlock();
             if(e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null){
-                /*
                 if(clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
                     BlockState clickedstate = clicked.getState();
                     if (clickedstate != null && clickedstate instanceof Chest) {
                         Chest chest = (Chest) clickedstate;
+                        Location l = toBlockLocation(chest.getLocation());
                         Inventory i;
-                        if (chests.containsKey(chest)) {
-                            i = chests.get(chest);
+                        if (chests.containsKey(l)) {
+                            i = chests.get(l);
                         }
                         else {
                             i = Bukkit.createInventory(chest, chest.getInventory().getType());
                             i.setContents(chest.getInventory().getContents());
-                            chests.put(chest, i);
+                            chests.put(l, i);
                         }
                         p.openInventory(i);
                     }
                 }
-                */
-                BlockState state = clicked.getState();
-                if(state instanceof InventoryHolder){
-                    InventoryHolder holder = (InventoryHolder)state;
-                    p.openInventory(holder.getInventory());
+                else {
+                    BlockState state = clicked.getState();
+                    if (state instanceof InventoryHolder) {
+                        InventoryHolder holder = (InventoryHolder) state;
+                        p.openInventory(holder.getInventory());
+                    }
                 }
             }
         }
     }
-/*
+
+
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
+    public void onCloseInventorySpectator(InventoryCloseEvent e){
+        final Inventory i = e.getInventory();
+        if(e.getPlayer() instanceof Player && isSpectating((Player)e.getPlayer())){
+            if (i.getHolder() != null && i.getHolder() instanceof Chest) {
+                Chest c = (Chest)i.getHolder();
+                final Location l = toBlockLocation(c.getLocation());
+                if(chests.containsKey(l) && i.getViewers().size() <= 1) {
+                    chests.remove(l);
+                }
+            }
+        }
+    }
+
+    private Location toBlockLocation(Location l){
+        return new Location(l.getWorld(),l.getBlockX(),l.getBlockY(),l.getBlockZ());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
+    public void onPlayerEditChest(InventoryClickEvent e){
+        if(e.getWhoClicked() instanceof Player && !isSpectating((Player)e.getWhoClicked())) {
+            final Inventory clicked = e.getView().getTopInventory();
+            if (clicked == e.getView().getTopInventory() && clicked.getHolder() != null && clicked.getHolder() instanceof Chest){
+                Chest c = (Chest)clicked.getHolder();
+                Location l = toBlockLocation(c.getLocation());
+                if(chests.containsKey(l)) {
+                    final Inventory change = chests.get(l);
+                    new BukkitRunnable(){
+                        @Override
+                        public void run() {
+                            change.setContents(clicked.getContents());
+                        }
+                    }.runTask(BubbleGameAPI.getInstance());
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
+    public void onPlayerEditChest(InventoryDragEvent e){
+        if(e.getWhoClicked() instanceof Player && !isSpectating((Player)e.getWhoClicked())) {
+            final Inventory clicked = e.getView().getTopInventory();
+            if (clicked == e.getView().getTopInventory() && clicked.getHolder() != null && clicked.getHolder() instanceof Chest){
+                Chest c = (Chest)clicked.getHolder();
+                Location l = toBlockLocation(c.getLocation());
+                if(chests.containsKey(l)) {
+                    final Inventory change = chests.get(l);
+                    new BukkitRunnable(){
+                        @Override
+                        public void run() {
+                            change.setContents(clicked.getContents());
+                        }
+                    }.runTask(BubbleGameAPI.getInstance());
+                }
+            }
+        }
+    }
+
     @EventHandler
     public void onEntitySpectatorDamage(EntityDamageEvent e){
         if(e.getEntity() instanceof Player){
             Player p = (Player)e.getEntity();
             if(isSpectating(p)){
                 e.setCancelled(true);
-                if(e instanceof EntityDamageByEntityEvent){
-                    EntityDamageByEntityEvent entityEvent = (EntityDamageByEntityEvent)e;
-                    if(entityEvent.getDamager() instanceof Projectile){
-                        Projectile projectile = (Projectile)entityEvent.getDamager();
-                        Projectile fire;
-                        if(projectile instanceof Arrow){
-                            Arrow previous = (Arrow)projectile;
-                            Arrow arrow = previous.getWorld().spawnArrow(previous.getLocation(),previous.getVelocity(),1f,1f);
-                            arrow.setCritical(previous.isCritical());
-                            arrow.setKnockbackStrength(previous.getKnockbackStrength());
-                            arrow.spigot().setDamage(previous.spigot().getDamage());
-                        }
-                        else{
-                            fire = (Projectile)projectile.getWorld().spawnEntity(projectile.getLocation(),projectile.getType());
-                            fire.setVelocity(projectile.getVelocity());
-                        }
-                        fire = (Projectile)projectile.getWorld().spawnEntity(projectile.getLocation(),projectile.getType());
-                        fire.setVelocity(projectile.getVelocity());
-                        fire.setShooter(projectile.getShooter());
-                        fire.setBounce(projectile.doesBounce());
-                    }
-                }
             }
         }
     }
-*/
-    /*
-    @EventHandler
-    public void onCloseInventorySpectator(InventoryCloseEvent e){
-        if(e.getPlayer() instanceof Player && isSpectating((Player)e.getPlayer())){
-            if(chests.containsKey(e.getInventory().getHolder())){
-                if(e.getInventory().getViewers().size() == 0){
-                    chests.remove(e.getInventory().getHolder());
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerEditChest(InventoryClickEvent e){
-        final Inventory clicked = e.getClickedInventory();
-        if(chests.containsKey(clicked.getHolder())){
-            new BukkitRunnable(){
-                @Override
-                public void run() {
-                    if(chests.containsKey(clicked.getHolder()))chests.get(clicked.getHolder()).setContents(clicked.getContents());
-                }
-            }.runTask(BubbleGameAPI.getInstance());
-        }
-    }
-    */
 
     @EventHandler
     public void onPlayerDeathToSpectator(PlayerDeathEvent e){
-        if(BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME)setSpectating(e.getEntity(),true);
+        Player p = e.getEntity();
+        Location l = p.getLocation();
+        if(BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME)setSpectating(p,true);
+        p.teleport(l);
     }
 
     @EventHandler

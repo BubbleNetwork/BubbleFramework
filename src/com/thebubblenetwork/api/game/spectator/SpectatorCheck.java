@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.spectator;
 
+import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.game.GameListener;
 import org.bukkit.entity.Player;
 
@@ -33,6 +34,6 @@ public class SpectatorCheck
     }
 
     public Boolean call(){
-        return GameListener.isSpectating(u);
+        return BubbleGameAPI.getInstance().getGame().isSpectating(u);
     }
 }

@@ -124,6 +124,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     private VoteInventory voteInventory;
     private GameTimer timer;
 
+    public GameListener getGame(){
+        return listener;
+    }
+
+    public VoteInventory getVoteInventory(){
+        return voteInventory;
+    }
+
     public static Vector getLobbySpawn() {
         return new Vector(0D, 50D, 0D);
     }
