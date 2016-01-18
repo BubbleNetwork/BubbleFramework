@@ -19,12 +19,12 @@ public abstract class GameTimer{
         left = times;
         runnable = new BukkitRunnable() {
             public void run() {
-                GameTimer.this.run(getLeft());
-                left--;
                 if(getLeft() == 0){
                     GameTimer.this.cancel();
                     end();
                 }
+                GameTimer.this.run(getLeft());
+                left--;
             }
         }.runTaskTimer(BubbleNetwork.getInstance(), 0L, (long) interval);
     }
