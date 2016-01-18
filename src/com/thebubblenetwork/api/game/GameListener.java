@@ -3,20 +3,14 @@ package com.thebubblenetwork.api.game;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
-import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
-import com.thebubblenetwork.api.framework.util.reflection.ReflectionUTIL;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.packets.PlayerGhost;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.spectator.SpectatorCheck;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -28,19 +22,18 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.LazyMetadataValue;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Team;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -55,6 +48,8 @@ public class GameListener implements Listener {
             .withName(ChatColor.DARK_AQUA + "" + ChatColor.UNDERLINE + "Kits")
             .withLore(ChatColor.GRAY + "Click to select or buy a kit")
             .withAmount(1);
+
+    private static String ghostteam = "GHOST";
 
     public GameListener() {
         BubbleGameAPI.getInstance().registerListener(this);
@@ -90,8 +85,31 @@ public class GameListener implements Listener {
         else disableSpectate(p);
     }
 
+    private static Team setupTeam(Player p){
+        Team t = p.getScoreboard().registerNewTeam(ghostteam);
+        t.setCanSeeFriendlyInvisibles(true);
+        t.setPrefix(ChatColor.RED.toString());
+        for(Player target:getSpectators())t.addPlayer(target);
+        return t;
+    }
+
+    private static Team addToTeam(Player p,Player target){
+        Team t = target.getScoreboard().getTeam(ghostteam);
+        if(t == null)t = setupTeam(target);
+        else t.addPlayer(p);
+        return t;
+    }
+
+    private static Team removeFromTeam(Player p,Player target){
+        Team t = target.getScoreboard().getTeam(ghostteam);
+        if(t == null)t = setupTeam(target);
+        else t.removePlayer(p);
+        return t;
+    }
+
     private static void enableSpectate(Player p){
         if(isSpectating(p))return;
+        spectators.add(p.getUniqueId());
         Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
         for (Iterator<Entity> iterator = p.getNearbyEntities(100d,100d,100d).iterator();iterator.hasNext();temp = iterator.next()) {
@@ -103,9 +121,16 @@ public class GameListener implements Listener {
             }
         }
         for(Player target:Bukkit.getOnlinePlayers()){
-            if(target != p && target.canSee(p))target.hidePlayer(p);
+            if(target != p) {
+                if(!isSpectating(target)){
+                    target.hidePlayer(p);
+                }
+                else{
+                    addToTeam(p,target);
+                }
+                p.showPlayer(target);
+            }
         }
-        spectators.add(p.getUniqueId());
         if(p.isDead())p.spigot().respawn();
         p.getInventory().setContents(new ItemStack[4*9]);
         p.getInventory().setArmorContents(new ItemStack[4]);
@@ -118,32 +143,52 @@ public class GameListener implements Listener {
         p.setAllowFlight(true);
         p.setFlying(true);
         p.spigot().setCollidesWithEntities(false);
+        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1), false);
         Messages.sendMessageTitle(p,"",ChatColor.AQUA + "You are now spectating",new Messages.TitleTiming(10,30,20));
     }
 
     private static void disableSpectate(Player p){
         if(!isSpectating(p))return;
+        spectators.remove(p.getUniqueId());
         p.spigot().setCollidesWithEntities(true);
-        for(Player t:Bukkit.getOnlinePlayers()){
-            if(p != t){
-                if(!t.canSee(p))t.showPlayer(p);
+        Team t = p.getScoreboard().getTeam("ghosts");
+        if(t != null){
+            t.unregister();
+        }
+        for(Player target:Bukkit.getOnlinePlayers()){
+            if(p != target){
+                if(isSpectating(target)){
+                    p.hidePlayer(target);
+                    removeFromTeam(p,target);
+                }
+                target.showPlayer(p);
             }
         }
+        p.removePotionEffect(PotionEffectType.INVISIBILITY);
+    }
+
+    @EventHandler
+    public void onSpectatorQuit(PlayerQuitEvent e){
+        setSpectating(e.getPlayer(),false);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerMetaSet(PlayerJoinEvent e){
         Player p = e.getPlayer();
+        try {
+            PlayerGhost.setup(p);
+        } catch (Throwable throwable) {
+            //Automatic Catch Statement
+            throwable.printStackTrace();
+        }
         p.setMetadata("spectating",new LazyMetadataValue(BubbleGameAPI.getInstance(),LazyMetadataValue.CacheStrategy.NEVER_CACHE,new SpectatorCheck(p)));
         p.setMetadata("vanished",new LazyMetadataValue(BubbleGameAPI.getInstance(),LazyMetadataValue.CacheStrategy.NEVER_CACHE,new SpectatorCheck(p)));
         for(Player t:Bukkit.getOnlinePlayers()){
             if(p != t){
                 if(isSpectating(t)){
-                    if(p.canSee(t))p.hidePlayer(t);
+                    p.hidePlayer(t);
                 }
-                else if(!p.canSee(t)){
-                    p.showPlayer(t);
-                }
+                else p.showPlayer(t);
             }
         }
     }
@@ -295,6 +340,19 @@ public class GameListener implements Listener {
     @EventHandler
     public void onInventoryClickSpectator(InventoryClickEvent e){
         if(e.getWhoClicked() instanceof Player && isSpectating((Player)e.getWhoClicked()))e.setCancelled(true);
+    }
+
+
+    @EventHandler
+    public void onSpectatorBlockPlace(BlockCanBuildEvent e) {
+        Block b = e.getBlock();
+        Location loc = b.getLocation();
+        for (Player p : b.getWorld().getPlayers()) {
+            if (isSpectating(p) && p.getLocation().distanceSquared(loc) <= 2.0) {
+                e.setBuildable(true);
+                return;
+            }
+        }
     }
 
     @EventHandler
