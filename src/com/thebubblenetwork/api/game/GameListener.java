@@ -98,19 +98,20 @@ public class GameListener implements Listener {
         t.setCanSeeFriendlyInvisibles(true);
         t.setAllowFriendlyFire(false);
         for(Player other:Bukkit.getOnlinePlayers()){
-            if(isSpectatingAsync(other.getUniqueId())) {
+            if(isSpectating(other)) {
                 t.addPlayer(other);
                 other.getScoreboard().getTeam(ghostteam).addPlayer(p);
             }
         }
     }
 
+
     private void endGhost(Player p){
         Scoreboard board = p.getScoreboard();
         Team t = board.getTeam(ghostteam);
         t.unregister();
         for(Player other:Bukkit.getOnlinePlayers()){
-            if(isSpectatingAsync(other.getUniqueId())){
+            if(isSpectating(other)){
                 other.getScoreboard().getTeam(ghostteam).removePlayer(p);
             }
         }
@@ -119,12 +120,7 @@ public class GameListener implements Listener {
     private void enableSpectate(final Player p){
         if(isSpectating(p))return;
         spectators.add(p.getUniqueId());
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                startGhost(p);
-            }
-        }.runTaskAsynchronously(BubbleGameAPI.getInstance());
+        startGhost(p);
         Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
         for (Iterator<Entity> iterator = p.getNearbyEntities(100d,100d,100d).iterator();iterator.hasNext();temp = iterator.next()) {
@@ -163,17 +159,8 @@ public class GameListener implements Listener {
     private void disableSpectate(final Player p){
         if(!isSpectating(p))return;
         spectators.remove(p.getUniqueId());
-        new BukkitRunnable(){
-            @Override
-            public void run() {
-                startGhost(p);
-            }
-        }.runTaskAsynchronously(BubbleGameAPI.getInstance());
+        endGhost(p);
         p.spigot().setCollidesWithEntities(true);
-        Team t = p.getScoreboard().getTeam(ghostteam);
-        if(t != null){
-            t.unregister();
-        }
         for(Player target:Bukkit.getOnlinePlayers()){
             if(isSpectating(target)){
                 p.hidePlayer(target);
@@ -351,6 +338,15 @@ public class GameListener implements Listener {
             Player p = (Player)e.getEntity();
             if(isSpectating(p)){
                 e.setCancelled(true);
+            }
+            else if(e instanceof EntityDamageByEntityEvent){
+                EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent)e;
+                if(damageByEntityEvent.getDamager() instanceof Player){
+                    Player damager = (Player)damageByEntityEvent.getDamager();
+                    if(isSpectating(damager)){
+                        e.setCancelled(true);
+                    }
+                }
             }
         }
     }
