@@ -5,7 +5,6 @@ import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
-import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.spectator.SpectatorCheck;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -53,14 +52,23 @@ public class GameListener implements Listener {
 
     private static String ghostteam = "GHOST";
 
+    private static int SPECTATORHUBSLOT = 8,MAPSLOT = 1,KITSLOT = 0,HUBSLOT = 8;
+
+    private static ItemStackBuilder HUBITEM = new ItemStackBuilder(Material.WOOD_DOOR)
+            .withName(ChatColor.DARK_RED + "Go back to hub")
+            .withLore(ChatColor.RED + "Click this to go back to hub")
+            .withAmount(1)
+            .withGlow();
+
     public GameListener() {
         BubbleGameAPI.getInstance().registerListener(this);
     }
 
     public static ItemStack[] generateSpawnInventory(int inventorysize) {
         ItemStack[] is = new ItemStack[inventorysize];
-        is[2] = mapselection.build();
-        is[6] = kitselection.build();
+        is[MAPSLOT] = mapselection.build();
+        is[KITSLOT] = kitselection.build();
+        is[HUBSLOT] = HUBITEM.build();
         return is;
     }
 
@@ -76,12 +84,17 @@ public class GameListener implements Listener {
         return spectators.contains(u);
     }
 
-    public boolean isSpectatingAsync(UUID u){
-        UUID other = null;
-        for(Iterator<UUID> iterator = spectators.iterator();iterator.hasNext();other = iterator.next()){
-            if(other == u)return true;
+    public void cleanSpectators(){
+        for(Player p:Bukkit.getOnlinePlayers()) {
+            if (isSpectating(p)) {
+                Team t = p.getScoreboard().getTeam(ghostteam);
+                t.unregister();
+            }
+            for(Player other:Bukkit.getOnlinePlayers()){
+                other.showPlayer(p);
+                p.showPlayer(other);
+            }
         }
-        return false;
     }
 
     public void setSpectating(Player p,boolean spectating){
@@ -120,7 +133,6 @@ public class GameListener implements Listener {
     private void enableSpectate(final Player p){
         if(isSpectating(p))return;
         spectators.add(p.getUniqueId());
-        startGhost(p);
         Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
         for (Iterator<Entity> iterator = p.getNearbyEntities(100d,100d,100d).iterator();iterator.hasNext();temp = iterator.next()) {
@@ -141,8 +153,10 @@ public class GameListener implements Listener {
             p.showPlayer(target);
         }
         if(p.isDead())p.spigot().respawn();
+        startGhost(p);
         p.getInventory().setContents(new ItemStack[4*9]);
         p.getInventory().setArmorContents(new ItemStack[4]);
+        p.getInventory().setItem(SPECTATORHUBSLOT,HUBITEM.build());
         p.setHealth(20d);
         p.setFoodLevel(20);
         p.setHealthScale(20d);
@@ -243,30 +257,36 @@ public class GameListener implements Listener {
         Player p = e.getPlayer();
         if(isSpectating(p)){
             e.setCancelled(true);
-            Block clicked = e.getClickedBlock();
-            if(e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null){
-                if(clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
-                    BlockState clickedstate = clicked.getState();
-                    if (clickedstate != null && clickedstate instanceof Chest) {
-                        Chest chest = (Chest) clickedstate;
-                        Location l = toBlockLocation(chest.getLocation());
-                        Inventory i;
-                        if (chests.containsKey(l)) {
-                            i = chests.get(l);
+            int i = p.getInventory().getHeldItemSlot();
+            if((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL) && i == SPECTATORHUBSLOT){
+                BubbleGameAPI.getInstance().getHubInventory().show(p);
+            }
+            else {
+                Block clicked = e.getClickedBlock();
+                if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
+                    if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
+                        BlockState clickedstate = clicked.getState();
+                        if (clickedstate != null && clickedstate instanceof Chest) {
+                            Chest chest = (Chest) clickedstate;
+                            Location l = toBlockLocation(chest.getLocation());
+                            Inventory inventory;
+                            if (chests.containsKey(l)) {
+                                inventory = chests.get(l);
+                            }
+                            else {
+                                inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(),chest.getInventory().getName());
+                                inventory.setContents(chest.getInventory().getContents());
+                                chests.put(l, inventory);
+                            }
+                            p.openInventory(inventory);
                         }
-                        else {
-                            i = Bukkit.createInventory(chest, chest.getInventory().getType());
-                            i.setContents(chest.getInventory().getContents());
-                            chests.put(l, i);
-                        }
-                        p.openInventory(i);
                     }
-                }
-                else {
-                    BlockState state = clicked.getState();
-                    if (state instanceof InventoryHolder) {
-                        InventoryHolder holder = (InventoryHolder) state;
-                        p.openInventory(holder.getInventory());
+                    else {
+                        BlockState state = clicked.getState();
+                        if (state instanceof InventoryHolder) {
+                            InventoryHolder holder = (InventoryHolder) state;
+                            p.openInventory(holder.getInventory());
+                        }
                     }
                 }
             }
@@ -353,10 +373,20 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onPlayerDeathToSpectator(PlayerDeathEvent e){
-        Player p = e.getEntity();
-        Location l = p.getLocation();
-        if(BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME)setSpectating(p,true);
-        p.teleport(l);
+        final Player p = e.getEntity();
+        final Location l = p.getLocation();
+        if(BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME){
+            p.spigot().respawn();
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    if(p.isOnline()) {
+                        setSpectating(p, true);
+                        p.teleport(l);
+                    }
+                }
+            }.runTask(BubbleGameAPI.getInstance());
+        }
     }
 
     @EventHandler
@@ -431,7 +461,7 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e){
-        if(Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMaxPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY){
+        if(Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY){
             BubbleGameAPI.getInstance().cancelWaiting();
         }
     }
@@ -462,11 +492,14 @@ public class GameListener implements Listener {
             if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY &&
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
-                if (slot == 2) {
+                if (slot == MAPSLOT) {
                     VoteInventory.getVoteInventory().show(p);
                 }
-                else if (slot == 6) {
+                else if (slot == KITSLOT) {
                     KitSelection.openMenu(p);
+                }
+                else if(slot == HUBSLOT){
+                    BubbleGameAPI.getInstance().getHubInventory().show(p);
                 }
             }
         }

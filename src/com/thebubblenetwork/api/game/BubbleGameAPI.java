@@ -123,6 +123,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     private GameListener listener;
     private VoteInventory voteInventory;
     private GameTimer timer;
+    private HubInventory hubInventory;
 
     public GameListener getGame(){
         return listener;
@@ -293,6 +294,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         return State.state;
     }
 
+    public HubInventory getHubInventory() {
+        return hubInventory;
+    }
+
+    public GameTimer getTimer() {
+        return timer;
+    }
+
     public void setState(State newstate) {
         State oldstate = State.state;
         State.state = newstate;
@@ -320,6 +329,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         GameBoard.registerlistener(this);
         listener = new GameListener();
         voteInventory = new VoteInventory(9);
+        hubInventory = new HubInventory();
         new BukkitRunnable() {
             @Override
             public void run() {
