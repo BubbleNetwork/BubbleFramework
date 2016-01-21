@@ -52,13 +52,18 @@ public class GameListener implements Listener {
 
     private static String ghostteam = "GHOST";
 
-    private static int SPECTATORHUBSLOT = 8,MAPSLOT = 1,KITSLOT = 0,HUBSLOT = 8;
+    private static int SPECTATORHUBSLOT = 8,SPECTATORPLAYERSSLOT = 0,MAPSLOT = 1,KITSLOT = 0,HUBSLOT = 8;
 
     private static ItemStackBuilder HUBITEM = new ItemStackBuilder(Material.WOOD_DOOR)
             .withName(ChatColor.DARK_RED + "Go back to hub")
             .withLore(ChatColor.RED + "Click this to go back to hub")
             .withAmount(1)
             .withGlow();
+
+    private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS)
+            .withName(ChatColor.DARK_AQUA + "Spectator menu")
+            .withLore(ChatColor.GRAY + "Click this to open the spectator menu")
+            .withAmount(1);
 
     public GameListener() {
         BubbleGameAPI.getInstance().registerListener(this);
@@ -82,6 +87,10 @@ public class GameListener implements Listener {
     @Deprecated
     public boolean isSpectating(UUID u){
         return spectators.contains(u);
+    }
+
+    public List<UUID> getSpectatorList(){
+        return spectators;
     }
 
     public void cleanSpectators(){
@@ -157,6 +166,7 @@ public class GameListener implements Listener {
         p.getInventory().setContents(new ItemStack[4*9]);
         p.getInventory().setArmorContents(new ItemStack[4]);
         p.getInventory().setItem(SPECTATORHUBSLOT,HUBITEM.build());
+        p.getInventory().setItem(SPECTATORPLAYERSSLOT,PLAYERS.build());
         p.setHealth(20d);
         p.setFoodLevel(20);
         p.setHealthScale(20d);
@@ -167,6 +177,7 @@ public class GameListener implements Listener {
         p.setFlying(true);
         p.spigot().setCollidesWithEntities(false);
         p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,Integer.MAX_VALUE,1), false);
+        BubbleGameAPI.getInstance().getPlayerList().update();
         Messages.sendMessageTitle(p,"",ChatColor.AQUA + "You are now spectating",new Messages.TitleTiming(10,30,20));
     }
 
@@ -183,11 +194,7 @@ public class GameListener implements Listener {
             target.showPlayer(p);
         }
         p.removePotionEffect(PotionEffectType.INVISIBILITY);
-    }
-
-    @EventHandler
-    public void onSpectatorQuit(PlayerQuitEvent e){
-        setSpectating(e.getPlayer(),false);
+        BubbleGameAPI.getInstance().getPlayerList().update();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -206,11 +213,6 @@ public class GameListener implements Listener {
     }
 
     @EventHandler
-    public void onSpectatorFoodLevelChange(FoodLevelChangeEvent e){
-        if(e.getEntity() instanceof Player && isSpectating((Player)e.getEntity()))e.setFoodLevel(20);
-    }
-
-    @EventHandler
     public void onEntityTargetSpectator(EntityTargetEvent e){
         if(e.getTarget() instanceof Player && isSpectating((Player)e.getTarget()))e.setCancelled(true);
     }
@@ -223,76 +225,6 @@ public class GameListener implements Listener {
             e.setCancelled(true);
         }
     }
-
-    @EventHandler
-    public void onDestroyVehicleSpectator(VehicleDestroyEvent e){
-        if(e.getAttacker() instanceof Player && isSpectating((Player)e.getAttacker()))e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onBlockDamageSpectator(BlockDamageEvent e){
-        if(isSpectating(e.getPlayer())){
-            e.setInstaBreak(true);
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onHangingBreakSpectator(HangingBreakByEntityEvent e){
-        if(e.getRemover() instanceof Player && isSpectating((Player)e.getRemover()))e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onPickupItemSpectator(PlayerPickupItemEvent e){
-        if(isSpectating(e.getPlayer()))e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onDropItemSpectator(PlayerDropItemEvent e){
-        if(isSpectating(e.getPlayer()))e.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onSpectatorInteract(PlayerInteractEvent e){
-        Player p = e.getPlayer();
-        if(isSpectating(p)){
-            e.setCancelled(true);
-            int i = p.getInventory().getHeldItemSlot();
-            if((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL) && i == SPECTATORHUBSLOT){
-                BubbleGameAPI.getInstance().getHubInventory().show(p);
-            }
-            else {
-                Block clicked = e.getClickedBlock();
-                if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
-                    if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
-                        BlockState clickedstate = clicked.getState();
-                        if (clickedstate != null && clickedstate instanceof Chest) {
-                            Chest chest = (Chest) clickedstate;
-                            Location l = toBlockLocation(chest.getLocation());
-                            Inventory inventory;
-                            if (chests.containsKey(l)) {
-                                inventory = chests.get(l);
-                            }
-                            else {
-                                inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(),chest.getInventory().getName());
-                                inventory.setContents(chest.getInventory().getContents());
-                                chests.put(l, inventory);
-                            }
-                            p.openInventory(inventory);
-                        }
-                    }
-                    else {
-                        BlockState state = clicked.getState();
-                        if (state instanceof InventoryHolder) {
-                            InventoryHolder holder = (InventoryHolder) state;
-                            p.openInventory(holder.getInventory());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
     public void onCloseInventorySpectator(InventoryCloseEvent e){
@@ -353,25 +285,6 @@ public class GameListener implements Listener {
     }
 
     @EventHandler
-    public void onEntitySpectatorDamage(EntityDamageEvent e){
-        if(e.getEntity() instanceof Player){
-            Player p = (Player)e.getEntity();
-            if(isSpectating(p)){
-                e.setCancelled(true);
-            }
-            else if(e instanceof EntityDamageByEntityEvent){
-                EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent)e;
-                if(damageByEntityEvent.getDamager() instanceof Player){
-                    Player damager = (Player)damageByEntityEvent.getDamager();
-                    if(isSpectating(damager)){
-                        e.setCancelled(true);
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
     public void onPlayerDeathToSpectator(PlayerDeathEvent e){
         final Player p = e.getEntity();
         final Location l = p.getLocation();
@@ -389,25 +302,41 @@ public class GameListener implements Listener {
         }
     }
 
+
     @EventHandler
-    public void onInventoryDragSpectator(InventoryDragEvent e){
-        if(e.getWhoClicked() instanceof Player && isSpectating((Player)e.getWhoClicked()))e.setCancelled(true);
+    public void onInventoryDrag(InventoryDragEvent e){
+        if(e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player)e.getWhoClicked())))e.setCancelled(true);
     }
 
     @EventHandler
-    public void onInventoryClickSpectator(InventoryClickEvent e){
-        if(e.getWhoClicked() instanceof Player && isSpectating((Player)e.getWhoClicked()))e.setCancelled(true);
+    public void onInventoryClick(InventoryClickEvent e){
+        if(e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player)e.getWhoClicked())))e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerPickupItem(PlayerPickupItemEvent e){
+        if(canDefault() || isSpectating(e.getPlayer()))e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent e){
+        if(canDefault() || isSpectating(e.getPlayer()))e.setCancelled(true);
     }
 
 
     @EventHandler
-    public void onSpectatorBlockPlace(BlockCanBuildEvent e) {
-        Block b = e.getBlock();
-        Location loc = b.getLocation();
-        for (Player p : b.getWorld().getPlayers()) {
-            if (isSpectating(p) && p.getLocation().distanceSquared(loc) <= 2.0) {
-                e.setBuildable(true);
-                return;
+    public void onBlockCanBuild(BlockCanBuildEvent e) {
+        if(canDefault()){
+            e.setBuildable(false);
+        }
+        else {
+            Block b = e.getBlock();
+            Location loc = b.getLocation();
+            for (Player p : b.getWorld().getPlayers()) {
+                if (isSpectating(p) && p.getLocation().distanceSquared(loc) <= 2.0) {
+                    e.setBuildable(true);
+                    return;
+                }
             }
         }
     }
@@ -461,6 +390,7 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e){
+        setSpectating(e.getPlayer(),false);
         if(Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY){
             BubbleGameAPI.getInstance().cancelWaiting();
         }
@@ -470,25 +400,13 @@ public class GameListener implements Listener {
         return (BubbleGameAPI.getInstance().getState() != BubbleGameAPI.State.INGAME);
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerDropItems(PlayerDropItemEvent e) {
-        if (canDefault())
-            e.setCancelled(true);
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerPickupItems(PlayerPickupItemEvent e) {
-        if (canDefault())
-            e.setCancelled(true);
-    }
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent e) {
+        Player p = e.getPlayer();
         if (canDefault()) {
             e.setCancelled(true);
             e.setUseInteractedBlock(Event.Result.DENY);
             e.setUseItemInHand(Event.Result.DENY);
-            Player p = e.getPlayer();
             if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY &&
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
@@ -503,33 +421,100 @@ public class GameListener implements Listener {
                 }
             }
         }
+        else if(isSpectating(p)){
+            e.setCancelled(true);
+            int i = p.getInventory().getHeldItemSlot();
+            if((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL)){
+                if(i == SPECTATORHUBSLOT)BubbleGameAPI.getInstance().getHubInventory().show(p);
+                else if(i == SPECTATORPLAYERSSLOT)BubbleGameAPI.getInstance().getPlayerList().show(p);
+            }
+            else {
+                Block clicked = e.getClickedBlock();
+                if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
+                    if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
+                        BlockState clickedstate = clicked.getState();
+                        if (clickedstate != null && clickedstate instanceof Chest) {
+                            Chest chest = (Chest) clickedstate;
+                            Location l = toBlockLocation(chest.getLocation());
+                            Inventory inventory;
+                            if (chests.containsKey(l)) {
+                                inventory = chests.get(l);
+                            }
+                            else {
+                                inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(),chest.getInventory().getName());
+                                inventory.setContents(chest.getInventory().getContents());
+                                chests.put(l, inventory);
+                            }
+                            p.openInventory(inventory);
+                        }
+                    }
+                    else {
+                        BlockState state = clicked.getState();
+                        if (state instanceof InventoryHolder) {
+                            InventoryHolder holder = (InventoryHolder) state;
+                            p.openInventory(holder.getInventory());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDamage(EntityDamageEvent e) {
-        if (e.getEntity() instanceof Player && canDefault())
-            e.setCancelled(true);
+        if (e.getEntity() instanceof Player) {
+            if(canDefault())e.setCancelled(true);
+            else{
+                final Player p = (Player)e.getEntity();
+                if(isSpectating(p)){
+                    e.setCancelled(true);
+                }
+                else{
+                    if(e instanceof EntityDamageByEntityEvent){
+                        EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent)e;
+                        if(damageByEntityEvent.getDamager() instanceof Player){
+                            Player damager = (Player)damageByEntityEvent.getDamager();
+                            if(isSpectating(damager)){
+                                e.setCancelled(true);
+                                return;
+                            }
+                        }
+                    }
+                    new BukkitRunnable() {
+                        public void run() {
+                            if (p.isOnline() && !isSpectating(p))
+                                BubbleGameAPI.getInstance().getPlayerList().update(p);
+                        }
+                    }.runTask(BubbleGameAPI.getInstance());
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onBlockDamage(BlockDamageEvent e) {
-        if (canDefault())
+        if (canDefault() || isSpectating(e.getPlayer())) {
             e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onCanBlock(BlockCanBuildEvent e) {
-        if (canDefault())
-            e.setBuildable(false);
+    public void onPlayerFoodChange(FoodLevelChangeEvent e) {
+        if (e.getEntity() instanceof Player && (canDefault() || isSpectating((Player)e.getEntity()))) {
+            e.setFoodLevel(20);
+        }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onLoseFood(FoodLevelChangeEvent e) {
-        if (canDefault()) {
-            if (e.getFoodLevel() == 20)
-                e.setCancelled(true);
-            else
-                e.setFoodLevel(20);
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
+    public void onPlayerFoodChangeList(FoodLevelChangeEvent e){
+        if(e.getEntity() instanceof Player && !isSpectating((Player)e.getEntity())){
+            final Player p = (Player)e.getEntity();
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    if(p.isOnline() && !isSpectating(p))BubbleGameAPI.getInstance().getPlayerList().update(p);
+                }
+            }.runTask(BubbleGameAPI.getInstance());
         }
     }
 }

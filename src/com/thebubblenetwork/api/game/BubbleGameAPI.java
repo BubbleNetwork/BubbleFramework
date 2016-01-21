@@ -23,6 +23,7 @@ import com.thebubblenetwork.api.game.maps.MapData;
 import com.thebubblenetwork.api.game.maps.Vote;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
+import com.thebubblenetwork.api.game.spectator.PlayersList;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -124,6 +125,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     private VoteInventory voteInventory;
     private GameTimer timer;
     private HubInventory hubInventory;
+    private PlayersList list;
 
     public GameListener getGame(){
         return listener;
@@ -302,6 +304,10 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         return timer;
     }
 
+    public PlayersList getPlayerList() {
+        return list;
+    }
+
     public void setState(State newstate) {
         State oldstate = State.state;
         State.state = newstate;
@@ -330,6 +336,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         listener = new GameListener();
         voteInventory = new VoteInventory(9);
         hubInventory = new HubInventory();
+        list = new PlayersList();
         new BukkitRunnable() {
             @Override
             public void run() {
