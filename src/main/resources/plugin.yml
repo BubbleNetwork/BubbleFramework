@@ -1,0 +1,7 @@
+name: BubbleFramework
+main: com.thebubblenetwork.api.framework.P
+version: 1.0
+load: STARTUP
+description: 'A framework for all bubblenetwork plugins'
+authors: ["JAC0B"]
+depend: [XServer]
