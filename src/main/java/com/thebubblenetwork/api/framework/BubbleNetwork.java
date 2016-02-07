@@ -1,6 +1,5 @@
 package com.thebubblenetwork.api.framework;
 
-import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.interaction.BubbleListener;
 import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
@@ -9,7 +8,6 @@ import com.thebubblenetwork.api.framework.plugin.BubblePluginLoader;
 import com.thebubblenetwork.api.framework.plugin.PluginDescriptionFile;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
-import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import com.thebubblenetwork.api.framework.util.version.VersionUTIL;
 import com.thebubblenetwork.api.global.bubblepackets.PacketInfo;
 import com.thebubblenetwork.api.global.bubblepackets.PacketListener;
@@ -21,27 +19,18 @@ import com.thebubblenetwork.api.global.file.PropertiesFile;
 import com.thebubblenetwork.api.global.plugin.BubbleHub;
 import com.thebubblenetwork.api.global.plugin.BubbleHubObject;
 import com.thebubblenetwork.api.global.ranks.Rank;
-import com.thebubblenetwork.api.global.sql.SQLConnection;
-import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
-import de.mickare.xserver.AbstractXServerManager;
-import de.mickare.xserver.BukkitXServerManager;
-import de.mickare.xserver.BukkitXServerPlugin;
-import de.mickare.xserver.XServerManager;
-import de.mickare.xserver.exceptions.NotInitializedException;
+import de.mickare.xserver.XServerPlugin;
 import de.mickare.xserver.net.XServer;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -104,6 +93,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
     }
 
     public void onBubbleEnable() {
+        logInfo("Loading components");
+
         api = new BubbleBarAPI();
         registerListener(getListener());
         commandPlugin.register(getPlugin());
@@ -113,15 +104,23 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         api.DragonBarTask();
         registerListener(util);
         manager.register(getPlugin());
-        for (BubblePlugin plugin : pluginList) {
-            plugin.onEnable();
-        }
+        getPacketHub().registerListener(this);
+
+        logInfo("Components have been loaded");
     }
 
     public void onBubbleLoad() {
         commandPlugin = new CommandPlugin();
-        if (!plugin.getDataFolder().exists())
+
+        logInfo("Finding addon folder");
+
+        if (!plugin.getDataFolder().exists()){
+            logInfo("Creating addon folder");
             plugin.getDataFolder().mkdir();
+        }
+
+        logInfo("Finding addons");
+
         Map<PluginDescriptionFile, File> loaderList = new HashMap<>();
         List<PluginDescriptionFile> files = new ArrayList<>();
         for (File f : plugin.getDataFolder().listFiles()) {
@@ -135,11 +134,21 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
                 }
             }
         }
+
+        logInfo("Found addons");
+
+        logInfo("Sorting addons");
+
         Collections.sort(files, new Comparator<PluginDescriptionFile>() {
             public int compare(PluginDescriptionFile o1, PluginDescriptionFile o2) {
                 return o1.getPriority() - o2.getPriority();
             }
         });
+
+        logInfo("Finished sorting addons");
+
+        logInfo("Loading addons...");
+
         for (PluginDescriptionFile file : files) {
             try {
                 BubblePluginLoader loader = new BubblePluginLoader(loaderList.get(file), file);
@@ -152,6 +161,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
                 logSevere("Error loading " + file.getName() + "\n");
             }
         }
+
+        logInfo("Finished loading addons");
     }
 
     public void onBubbleDisable() {
@@ -195,6 +206,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
     public void saveXServerDefaults() {
         int port;
         String ip;
+
+        logInfo("Finding default server properties...");
+
         try {
             PropertiesFile thisserver = new PropertiesFile(new File("server.properties"));
             port = thisserver.getNumber("server-port").intValue();
@@ -205,16 +219,28 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
             endSetup("Could not load this servers properties");
             return;
         }
+
+        logInfo("Found default server properties");
+
         this.FINALID = port-2000;
+
+        logInfo("Creating xserver files");
+
         File xserverfolder = new File("plugins" + File.separator + "Xserver");
+
         if(!xserverfolder.exists())xserverfolder.mkdir();
+
         File config = new File(xserverfolder + File.separator + "config.yml");
+
         if(!config.exists()) try {
             config.createNewFile();
         } catch (IOException e) {
             logSevere(e.getMessage());
             endSetup("Could not create xserver configuration");
         }
+
+        logInfo("Loading XServer configuration...");
+
         YamlConfiguration xserverconfig = YamlConfiguration.loadConfiguration(config);
         xserverconfig.set("useMotdForServername", false);
         xserverconfig.set("servername", String.valueOf(FINALID));
@@ -226,6 +252,11 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         xserverconfig.set("mysql.TableXServers", "xserver_servers");
         xserverconfig.set("mysql.TableXGroups", "xserver_groups");
         xserverconfig.set("mysql.TableXServersGroups", "xserver_servergroups");
+
+        logInfo("Loaded XServer configuration");
+
+        logInfo("Saving XServer configuration...");
+
         try {
             xserverconfig.save(config);
         } catch (IOException e) {
@@ -233,7 +264,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
             logSevere(e.getMessage());
             endSetup("Could not save xserver files, plugin is disabling");
         }
-        logInfo("The plugin has loaded successfully, starting...");
+
+        logSevere("Saved XServer configuration");
     }
 
     public Player getPlayer(UUID uuid) {
@@ -245,16 +277,21 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         throw new RuntimeException(s);
     }
 
+    public Logger getLogger(){
+        if(getPlugin() != null && getPlugin().isEnabled())return getPlugin().getLogger();
+        return null;
+    }
+
     public void logInfo(String s) {
-        Logger l = getPlugin().getLogger();
+        Logger l = getLogger();
         if(l != null)l.info(s);
-        else System.out.println(s);
+        else System.out.println("[BubbleFramework] " + s);
     }
 
     public void logSevere(String s) {
-        Logger l = getPlugin().getLogger();
+        Logger l = getLogger();
         if(l != null)l.severe(s);
-        else System.err.println(s);
+        else System.err.println("[BubbleFramework] " + s);
     }
 
     public BubblePlugin getPlugin(String s){
@@ -264,27 +301,42 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         return null;
     }
 
+    public void disableAddon(){
+        logInfo("Disabling addon : " + getAssigned().getName());
+        getAssigned().onDisable();
+        assigned = null;
+    }
+
+    public void enableAddon(BubblePlugin plugin){
+        if(getAssigned() != null)disableAddon();
+        logInfo("Enabling addon: " + plugin.getName());
+        assigned = plugin;
+        assigned.onLoad();
+        logInfo("Addon is loaded");
+        assigned.onEnable();
+        logInfo("Addon is enabled");
+    }
+
     public void onMessage(PacketInfo info, IPluginMessage message) {
         if(message instanceof AssignMessage){
+            logInfo("Received assign message");
             AssignMessage assignMessage = (AssignMessage)message;
             this.type = assignMessage.getWrapperType();
             this.id = assignMessage.getId();
+            logInfo("ServerType: " + type.getName() + " ID: " + String.valueOf(id));
             this.proxy = info.getServer();
+            BubblePlugin addon = getPlugin(type.getName());
+            if(addon == null){
+                endSetup("Could not find assigned addon");
+            }
+            enableAddon(addon);
             try {
                 getPacketHub().sendMessage(info.getServer(),new AssignMessage(id,type));
             } catch (IOException e) {
                 logSevere(e.getMessage());
+                endSetup("Could not send assign message");
             }
-            if(getAssigned() != null){
-                getAssigned().onDisable();
-            }
-            assigned = getPlugin(type.getName());
-            getAssigned().onLoad();
-            new BukkitRunnable(){
-                public void run() {
-                    getAssigned().onEnable();
-                }
-            }.runTask(getPlugin());
+            logInfo("Sent assign message!");
         }
         else if(message instanceof RankDataUpdate){
             RankDataUpdate rankDataUpdate = (RankDataUpdate)message;
@@ -312,35 +364,17 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         return id;
     }
 
-    public AbstractXServerManager getXManager() {
-        try {
-            return BukkitXServerManager.getInstance();
-        } catch (NotInitializedException e) {
-            logSevere("Could not find XServer, looking for other ways");
-        }
-        Plugin p = getPlugin().getServer().getPluginManager().getPlugin("XServer");
-        if(p == null){
-            logSevere("Could not find XServer plugin, last try");
-            p = BukkitXServerPlugin.getProvidingPlugin(BukkitXServerPlugin.class);
-            if(p == null){
-                endSetup("Could not find XServer");
-            }
-        }
-        BukkitXServerPlugin xServerPlugin = (BukkitXServerPlugin)p;
-        XServerManager manager = null;
-        try {
-            manager = xServerPlugin.getManager();
-        } catch (Exception e) {
-            logSevere(e.getMessage());
-        }
-        if(manager != null)return manager;
-        logSevere("Could not find XServer, restarting");
-        endSetup("Could not find XServer instance");
-        throw new RuntimeException();
+    public XServerPlugin getXPlugin() {
+        if(!getPlugin().getServer().getPluginManager().isPluginEnabled("XServer"))endSetup("Could not find XServer");
+        return (XServerPlugin) getPlugin().getServer().getPluginManager().getPlugin("XServer");
     }
 
     public void runTaskLater(Runnable runnable, long l, TimeUnit timeUnit) {
         getPlugin().getServer().getScheduler().runTaskLater(getPlugin(),runnable,timeUnit.toMillis(l)/50);
+    }
+
+    public boolean bungee(){
+        return false;
     }
 
     public void onConnect(PacketInfo info) {
