@@ -16,12 +16,14 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshak
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.RankDataUpdate;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
+import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.plugin.BubbleHub;
 import com.thebubblenetwork.api.global.plugin.BubbleHubObject;
 import com.thebubblenetwork.api.global.ranks.Rank;
 import com.thebubblenetwork.api.global.type.ServerType;
 import de.mickare.xserver.XServerPlugin;
 import de.mickare.xserver.net.XServer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -222,7 +224,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
 
         logInfo("Found default server properties");
 
-        this.FINALID = port-2000;
+        this.FINALID = port-10000;
 
         logInfo("Creating xserver files");
 
@@ -344,7 +346,15 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         }
         else if(message instanceof PlayerDataResponse){
             PlayerDataResponse dataResponse = (PlayerDataResponse)message;
-            getListener().getData().put(dataResponse.getUUID(),dataResponse.getData());
+            Player player = Bukkit.getPlayer(dataResponse.getName());
+            if(player != null) {
+                BubblePlayer<Player> bukkitBubblePlayer;
+                if((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
+                    logSevere("Received data for a player which is not online " + dataResponse.getName());
+                }
+                else bukkitBubblePlayer.setData(dataResponse.getData());
+            }
+            else getListener().getData().put(dataResponse.getName(),dataResponse.getData());
         }
     }
 

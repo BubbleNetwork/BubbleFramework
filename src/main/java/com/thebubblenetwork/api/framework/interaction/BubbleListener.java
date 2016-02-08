@@ -37,13 +37,13 @@ import java.util.UUID;
 public class BubbleListener implements Listener{
     private BubbleNetwork network;
 
-    private Map<UUID,Map<?,?>> data = new HashMap<>();
+    private Map<String,Map<?,?>> data = new HashMap<>();
 
     protected BubbleNetwork getNetwork(){
         return network;
     }
 
-    public Map<UUID,Map<?,?>> getData(){
+    public Map<String,Map<?,?>> getData(){
         return data;
     }
 
@@ -53,14 +53,13 @@ public class BubbleListener implements Listener{
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPreJoin(AsyncPlayerPreLoginEvent e){
-        UUID u = e.getUniqueId();
-        data.put(u,DataRequestTask.requestAsync(u).getData());
+        data.put(e.getName(),DataRequestTask.requestAsync(data,e.getName()));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
-        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(),new BukkitBubblePlayer(p.getUniqueId(),new PlayerData(data.remove(p.getUniqueId()))));
+        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(),new BukkitBubblePlayer(p.getUniqueId(),new PlayerData(data.remove(p.getName()))));
         try {
             getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(),new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
         } catch (IOException e1) {

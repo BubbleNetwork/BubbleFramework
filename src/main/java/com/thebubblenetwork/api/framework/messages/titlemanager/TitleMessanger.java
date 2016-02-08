@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
  */
 public class TitleMessanger {
     private static Class<?> ichatbasecomponent, craftplayer, packet, packetplayoutchat, entityplayer,
-            entityplayerconnection, chatserializer, packetinjector,packetaction;
+            entityplayerconnection, chatserializer,protcolinjector, packetinjector,packetaction;
     ;
     private static Method geticbc, getentityplayer, sendPacket;
     private static Field playerconnectionfield,title,subtitle,times;
@@ -28,8 +28,9 @@ public class TitleMessanger {
             entityplayer = ReflectionUTIL.getNMSClass("EntityPlayer");
             entityplayerconnection = ReflectionUTIL.getNMSClass("PlayerConnection");
             craftplayer = ReflectionUTIL.getCraftClass("entity.CraftPlayer");
-            packetinjector = Class.forName("org.spigotmc.ProtocolInjector.PacketTitle.class");
-            packetaction = Class.forName("org.spigotmc.ProtocolInjector.PacketTitle.Action.class");
+            protcolinjector = Class.forName("org.spigotmc.ProtocolInjector");
+            packetinjector = protcolinjector.getDeclaredClasses()[0];
+            packetaction = packetinjector.getDeclaredClasses()[0];
 
             //Classes needed for methods and fields
             chatserializer = ReflectionUTIL.getNMSClass("ChatSerializer");

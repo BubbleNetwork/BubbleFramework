@@ -27,43 +27,37 @@ import java.util.UUID;
  * Project: BubbleFramework
  */
 public class DataRequestTask extends BukkitRunnable{
-    private static Map<UUID,PlayerDataResponse> dataRequestTaskMap = new HashMap<>();
-    private static Thread thread;
 
-    static{
-        thread = Thread.currentThread();
-    }
-
-    public static PlayerDataResponse requestAsync(UUID u) throws SunToolkit.IllegalThreadException{
-        if(Thread.currentThread() == thread)throw new SunToolkit.IllegalThreadException("Not async");
-        DataRequestTask task = new DataRequestTask(u);
+    public static Map<?,?> requestAsync(Map<String,Map<?,?>> place,String name){
+        BubbleNetwork.getInstance().logInfo("Requesting data for " + name);
+        DataRequestTask task = new DataRequestTask(place,name);
         while(!task.isCompleted()){
         }
-        return dataRequestTaskMap.remove(u);
+        return place.remove(name);
     }
 
-    private UUID u;
-    private boolean completed = false;
+    private String name;
+    private Map<String,Map<?,?>> place;
 
-    private DataRequestTask(UUID u) {
-        this.u = u;
+    private DataRequestTask(Map<String,Map<?,?>> place,String name) {
+        this.name = name;
+        this.place = place;
         runTask(BubbleNetwork.getInstance().getPlugin());
     }
 
     public void run(){
         try {
-            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataRequest(getUUID()));
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataRequest(getName()));
         } catch (IOException e) {
-            dataRequestTaskMap.put(getUUID(),new PlayerDataResponse(u,new HashMap<>()));
+            place.put(getName(),new HashMap());
         }
-        completed = true;
     }
 
     public boolean isCompleted() {
-        return completed;
+        return place.containsKey(name);
     }
 
-    public UUID getUUID(){
-        return u;
+    public String getName(){
+        return name;
     }
 }
