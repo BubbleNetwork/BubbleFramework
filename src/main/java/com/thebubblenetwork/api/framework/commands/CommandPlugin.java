@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.Plugin;
@@ -38,7 +39,7 @@ public class CommandPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST,ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (!isFeatureEnabled())
             return;
