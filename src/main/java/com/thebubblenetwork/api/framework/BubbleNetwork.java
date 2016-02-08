@@ -2,6 +2,7 @@ package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.interaction.BubbleListener;
+import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
 import com.thebubblenetwork.api.framework.plugin.BubblePluginLoader;
@@ -354,7 +355,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
                 }
                 else bukkitBubblePlayer.setData(dataResponse.getData());
             }
-            else getListener().getData().put(dataResponse.getName(),dataResponse.getData());
+            else DataRequestTask.setData(dataResponse.getName(),dataResponse.getData());
         }
     }
 

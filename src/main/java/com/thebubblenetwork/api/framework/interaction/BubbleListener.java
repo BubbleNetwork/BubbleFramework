@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -53,7 +54,8 @@ public class BubbleListener implements Listener{
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPreJoin(AsyncPlayerPreLoginEvent e){
-        data.put(e.getName(),DataRequestTask.requestAsync(data,e.getName()));
+        data.put(e.getName(),DataRequestTask.requestAsync(e.getName()));
+    }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

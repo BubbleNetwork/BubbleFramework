@@ -6,6 +6,7 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response
 import org.bukkit.scheduler.BukkitRunnable;
 import sun.awt.SunToolkit;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,34 +28,49 @@ import java.util.UUID;
  * Project: BubbleFramework
  */
 public class DataRequestTask extends BukkitRunnable{
+    private static Map<String,DataRequestTask> taskMap = new HashMap<>();
 
-    public static Map<?,?> requestAsync(Map<String,Map<?,?>> place,String name){
-        BubbleNetwork.getInstance().logInfo("Requesting data for " + name);
-        DataRequestTask task = new DataRequestTask(place,name);
-        while(!task.isCompleted()){
+    public static void setData(String name,Map<?,?> received){
+        if(taskMap.containsKey(name.toLowerCase())){
+            taskMap.remove(name.toLowerCase()).setResult(received);
+            BubbleNetwork.getInstance().logInfo("Received pending data for " + name);
         }
-        return place.remove(name);
+        else BubbleNetwork.getInstance().logSevere("Set data for invalid player " + name);
+    }
+
+    public static Map<?,?> requestAsync(String name){
+        BubbleNetwork.getInstance().logInfo("Requesting data for " + name);
+        DataRequestTask task = new DataRequestTask(name);
+        taskMap.put(name.toLowerCase(),task);
+        task.runTask(BubbleNetwork.getInstance().getPlugin());
+        while(taskMap.containsKey(name.toLowerCase())){
+            
+        }
+        BubbleNetwork.getInstance().logInfo("Found data for " + name);
+        return task.getResult();
     }
 
     private String name;
-    private Map<String,Map<?,?>> place;
+    private Map<?,?> result = null;
 
-    private DataRequestTask(Map<String,Map<?,?>> place,String name) {
+    private DataRequestTask(String name) {
         this.name = name;
-        this.place = place;
-        runTask(BubbleNetwork.getInstance().getPlugin());
     }
 
     public void run(){
         try {
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataRequest(getName()));
         } catch (IOException e) {
-            place.put(getName(),new HashMap());
+            result = new HashMap();
         }
     }
 
-    public boolean isCompleted() {
-        return place.containsKey(name);
+    public Map<?,?> getResult(){
+        return result;
+    }
+
+    public void setResult(Map<?,?> result){
+        this.result = result;
     }
 
     public String getName(){
