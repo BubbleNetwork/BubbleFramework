@@ -44,7 +44,7 @@ public class DataRequestTask extends BukkitRunnable{
         taskMap.put(name.toLowerCase(),task);
         task.runTask(BubbleNetwork.getInstance().getPlugin());
         while(taskMap.containsKey(name.toLowerCase())){
-            
+
         }
         BubbleNetwork.getInstance().logInfo("Found data for " + name);
         return task.getResult();

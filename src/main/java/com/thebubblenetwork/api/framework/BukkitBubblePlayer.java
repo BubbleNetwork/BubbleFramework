@@ -30,4 +30,8 @@ public class BukkitBubblePlayer extends BubblePlayerObject<Player> implements Bu
     public static BubblePlayer<Player> getObject(UUID u) {
         return getPlayerObjectMap().get(u);
     }
+
+    public String getName(){
+        return getPlayer().getName();
+    }
 }

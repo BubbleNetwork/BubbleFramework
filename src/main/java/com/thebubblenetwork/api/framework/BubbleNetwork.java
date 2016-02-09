@@ -15,6 +15,7 @@ import com.thebubblenetwork.api.global.bubblepackets.PacketListener;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.IPluginMessage;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.AssignMessage;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.RankDataUpdate;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerDataRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
@@ -344,6 +345,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
         else if(message instanceof RankDataUpdate){
             RankDataUpdate rankDataUpdate = (RankDataUpdate)message;
             Rank.loadRank(rankDataUpdate.getName(),rankDataUpdate.getData());
+            logInfo("Loaded rank: " + rankDataUpdate.getName());
         }
         else if(message instanceof PlayerDataResponse){
             PlayerDataResponse dataResponse = (PlayerDataResponse)message;
@@ -356,6 +358,23 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
                 else bukkitBubblePlayer.setData(dataResponse.getData());
             }
             else DataRequestTask.setData(dataResponse.getName(),dataResponse.getData());
+        }
+        else if(message instanceof PlayerDataRequest){
+            PlayerDataRequest request = (PlayerDataRequest)message;
+            Player p = Bukkit.getPlayer(request.getName());
+            if(p != null) {
+                BubblePlayer<Player> player = BukkitBubblePlayer.getObject(p.getUniqueId());
+                if(player != null) {
+                    try {
+                        getPacketHub().sendMessage(getProxy(), new PlayerDataResponse(request.getName(), player.getData().getRaw()));
+                    } catch (IOException e1) {
+                        logSevere(e1.getMessage());
+                        logSevere("Could not save playerdata for " + request.getName());
+                    }
+                }
+                else logSevere("BubblePlayer not found for data request " + request.getName());
+            }
+            else logSevere("Player not found for data request " + request.getName());
         }
     }
 
