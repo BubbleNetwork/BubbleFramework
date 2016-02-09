@@ -4,6 +4,7 @@ import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.PlayerCountUpdate;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerDataRequest;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -56,6 +57,20 @@ public class BubbleListener implements Listener{
     public void onPreJoin(AsyncPlayerPreLoginEvent e){
         data.put(e.getName(),DataRequestTask.requestAsync(e.getName()));
     }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuitPlayecount(PlayerQuitEvent e){
+        try {
+            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(),new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()-1));
+        } catch (IOException e1) {
+            getNetwork().logSevere(e1.getMessage());
+            getNetwork().logSevere("Could not send playercount update");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuitRemoval(PlayerQuitEvent e){
+        BukkitBubblePlayer.getPlayerObjectMap().remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -66,6 +81,9 @@ public class BubbleListener implements Listener{
             getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(),new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
         } catch (IOException e1) {
             getNetwork().logSevere(e1.getMessage());
+            getNetwork().logSevere("Could not send playercount update");
         }
     }
+
+
 }
