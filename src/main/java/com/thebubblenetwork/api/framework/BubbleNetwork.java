@@ -16,6 +16,7 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.IPluginMessage;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.AssignMessage;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.RankDataUpdate;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerDataRequest;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
@@ -31,7 +32,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * Created by Jacob on 09/12/2015.
  */
 
-public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implements BubbleHub<JavaPlugin, Player> ,PacketListener{
+public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin> ,PacketListener{
     private static final Random random = new Random();
     protected static List<BubblePlugin> pluginList = new ArrayList<>();
     private static BubbleNetwork instance;
@@ -172,6 +172,12 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
     public void onBubbleDisable() {
         if(getAssigned() != null)getAssigned().onDisable();
         EnchantGlow.kill();
+        try {
+            getPacketHub().sendMessage(getProxy(),new ServerShutdownRequest());
+        } catch (IOException e) {
+            logSevere(e.getMessage());
+            logSevere("Could not send shutdown request");
+        }
     }
 
 
@@ -273,7 +279,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
     }
 
     public Player getPlayer(UUID uuid) {
-        return null;
+        return getPlugin().getServer().getPlayer(uuid);
     }
 
     public void endSetup(String s) throws RuntimeException {
@@ -412,4 +418,6 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin, Player> implement
 
     public void onDisconnect(PacketInfo info) {
     }
+
+
 }

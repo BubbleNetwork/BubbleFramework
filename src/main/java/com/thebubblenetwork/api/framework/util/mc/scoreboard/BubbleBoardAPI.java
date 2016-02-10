@@ -86,8 +86,7 @@ public abstract class BubbleBoardAPI {
                             score.setScoreManual(o);
                         }
                     });
-                else
-                    score.unsetScore();
+                else score.unsetScore();
             }
         }
         getObject().update(updateList);
