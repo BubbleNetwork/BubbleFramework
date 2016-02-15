@@ -3,6 +3,7 @@ package com.thebubblenetwork.api.framework.plugin;
 import com.avaje.ebean.EbeanServer;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.P;
+import com.thebubblenetwork.api.global.plugin.updater.FileUpdater;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -21,8 +22,14 @@ import java.util.logging.Logger;
 /**
  * Created by Jacob on 09/12/2015.
  */
-public class BubblePlugin implements Plugin {
+public abstract class BubblePlugin implements Plugin,FileUpdater {
     private PluginDescriptionFile descriptionFile;
+    private File file;
+    private InputStream update;
+
+    public BubblePlugin(){
+        BubbleNetwork.getInstance().addUpdater(this);
+    }
 
     public org.bukkit.plugin.PluginDescriptionFile getDescription() {
         return PluginDescriptionFile.asMirror(descriptionFile);
@@ -66,6 +73,7 @@ public class BubblePlugin implements Plugin {
     }
 
     public void __init__(BubblePluginLoader loader) {
+        file = loader.getJar();
         descriptionFile = loader.getFile();
     }
 
@@ -98,7 +106,7 @@ public class BubblePlugin implements Plugin {
 
     @Deprecated
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     public void onEnable() {
@@ -112,6 +120,8 @@ public class BubblePlugin implements Plugin {
     public P getPlugin() {
         return BubbleNetwork.getInstance().getPlugin();
     }
+
+    public abstract long finishUp();
 
     public File getDataFolder() {
         return new File(getPlugin().getDataFolder() + File.separator + getName());
@@ -127,5 +137,22 @@ public class BubblePlugin implements Plugin {
 
     public void registerListener(Listener l) {
         getServer().getPluginManager().registerEvents(l, this);
+    }
+
+    public String getArtifact() {
+        return getName();
+    }
+
+    public File getReplace() {
+        return file;
+    }
+
+    public void update(InputStream inputStream) {
+        if(BubbleNetwork.getInstance().getAssigned() == this)finishUp();
+        update = inputStream;
+    }
+
+    public InputStream getUpdate(){
+        return update;
     }
 }

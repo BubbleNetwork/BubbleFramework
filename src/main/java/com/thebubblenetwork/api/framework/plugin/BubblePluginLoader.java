@@ -22,10 +22,12 @@ import java.util.jar.JarFile;
 public class BubblePluginLoader extends URLClassLoader {
     private BubblePlugin plugin;
     private PluginDescriptionFile file;
+    private File jar;
 
     public BubblePluginLoader(File jar, PluginDescriptionFile file) throws MalformedURLException,
             InvalidDescriptionException, InvalidPluginException {
         super(new URL[]{jar.toURI().toURL()}, BubbleNetwork.class.getClassLoader());
+        this.jar = jar;
         Class ex;
         this.file = file;
         try {
@@ -89,6 +91,10 @@ public class BubblePluginLoader extends URLClassLoader {
         }
 
         return var6;
+    }
+
+    public File getJar(){
+        return jar;
     }
 
     public PluginDescriptionFile getFile() {

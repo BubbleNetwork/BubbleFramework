@@ -1,10 +1,12 @@
 package com.thebubblenetwork.api.framework;
 
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.player.BubblePlayerObject;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -27,11 +29,19 @@ public class BukkitBubblePlayer extends BubblePlayerObject<Player> implements Bu
         super(u, data);
     }
 
-    public static BubblePlayer<Player> getObject(UUID u) {
-        return getPlayerObjectMap().get(u);
+    public static BukkitBubblePlayer getObject(UUID u) {
+        return (BukkitBubblePlayer) getPlayerObjectMap().get(u);
     }
 
     public String getName(){
         return getPlayer().getName();
+    }
+
+    public void save(){
+        try {
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataResponse(getName(),getData().getRaw()));
+        } catch (IOException e) {
+            BubbleNetwork.getInstance().logSevere("Failed to send data update: " + e.getMessage());
+        }
     }
 }

@@ -34,7 +34,7 @@ public class KitSelection extends Menu {
 
     private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
     private UUID uuid;
-    private BubblePlayer<Player> player;
+    private BukkitBubblePlayer player;
     private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
 
     public KitSelection(Player p) {
@@ -141,7 +141,7 @@ public class KitSelection extends Menu {
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (slot < KitManager.getKits().size()) {
             Kit k = KitManager.getKits().get(slot);
-            BubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
+            BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
             if (type == ClickType.LEFT) {
                 MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(k.getName()).append("\n").append("\n");
                 for (String s : k.getDescription())

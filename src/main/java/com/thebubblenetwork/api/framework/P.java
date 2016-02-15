@@ -4,6 +4,8 @@ import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 /**
  * Copyright Statement
  * ----------------------
@@ -41,5 +43,9 @@ public class P extends JavaPlugin {
 
     public ChunkGenerator getDefaultWorldGenerator(String s1,String s2){
         return VoidWorldGenerator.getGenerator();
+    }
+
+    public File getFile(){
+        return super.getFile();
     }
 }

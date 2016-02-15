@@ -1,6 +1,7 @@
 package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -33,11 +34,14 @@ public class KitLevelUpInventory extends BuyInventory {
     private int cost;
     private Kit k;
     private boolean cancelled = false;
+    private int level;
+
     public KitLevelUpInventory(Kit k, int cost, int level, final Player player) {
         super(ChatColor.GOLD + k.getNameClear() + ChatColor.DARK_GRAY + " -> Lv" + ChatColor.RED + String.valueOf(level) + ChatColor.DARK_GRAY + " T" +
                 ChatColor.GREEN + String.valueOf(k.getPrice()), "kit_levelup_" + player.getUniqueId());
         this.k = k;
         this.cost = cost;
+        this.level = level;
         BubbleNetwork.getInstance().registerListener(new Listener() {
             @EventHandler
             public void onInventoryClose(InventoryCloseEvent e) {
@@ -62,6 +66,10 @@ public class KitLevelUpInventory extends BuyInventory {
         return cost;
     }
 
+    public int getLevel(){
+        return level;
+    }
+
     public boolean isCancelled() {
         return cancelled;
     }
@@ -75,8 +83,8 @@ public class KitLevelUpInventory extends BuyInventory {
 
     @Override
     public void onAllow(Player player) {
-        player.closeInventory();
-        //TODO - Kitbuying
+        BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
+        getKit().level(bubblePlayer,getLevel());
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
 

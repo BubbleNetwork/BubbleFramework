@@ -34,8 +34,6 @@ public class BoardScore {
     }
 
     public void unsetScore() {
-        if (!set)
-            return;
         getApi().getObject().getBoard().resetScores(getModule().getPlayer());
         set = false;
     }
@@ -52,8 +50,6 @@ public class BoardScore {
     }
 
     protected void setScoreManual(Objective o, int score) {
-        if (set)
-            return;
         o.getScore(getModule().getPlayer()).setScore(score);
         set = true;
     }

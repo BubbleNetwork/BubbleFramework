@@ -2,6 +2,7 @@ package com.thebubblenetwork.api.framework.util.mc.scoreboard;
 
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Map;

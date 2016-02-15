@@ -6,6 +6,7 @@ import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
 import com.thebubblenetwork.api.framework.plugin.BubblePluginLoader;
+import com.thebubblenetwork.api.framework.plugin.BukkitPlugman;
 import com.thebubblenetwork.api.framework.plugin.PluginDescriptionFile;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
@@ -35,6 +36,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -45,6 +48,8 @@ import java.util.logging.Logger;
 
 public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin> ,PacketListener{
     private static final Random random = new Random();
+    private static final int VERSION = 8;
+
     protected static List<BubblePlugin> pluginList = new ArrayList<>();
     private static BubbleNetwork instance;
     private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
@@ -61,6 +66,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     private XServer proxy;
     private BubblePlugin assigned;
     private BubbleListener listener = new BubbleListener(this);
+    private BukkitPlugman plugman;
 
     public BubbleNetwork(P plugin) {
         super();
@@ -109,6 +115,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         registerListener(util);
         manager.register(getPlugin());
         getPacketHub().registerListener(this);
+        plugman = new BukkitPlugman(getPlugin().getServer());
 
         logInfo("Components have been loaded");
     }
@@ -177,6 +184,23 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         } catch (IOException e) {
             logSevere(e.getMessage());
             logSevere("Could not send shutdown request");
+        }
+        for(BubblePlugin addon:pluginList){
+            if(addon.getUpdate() != null){
+                try {
+                    Files.copy(addon.getUpdate(),addon.getReplace().toPath(),StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    logSevere(e.getMessage());
+                    logSevere("Could not replace file in update");
+                }
+                finally {
+                    try {
+                        addon.getUpdate().close();
+                    } catch (IOException e) {
+                        //Blank
+                    }
+                }
+            }
         }
     }
 
@@ -409,6 +433,25 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         getPlugin().getServer().getScheduler().runTaskLater(getPlugin(),runnable,timeUnit.toMillis(l)/50);
     }
 
+    public File getReplace() {
+        return getPlugin().getFile();
+    }
+
+    public String getArtifact() {
+        return getPlugin().getName();
+    }
+
+    public int getVersion() {
+        return VERSION;
+    }
+
+    public void update(Runnable update) {
+        if(getAssigned() != null){
+            runTaskLater(update,getAssigned().finishUp(),TimeUnit.SECONDS);
+        }
+        else runTaskLater(update,0L,TimeUnit.SECONDS);
+    }
+
     public boolean bungee(){
         return false;
     }
@@ -419,5 +462,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     public void onDisconnect(PacketInfo info) {
     }
 
-
+    public BukkitPlugman getPlugman() {
+        return plugman;
+    }
 }

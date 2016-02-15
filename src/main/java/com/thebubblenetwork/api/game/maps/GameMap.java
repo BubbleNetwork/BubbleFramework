@@ -1,11 +1,11 @@
 package com.thebubblenetwork.api.game.maps;
 
-import com.thebubblenetwork.api.framework.util.files.FileUTIL;
-import com.thebubblenetwork.api.framework.util.http.DownloadUtil;
-import com.thebubblenetwork.api.framework.util.http.SSLUtil;
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.global.data.InvalidBaseException;
+import com.thebubblenetwork.api.global.file.DownloadUtil;
+import com.thebubblenetwork.api.global.file.FileUTIL;
+import com.thebubblenetwork.api.global.file.SSLUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.World;

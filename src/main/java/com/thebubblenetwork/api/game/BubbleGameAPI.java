@@ -5,9 +5,6 @@ import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
-import com.thebubblenetwork.api.framework.util.files.FileUTIL;
-import com.thebubblenetwork.api.framework.util.http.DownloadUtil;
-import com.thebubblenetwork.api.framework.util.http.SSLUtil;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
@@ -21,7 +18,9 @@ import com.thebubblenetwork.api.game.maps.Vote;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
-import com.thebubblenetwork.api.global.player.BubblePlayer;
+import com.thebubblenetwork.api.global.file.DownloadUtil;
+import com.thebubblenetwork.api.global.file.FileUTIL;
+import com.thebubblenetwork.api.global.file.SSLUtil;
 import com.thebubblenetwork.api.global.ranks.Rank;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
@@ -93,7 +92,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
             ) {
 
                 public void onEnable(BubbleBoardAPI board) {
-                    BubblePlayer<Player> player = BukkitBubblePlayer.getObject(Bukkit.getPlayer(board.getName()).getUniqueId());
+                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(Bukkit.getPlayer(board.getName()).getUniqueId());
                     BoardScore playingValue = board.getScore(this, getModule("PlayingValue"));
                     playingValue.getTeam().setSuffix(BubbleGameAPI.getInstance().getName());
                     BoardScore rankValue = board.getScore(this, getModule("RankValue"));
