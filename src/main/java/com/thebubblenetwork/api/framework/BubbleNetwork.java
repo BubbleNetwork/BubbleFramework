@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 
 public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin> ,PacketListener{
     private static final Random random = new Random();
-    private static final int VERSION = 8;
+    private static final int VERSION = 9;
 
     protected static List<BubblePlugin> pluginList = new ArrayList<>();
     private static BubbleNetwork instance;
