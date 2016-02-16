@@ -56,4 +56,6 @@ out/artifacts/BubbleFramework_jar/BubbleFramework.jar
 *.ipl
 .idea/*
 out/*
+target
+target/*
 out

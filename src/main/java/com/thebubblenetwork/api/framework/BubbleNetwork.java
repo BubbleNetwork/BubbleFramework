@@ -125,16 +125,19 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
 
         logInfo("Finding addon folder");
 
-        if (!plugin.getDataFolder().exists()){
+        if (!getPlugin().getDataFolder().exists()){
             logInfo("Creating addon folder");
-            plugin.getDataFolder().mkdir();
+            getPlugin().getDataFolder().mkdir();
         }
 
         logInfo("Finding addons");
 
         Map<PluginDescriptionFile, File> loaderList = new HashMap<>();
         List<PluginDescriptionFile> files = new ArrayList<>();
-        for (File f : plugin.getDataFolder().listFiles()) {
+
+        if(!getPlugin().getDataFolder().isDirectory())endSetup("Folder is not a directory");
+
+        for (File f : getPlugin().getDataFolder().listFiles()) {
             if (f.getName().endsWith(".jar")) {
                 try {
                     PluginDescriptionFile file = BubblePluginLoader.getPluginDescription(f);
