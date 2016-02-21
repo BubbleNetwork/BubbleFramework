@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 public abstract class BubblePlugin implements Plugin,FileUpdater {
     private PluginDescriptionFile descriptionFile;
     private File file;
-    private InputStream update;
 
     public BubblePlugin(){
         BubbleNetwork.getInstance().addUpdater(this);
@@ -136,7 +135,7 @@ public abstract class BubblePlugin implements Plugin,FileUpdater {
     }
 
     public void registerListener(Listener l) {
-        getServer().getPluginManager().registerEvents(l, this);
+        BubbleNetwork.getInstance().registerListener(this,l);
     }
 
     public String getArtifact() {
@@ -145,14 +144,5 @@ public abstract class BubblePlugin implements Plugin,FileUpdater {
 
     public File getReplace() {
         return file;
-    }
-
-    public void update(InputStream inputStream) {
-        if(BubbleNetwork.getInstance().getAssigned() == this)finishUp();
-        update = inputStream;
-    }
-
-    public InputStream getUpdate(){
-        return update;
     }
 }

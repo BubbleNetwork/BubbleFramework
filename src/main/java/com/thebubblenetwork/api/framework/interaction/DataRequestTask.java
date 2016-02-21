@@ -30,7 +30,7 @@ import java.util.UUID;
 public class DataRequestTask extends BukkitRunnable{
     private static Map<String,DataRequestTask> taskMap = new HashMap<>();
 
-    public static void setData(String name,Map<?,?> received){
+    public static void setData(String name,Map<String,String> received){
         if(taskMap.containsKey(name.toLowerCase())){
             taskMap.remove(name.toLowerCase()).setResult(received);
             BubbleNetwork.getInstance().logInfo("Received pending data for " + name);
@@ -38,7 +38,7 @@ public class DataRequestTask extends BukkitRunnable{
         else BubbleNetwork.getInstance().logSevere("Set data for invalid player " + name);
     }
 
-    public static Map<?,?> requestAsync(String name){
+    public static Map<String,String> requestAsync(String name){
         BubbleNetwork.getInstance().logInfo("Requesting data for " + name);
         DataRequestTask task = new DataRequestTask(name);
         taskMap.put(name.toLowerCase(),task);
@@ -51,7 +51,7 @@ public class DataRequestTask extends BukkitRunnable{
     }
 
     private String name;
-    private Map<?,?> result = null;
+    private Map<String,String> result = null;
 
     private DataRequestTask(String name) {
         this.name = name;
@@ -61,15 +61,15 @@ public class DataRequestTask extends BukkitRunnable{
         try {
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataRequest(getName()));
         } catch (IOException e) {
-            result = new HashMap();
+            result = new HashMap<>();
         }
     }
 
-    public Map<?,?> getResult(){
+    public Map<String,String> getResult(){
         return result;
     }
 
-    public void setResult(Map<?,?> result){
+    public void setResult(Map<String,String> result){
         this.result = result;
     }
 

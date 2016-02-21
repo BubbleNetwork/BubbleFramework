@@ -39,13 +39,13 @@ import java.util.UUID;
 public class BubbleListener implements Listener{
     private BubbleNetwork network;
 
-    private Map<String,Map<?,?>> data = new HashMap<>();
+    private Map<String,Map<String,String>> data = new HashMap<>();
 
     protected BubbleNetwork getNetwork(){
         return network;
     }
 
-    public Map<String,Map<?,?>> getData(){
+    public Map<String,Map<String,String>> getData(){
         return data;
     }
 

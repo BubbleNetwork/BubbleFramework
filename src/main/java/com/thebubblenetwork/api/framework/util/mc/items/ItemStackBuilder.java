@@ -126,7 +126,7 @@ public class ItemStackBuilder implements Cloneable {
     }
 
     public ItemStackBuilder clearLore() {
-        final ItemMeta meta = ITEM_STACK.getItemMeta();
+        ItemMeta meta = ITEM_STACK.getItemMeta();
         meta.setLore(new ArrayList<String>());
         ITEM_STACK.setItemMeta(meta);
         return this;
@@ -155,6 +155,13 @@ public class ItemStackBuilder implements Cloneable {
         } else {
             throw new IllegalArgumentException("withColor is only applicable for leather armor!");
         }
+    }
+
+    public ItemStackBuilder withUnbreaking(boolean unbreaking){
+        ItemMeta meta = ITEM_STACK.getItemMeta();
+        meta.spigot().setUnbreakable(unbreaking);
+        ITEM_STACK.setItemMeta(meta);
+        return this;
     }
 
     public ItemStack build() {

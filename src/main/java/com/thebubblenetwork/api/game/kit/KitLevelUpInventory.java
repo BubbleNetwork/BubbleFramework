@@ -3,6 +3,7 @@ package com.thebubblenetwork.api.game.kit;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
+import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -42,7 +43,7 @@ public class KitLevelUpInventory extends BuyInventory {
         this.k = k;
         this.cost = cost;
         this.level = level;
-        BubbleNetwork.getInstance().registerListener(new Listener() {
+        BubbleGameAPI.getInstance().registerListener(new Listener() {
             @EventHandler
             public void onInventoryClose(InventoryCloseEvent e) {
                 if (e.getInventory() == getInventory()) {

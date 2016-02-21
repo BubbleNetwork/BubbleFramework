@@ -77,7 +77,7 @@ public abstract class GameMap {
 
         if (!folder.exists())
             folder.mkdir();
-        for (Map.Entry<String, MapData> data : MapData.loadData()) {
+        for (Map.Entry<String, MapData> data : MapData.loadData().entrySet()) {
             File downloadto = new File(folder + File.separator + data.getKey());
             File zip = new File(downloadto + ".zip");
             File yml = new File(downloadto + ".yml");

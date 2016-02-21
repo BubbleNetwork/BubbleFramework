@@ -11,6 +11,7 @@ import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BubbleBoardAPI;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.util.BoardModuleBuilder;
 import com.thebubblenetwork.api.game.kit.Kit;
+import com.thebubblenetwork.api.game.kit.KitManager;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.GameMap;
 import com.thebubblenetwork.api.game.maps.MapData;
@@ -24,6 +25,7 @@ import com.thebubblenetwork.api.global.file.SSLUtil;
 import com.thebubblenetwork.api.global.ranks.Rank;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
+import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -123,6 +125,10 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     private GameTimer timer;
     private HubInventory hubInventory;
     private PlayersList list;
+    private GameMode defaultgamemode;
+    private String defaultkit;
+    private String type;
+    private int minplayers;
 
     public static Vector getLobbySpawn() {
         return new Vector(0D, 50D, 0D);
@@ -134,6 +140,14 @@ public abstract class BubbleGameAPI extends BubblePlugin {
 
     public static void setInstance(BubbleGameAPI instance) {
         BubbleGameAPI.instance = instance;
+    }
+
+    public BubbleGameAPI(String type,GameMode defaultgamemode,String defaultkit,int minplayers){
+        super();
+        this.minplayers = minplayers;
+        this.type = type;
+        this.defaultgamemode = defaultgamemode;
+        this.defaultkit = defaultkit;
     }
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
@@ -227,8 +241,8 @@ public abstract class BubbleGameAPI extends BubblePlugin {
                 p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld("world")));
                 p.setGameMode(GameMode.SURVIVAL);
             }
-            if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers()) {
-                BubbleGameAPI.getInstance().setState(BubbleGameAPI.State.PREGAME);
+            if (Bukkit.getOnlinePlayers().size() == api.getMinPlayers()) {
+                api.setState(BubbleGameAPI.State.PREGAME);
             }
         }
     }
@@ -267,6 +281,10 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         return maps;
     }
 
+    public int getMinPlayers(){
+        return minplayers;
+    }
+
     public GameListener getGame() {
         return listener;
     }
@@ -298,8 +316,8 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     public void setState(State newstate) {
         State oldstate = State.state;
         State.state = newstate;
-        stateChange(this, oldstate, newstate);
         onStateChange(oldstate, newstate);
+        stateChange(this, oldstate, newstate);
     }
 
     public HubInventory getHubInventory() {
@@ -318,26 +336,27 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         setInstance(this);
         SQLConnection connection = BubbleNetwork.getInstance().getConnection();
         try {
+            BubbleNetwork.getInstance().logInfo("Finding map table");
             if (!SQLUtil.tableExists(connection, MapData.maptable)) {
+                BubbleNetwork.getInstance().logInfo("Map table not found, creating new");
+                //TODO - dynamic table creation
                 SQLUtil.createTable(connection, MapData.maptable, new ImmutableMap.Builder<String, Map.Entry<SQLUtil.SQLDataType, Integer>>()
                         .put("map", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, 32))
                         .put("key",new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1))
                         .put("value",new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1))
                         .build());
+                BubbleNetwork.getInstance().endSetup("Created map table");
+                return;
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            BubbleNetwork.getInstance().endSetup("Could not get map table");
         }
         KitSelection.register(this);
         GameBoard.registerlistener(this);
         listener = new GameListener();
-        voteInventory = new VoteInventory(9);
         hubInventory = new HubInventory();
         list = new PlayersList();
         new BukkitRunnable() {
-            @Override
             public void run() {
                 setState(State.LOADING);
             }
@@ -419,27 +438,29 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         p.setFlying(true);
     }
 
+    public ServerType getType(){
+        return ServerType.getType(type);
+    }
+
+    public Kit getDefaultKit(){
+        return KitManager.getKit(defaultkit);
+    }
+
     public abstract void onStateChange(State oldstate, State newstate);
-
-    public abstract Kit getDefaultKit();
-
-    public abstract int getMaxPlayers();
-
-    public abstract int getMinPlayers();
-
-    public abstract int getMinTeamsize();
-
-    public abstract int getMaxTeamsize();
 
     public abstract BoardPreset getScorePreset();
 
     public abstract GameMap loadMap(String name, MapData data, File yml, File zip);
 
-    public abstract String getTablesuffix();
-
     public abstract void teleportPlayers(GameMap map, World w);
 
-    public abstract GameMode getGameMode();
+    public String getTablesuffix(){
+        return getName().toLowerCase();
+    }
+
+    public GameMode getGameMode(){
+        return defaultgamemode;
+    }
 
     public enum State {
         HIDDEN, LOADING, LOBBY, PREGAME, INGAME, ENDGAME, RESTARTING;

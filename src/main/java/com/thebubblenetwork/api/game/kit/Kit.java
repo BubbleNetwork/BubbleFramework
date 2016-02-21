@@ -39,7 +39,6 @@ public class Kit {
             this.inventorypreset[i] = inventorypreset.get(i);
             this.armorpreset[i] = armorpreset.get(i);
         }
-        KitManager.register(this);
     }
 
     public int getMaxlevel() {

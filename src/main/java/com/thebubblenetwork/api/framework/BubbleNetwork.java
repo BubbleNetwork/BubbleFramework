@@ -1,5 +1,7 @@
 package com.thebubblenetwork.api.framework;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.interaction.BubbleListener;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
@@ -31,6 +33,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -67,11 +70,27 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     private BubblePlugin assigned;
     private BubbleListener listener = new BubbleListener(this);
     private BukkitPlugman plugman;
+    private Multimap<BubblePlugin,Listener> multimap = ArrayListMultimap.create();
 
     public BubbleNetwork(P plugin) {
         super();
         instance = this;
         this.plugin = plugin;
+    }
+
+    public void registerListener(BubblePlugin plugin,Listener listener){
+        if(getAssigned() == plugin){
+            if(multimap.containsKey(listener))throw new IllegalArgumentException("Listener already registered");
+            multimap.put(plugin,listener);
+            getPlugin().getServer().getPluginManager().registerEvents(listener,getPlugin());
+        }
+        else throw new IllegalArgumentException("Plugin not registered");
+    }
+
+    private void unregisterListener(BubblePlugin plugin){
+        for(Listener listener:multimap.removeAll(plugin)){
+            HandlerList.unregisterAll(listener);
+        }
     }
 
     public static String getChatFormat() {
@@ -188,23 +207,6 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             logSevere(e.getMessage());
             logSevere("Could not send shutdown request");
         }
-        for(BubblePlugin addon:pluginList){
-            if(addon.getUpdate() != null){
-                try {
-                    Files.copy(addon.getUpdate(),addon.getReplace().toPath(),StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    logSevere(e.getMessage());
-                    logSevere("Could not replace file in update");
-                }
-                finally {
-                    try {
-                        addon.getUpdate().close();
-                    } catch (IOException e) {
-                        //Blank
-                    }
-                }
-            }
-        }
     }
 
 
@@ -216,7 +218,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         return util;
     }
 
-    public void registerListener(Listener l) {
+    private void registerListener(Listener l) {
         getPlugin().getServer().getPluginManager().registerEvents(l, getPlugin());
     }
 
@@ -339,7 +341,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void disableAddon(){
+        if(assigned == null)throw new IllegalArgumentException("No addon found");
         logInfo("Disabling addon : " + getAssigned().getName());
+        unregisterListener(getAssigned());
         getAssigned().onDisable();
         assigned = null;
     }
@@ -409,6 +413,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             }
             else logSevere("Player not found for data request " + request.getName());
         }
+        else logSevere("Unsupported message " + message.getType().getName());
     }
 
     public XServer getProxy() {

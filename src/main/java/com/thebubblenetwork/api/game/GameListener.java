@@ -350,7 +350,7 @@ public class GameListener implements Listener {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "You cannot join at " +
                     "this time");
         } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY && Bukkit.getOnlinePlayers()
-                .size() == BubbleGameAPI.getInstance().getMaxPlayers()) {
+                .size() == BubbleGameAPI.getInstance().getType().getMaxPlayers()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "This game is " +
                     "currently full");
         }
