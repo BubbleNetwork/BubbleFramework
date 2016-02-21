@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -51,6 +52,11 @@ public class BubbleListener implements Listener{
 
     public BubbleListener(BubbleNetwork network) {
         this.network = network;
+    }
+
+    @EventHandler
+    public void onRainSnow(WeatherChangeEvent e){
+        if(e.toWeatherState())e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
