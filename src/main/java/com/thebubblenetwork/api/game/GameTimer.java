@@ -1,8 +1,8 @@
 package com.thebubblenetwork.api.game;
 
-import com.thebubblenetwork.api.framework.BubbleNetwork;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Jacob on 04/01/2016.
@@ -13,7 +13,7 @@ public abstract class GameTimer {
 
     public GameTimer(int interval, int times) {
         left = times;
-        runnable = new BukkitRunnable() {
+        Runnable r = new Runnable() {
             public void run() {
                 if (getLeft() == 0) {
                     GameTimer.this.cancel();
@@ -22,7 +22,9 @@ public abstract class GameTimer {
                 GameTimer.this.run(getLeft());
                 left--;
             }
-        }.runTaskTimer(BubbleNetwork.getInstance().getPlugin(), 0L, (long) interval);
+        };
+        BubbleGameAPI.getInstance().runTaskTimer(r, TimeUnit.MILLISECONDS,interval*50);
+        r.run();
     }
 
     public int getLeft() {

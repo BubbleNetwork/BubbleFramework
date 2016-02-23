@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -132,6 +133,29 @@ public abstract class BubblePlugin implements Plugin,FileUpdater {
 
     public String getName() {
         return descriptionFile.getName();
+    }
+
+    public void runTask(Runnable r){
+        BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,false);
+    }
+
+    public void runTaskAsynchonrously(Runnable r){
+        BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,true);
+    }
+
+    public void runTaskLater(Runnable r,TimeUnit unit,long time){
+        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,false);
+    }
+
+    public void runTaskLaterAsynchronously(Runnable r,TimeUnit unit,long time){
+        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,true);
+    }
+    public void runTaskTimer(Runnable r,TimeUnit unit,long time){
+        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,false);
+    }
+
+    public void runTaskTimerAsynchronously(Runnable r,TimeUnit unit,long time){
+        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,true);
     }
 
     public void registerListener(Listener l) {

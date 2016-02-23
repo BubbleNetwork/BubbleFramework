@@ -36,6 +36,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +70,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     private BubblePlugin assigned;
     private BubbleListener listener = new BubbleListener(this);
     private BukkitPlugman plugman;
-    private Multimap<BubblePlugin,Listener> multimap = ArrayListMultimap.create();
+    private Multimap<BubblePlugin,Listener> listenersByPlugin = ArrayListMultimap.create();
+    private Multimap<BubblePlugin,BukkitTask> tasksByPlugin = ArrayListMultimap.create();
 
     public BubbleNetwork(P plugin) {
         super();
@@ -78,15 +81,42 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
 
     public void registerListener(BubblePlugin plugin,Listener listener){
         if(getAssigned() == plugin){
-            if(multimap.containsKey(listener))throw new IllegalArgumentException("Listener already registered");
-            multimap.put(plugin,listener);
+            if(listenersByPlugin.containsKey(listener))throw new IllegalArgumentException("Listener already registered");
+            listenersByPlugin.put(plugin,listener);
             getPlugin().getServer().getPluginManager().registerEvents(listener,getPlugin());
         }
         else throw new IllegalArgumentException("Plugin not registered");
     }
 
+    public BukkitTask registerRunnable(BubblePlugin plugin,Runnable r,TimeUnit unit,long time,boolean timer,boolean async){
+        if(getAssigned() == plugin){
+            long ticks = unit.toMillis(time)/50;
+            BukkitScheduler scheduler = getPlugin().getServer().getScheduler();
+            BukkitTask task;
+            if(async) {
+                if (timer) task = scheduler.runTaskTimerAsynchronously(getPlugin(), r, ticks, ticks);
+                else task = scheduler.runTaskLater(getPlugin(), r, ticks);
+            }
+            else if(timer) task = scheduler.runTaskTimer(getPlugin(),r,ticks,ticks);
+            else task = scheduler.runTaskLater(getPlugin(),r,ticks);
+            tasksByPlugin.put(plugin,task);
+            return task;
+        }
+        else throw new IllegalArgumentException("Plugin not registered");
+    }
+
+    private void unregisterTasks(BubblePlugin plugin){
+        for(BukkitTask task:tasksByPlugin.removeAll(plugin)){
+            try {
+                task.cancel();
+            }
+            catch (Throwable throwable){
+            }
+        }
+    }
+
     private void unregisterListener(BubblePlugin plugin){
-        for(Listener listener:multimap.removeAll(plugin)){
+        for(Listener listener: listenersByPlugin.removeAll(plugin)){
             HandlerList.unregisterAll(listener);
         }
     }
@@ -341,8 +371,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     public void disableAddon(){
         if(assigned == null)throw new IllegalArgumentException("No addon found");
         logInfo("Disabling addon : " + getAssigned().getName());
-        unregisterListener(getAssigned());
         getAssigned().onDisable();
+        unregisterListener(getAssigned());
+        unregisterTasks(getAssigned());
         assigned = null;
     }
 
@@ -350,9 +381,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         if(getAssigned() != null)disableAddon();
         logInfo("Enabling addon: " + plugin.getName());
         assigned = plugin;
-        assigned.onLoad();
+        getAssigned().onLoad();
         logInfo("Addon is loaded");
-        assigned.onEnable();
+        getAssigned().onEnable();
         logInfo("Addon is enabled");
     }
 
@@ -362,9 +393,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             AssignMessage assignMessage = (AssignMessage)message;
             this.type = assignMessage.getWrapperType();
             this.id = assignMessage.getId();
-            logInfo("ServerType: " + type.getName() + " ID: " + String.valueOf(id));
+            logInfo("ServerType: " + getType().getName() + " ID: " + String.valueOf(id));
             this.proxy = info.getServer();
-            BubblePlugin addon = getPlugin(type.getName());
+            BubblePlugin addon = getPlugin(getType().getName());
             if(addon == null){
                 endSetup("Could not find assigned addon");
             }

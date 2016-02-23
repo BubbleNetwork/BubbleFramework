@@ -356,11 +356,11 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         listener = new GameListener();
         hubInventory = new HubInventory();
         list = new PlayersList();
-        new BukkitRunnable() {
+        runTask(new BukkitRunnable() {
             public void run() {
                 setState(State.LOADING);
             }
-        }.runTask(this);
+        });
     }
 
     public void onDisable() {

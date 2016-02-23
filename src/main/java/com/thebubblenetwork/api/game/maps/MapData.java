@@ -33,7 +33,7 @@ public class MapData extends DataObject {
                 String title = set.getString("map");
                 String key = set.getString("key");
                 String value = set.getString("value");
-                MapData data = objectMap.containsKey(title) ? objectMap.get(title) :  new MapData(new HashMap<>());
+                MapData data = objectMap.containsKey(title) ? objectMap.get(title) :  new MapData(new HashMap<String,String>());
                 data.getRaw().put(key,value);
                 objectMap.put(title,data);
             }

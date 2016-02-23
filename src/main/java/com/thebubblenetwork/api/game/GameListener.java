@@ -255,12 +255,11 @@ public class GameListener implements Listener {
                 Location l = toBlockLocation(c.getLocation());
                 if (chests.containsKey(l)) {
                     final Inventory change = chests.get(l);
-                    new BukkitRunnable() {
-                        @Override
+                    BubbleGameAPI.getInstance().runTask(new Runnable() {
                         public void run() {
                             change.setContents(clicked.getContents());
                         }
-                    }.runTask(BubbleGameAPI.getInstance());
+                    });
                 }
             }
         }
@@ -275,12 +274,11 @@ public class GameListener implements Listener {
                 Location l = toBlockLocation(c.getLocation());
                 if (chests.containsKey(l)) {
                     final Inventory change = chests.get(l);
-                    new BukkitRunnable() {
-                        @Override
+                    BubbleGameAPI.getInstance().runTask(new Runnable(){
                         public void run() {
                             change.setContents(clicked.getContents());
                         }
-                    }.runTask(BubbleGameAPI.getInstance());
+                    });
                 }
             }
         }
@@ -292,7 +290,7 @@ public class GameListener implements Listener {
         final Location l = p.getLocation();
         if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME) {
             p.spigot().respawn();
-            new BukkitRunnable() {
+            BubbleGameAPI.getInstance().runTask(new Runnable() {
                 @Override
                 public void run() {
                     if (p.isOnline()) {
@@ -300,7 +298,7 @@ public class GameListener implements Listener {
                         p.teleport(l);
                     }
                 }
-            }.runTask(BubbleGameAPI.getInstance());
+            });
         }
     }
 
@@ -379,12 +377,12 @@ public class GameListener implements Listener {
         } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME) {
             setSpectating(p, true);
         } else {
-            new BukkitRunnable() {
+            BubbleGameAPI.getInstance().runTask(new Runnable(){
                 @Override
                 public void run() {
                     //TODO - Sending to LOBBY
                 }
-            }.runTask(BubbleGameAPI.getInstance());
+            });
         }
     }
 
@@ -473,12 +471,12 @@ public class GameListener implements Listener {
                             }
                         }
                     }
-                    new BukkitRunnable() {
+                    BubbleGameAPI.getInstance().runTask(new Runnable(){
                         public void run() {
                             if (p.isOnline() && !isSpectating(p))
                                 BubbleGameAPI.getInstance().getPlayerList().update(p);
                         }
-                    }.runTask(BubbleGameAPI.getInstance());
+                    });
                 }
             }
         }
@@ -502,12 +500,11 @@ public class GameListener implements Listener {
     public void onPlayerFoodChangeList(FoodLevelChangeEvent e) {
         if (e.getEntity() instanceof Player && !isSpectating((Player) e.getEntity())) {
             final Player p = (Player) e.getEntity();
-            new BukkitRunnable() {
-                @Override
+            BubbleGameAPI.getInstance().runTask(new Runnable() {
                 public void run() {
                     if (p.isOnline() && !isSpectating(p)) BubbleGameAPI.getInstance().getPlayerList().update(p);
                 }
-            }.runTask(BubbleGameAPI.getInstance());
+            });
         }
     }
 }
