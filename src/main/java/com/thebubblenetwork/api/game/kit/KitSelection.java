@@ -2,14 +2,13 @@ package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
-import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
-import com.thebubblenetwork.api.global.player.BubblePlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Sound;
@@ -54,7 +53,7 @@ public class KitSelection extends Menu {
         return k;
     }
 
-    public static void register(BubblePlugin plugin) {
+    public static void register(BubbleAddon plugin) {
         plugin.registerListener(new Listener() {
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent e) {

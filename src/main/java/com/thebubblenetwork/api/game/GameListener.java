@@ -5,7 +5,7 @@ import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
-import com.thebubblenetwork.api.game.spectator.SpectatorCheck;
+import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -33,10 +33,8 @@ import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.LazyMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -203,8 +201,6 @@ public class GameListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerMetaSet(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        p.setMetadata("spectating", new LazyMetadataValue(BubbleGameAPI.getInstance(), LazyMetadataValue.CacheStrategy.NEVER_CACHE, new SpectatorCheck(p)));
-        p.setMetadata("vanished", new LazyMetadataValue(BubbleGameAPI.getInstance(), LazyMetadataValue.CacheStrategy.NEVER_CACHE, new SpectatorCheck(p)));
         for (Player t : Bukkit.getOnlinePlayers()) {
             if (p != t) {
                 if (isSpectating(t)) {
@@ -378,9 +374,8 @@ public class GameListener implements Listener {
             setSpectating(p, true);
         } else {
             BubbleGameAPI.getInstance().runTask(new Runnable(){
-                @Override
                 public void run() {
-                    //TODO - Sending to LOBBY
+                    BubbleNetwork.getInstance().sendPlayer(p, ServerType.getType("Lobby"));
                 }
             });
         }

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
-import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
@@ -38,13 +38,12 @@ import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
  * Created by Jacob on 12/12/2015.
  */
-public abstract class BubbleGameAPI extends BubblePlugin {
+public abstract class BubbleGameAPI extends BubbleAddon {
     private static final String playingtitle = ChatColor.BLUE + "" + ChatColor.BOLD + "Playing", ranktitle =
             ChatColor.BLUE + "" + ChatColor.BOLD + "Rank", tokenstitle = ChatColor.BLUE + "" + ChatColor.BOLD +
             "Tokens", site = "thebubblenetwork", playerneed = "Players needed", Starting = "Starting in";
@@ -123,7 +122,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
     private GameListener listener;
     private VoteInventory voteInventory;
     private GameTimer timer;
-    private HubInventory hubInventory;
+    private LobbyInventory hubInventory;
     private PlayersList list;
     private GameMode defaultgamemode;
     private String defaultkit;
@@ -320,7 +319,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         stateChange(this, oldstate, newstate);
     }
 
-    public HubInventory getHubInventory() {
+    public LobbyInventory getHubInventory() {
         return hubInventory;
     }
 
@@ -354,7 +353,7 @@ public abstract class BubbleGameAPI extends BubblePlugin {
         KitSelection.register(this);
         GameBoard.registerlistener(this);
         listener = new GameListener();
-        hubInventory = new HubInventory();
+        hubInventory = new LobbyInventory();
         list = new PlayersList();
         runTask(new BukkitRunnable() {
             public void run() {

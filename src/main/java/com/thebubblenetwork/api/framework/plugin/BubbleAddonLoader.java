@@ -19,12 +19,12 @@ import java.util.jar.JarFile;
 /**
  * Created by Jacob on 12/12/2015.
  */
-public class BubblePluginLoader extends URLClassLoader {
-    private BubblePlugin plugin;
-    private PluginDescriptionFile file;
+public class BubbleAddonLoader extends URLClassLoader {
+    private BubbleAddon plugin;
+    private AddonDescriptionFile file;
     private File jar;
 
-    public BubblePluginLoader(File jar, PluginDescriptionFile file) throws MalformedURLException,
+    public BubbleAddonLoader(File jar, AddonDescriptionFile file) throws MalformedURLException,
             InvalidDescriptionException, InvalidPluginException {
         super(new URL[]{jar.toURI().toURL()}, BubbleNetwork.class.getClassLoader());
         this.jar = jar;
@@ -38,25 +38,25 @@ public class BubblePluginLoader extends URLClassLoader {
         if (ex == null) {
             throw new InvalidPluginException("Cannot find main class no ex `" + file.getMain() + "\'");
         }
-        Class<? extends BubblePlugin> subclass;
+        Class<? extends BubbleAddon> subclass;
         try {
-            subclass = ex.asSubclass(BubblePlugin.class);
+            subclass = ex.asSubclass(BubbleAddon.class);
         } catch (Exception e) {
             throw new InvalidPluginException("main class `" + file.getMain() + "\' does not extend BubblePlugin", e);
         }
         try {
-            plugin = (BubblePlugin) subclass.newInstance();
+            plugin = (BubbleAddon) subclass.newInstance();
         } catch (Exception e) {
             throw new InvalidPluginException("Error loading main class`" + file.getMain(), e);
         }
     }
 
-    public static PluginDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
+    public static AddonDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
         Validate.notNull(file, "File cannot be null");
         JarFile jar = null;
         InputStream stream = null;
 
-        PluginDescriptionFile var6;
+        AddonDescriptionFile var6;
         try {
             jar = new JarFile(file);
             JarEntry ex = jar.getJarEntry("bubbleplugin.yml");
@@ -66,7 +66,7 @@ public class BubblePluginLoader extends URLClassLoader {
             }
 
             stream = jar.getInputStream(ex);
-            var6 = new PluginDescriptionFile(stream);
+            var6 = new AddonDescriptionFile(stream);
         } catch (IOException var16) {
             throw new InvalidDescriptionException(var16);
         } catch (YAMLException var17) {
@@ -97,11 +97,11 @@ public class BubblePluginLoader extends URLClassLoader {
         return jar;
     }
 
-    public PluginDescriptionFile getFile() {
+    public AddonDescriptionFile getFile() {
         return file;
     }
 
-    public BubblePlugin getPlugin() {
+    public BubbleAddon getPlugin() {
         return plugin;
     }
 }

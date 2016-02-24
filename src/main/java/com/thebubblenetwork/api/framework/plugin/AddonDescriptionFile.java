@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public final class PluginDescriptionFile {
+public final class AddonDescriptionFile {
     private static final ThreadLocal<Yaml> YAML = new ThreadLocal() {
         protected Yaml initialValue() {
             return new Yaml(new SafeConstructor() {
@@ -66,22 +66,22 @@ public final class PluginDescriptionFile {
     private String prefix = null;
     private short priority = LoadPriority.NORMAL;
 
-    public PluginDescriptionFile(InputStream stream) throws InvalidDescriptionException {
+    public AddonDescriptionFile(InputStream stream) throws InvalidDescriptionException {
         this.loadMap(this.asMap(((Yaml) YAML.get()).load(stream)));
     }
 
-    public PluginDescriptionFile(Reader reader) throws InvalidDescriptionException {
+    public AddonDescriptionFile(Reader reader) throws InvalidDescriptionException {
         this.loadMap(this.asMap(((Yaml) YAML.get()).load(reader)));
     }
 
-    public PluginDescriptionFile(String pluginName, String pluginVersion, String mainClass) {
+    public AddonDescriptionFile(String pluginName, String pluginVersion, String mainClass) {
         this.name = pluginName.replace(' ', '_');
         this.version = pluginVersion;
         this.main = mainClass;
     }
 
 
-    public static org.bukkit.plugin.PluginDescriptionFile asMirror(PluginDescriptionFile f) {
+    public static org.bukkit.plugin.PluginDescriptionFile asMirror(AddonDescriptionFile f) {
         return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getVersion(), f.getMain());
     }
 

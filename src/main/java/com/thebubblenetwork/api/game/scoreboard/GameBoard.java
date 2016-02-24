@@ -2,7 +2,7 @@ package com.thebubblenetwork.api.game.scoreboard;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
-import com.thebubblenetwork.api.framework.plugin.BubblePlugin;
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.SingleBubbleBoard;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
@@ -37,7 +37,7 @@ public class GameBoard extends SingleBubbleBoard {
         return boardMap.get(p.getUniqueId());
     }
 
-    public static void registerlistener(BubblePlugin api) {
+    public static void registerlistener(BubbleAddon api) {
         api.registerListener(new Listener() {
             @EventHandler
             public void onPlayerJoin(PlayerJoinEvent e) {

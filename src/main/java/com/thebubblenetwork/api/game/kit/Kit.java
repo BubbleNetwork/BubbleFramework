@@ -3,8 +3,6 @@ package com.thebubblenetwork.api.game.kit;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
-import com.thebubblenetwork.api.global.player.BubblePlayer;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

@@ -40,7 +40,7 @@ public class PlayersList extends Menu implements Listener {
     public PlayersList() {
         super(ChatColor.BLUE + "Playing", 9);
         update();
-        Bukkit.getServer().getPluginManager().registerEvents(this, BubbleGameAPI.getInstance());
+        BubbleGameAPI.getInstance().registerListener(this);
     }
 
     @Override

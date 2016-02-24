@@ -1,6 +1,8 @@
 package com.thebubblenetwork.api.game;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
+import com.thebubblenetwork.api.global.type.ServerType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -19,19 +21,17 @@ import org.bukkit.entity.Player;
  * Date-created: 19/01/2016 19:46
  * Project: BubbleFramework
  */
-public class HubInventory extends BuyInventory {
-    public HubInventory() {
-        super(ChatColor.GOLD + "Teleport to hub", "hub_teleport", "Teleport me to hub", "Cancel");
+public class LobbyInventory extends BuyInventory {
+    public LobbyInventory() {
+        super(ChatColor.GOLD + "Teleport to lobby", "lobby_teleport", "Teleport me to lobby", "Cancel");
     }
 
-    @Override
     public void onCancel(Player p) {
         p.closeInventory();
     }
 
-    @Override
     public void onAllow(Player p) {
         p.closeInventory();
-        p.sendMessage("WIP");
+        BubbleNetwork.getInstance().sendPlayer(p, ServerType.getType("Lobby"));
     }
 }
