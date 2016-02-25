@@ -15,13 +15,13 @@ import org.bukkit.plugin.Plugin;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class MenuManager implements Listener {
+    private Set<Menu> menus;
 
-    private Map<Object, Menu> menus = new HashMap<Object, Menu>();
-
-    public MenuManager() {
-
+    public MenuManager(Set<Menu> menus) {
+        this.menus = menus;
     }
 
     public static int getRoundedInventorySize(int items) {
@@ -32,35 +32,11 @@ public class MenuManager implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    public void clear() {
-        menus.clear();
-    }
-
-    public void addMenu(Object key, Menu menu) {
-        menus.put(key, menu);
-    }
-
-    public boolean isMenu(Object key) {
-        return menus.containsKey(key);
-    }
-
-    public void remove(Object key) {
-        menus.remove(key);
-    }
-
-    public Collection<Menu> getMenus() {
-        return menus.values();
-    }
-
-    public Menu getMenu(Object key) {
-        return menus.get(key);
-    }
-
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
         Inventory inv = e.getView().getTopInventory();
-        for (Menu menu : menus.values()) {
+        for (Menu menu : menus) {
             if (menu.getInventory().equals(inv)) {
                 e.setCancelled(true);
                 if (e.getClickedInventory().equals(inv))

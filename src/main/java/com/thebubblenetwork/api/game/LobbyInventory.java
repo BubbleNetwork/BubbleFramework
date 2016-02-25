@@ -23,7 +23,7 @@ import org.bukkit.entity.Player;
  */
 public class LobbyInventory extends BuyInventory {
     public LobbyInventory() {
-        super(ChatColor.GOLD + "Teleport to lobby", "lobby_teleport", "Teleport me to lobby", "Cancel");
+        super(ChatColor.GOLD + "Teleport to lobby","Teleport me to lobby", "Cancel");
     }
 
     public void onCancel(Player p) {

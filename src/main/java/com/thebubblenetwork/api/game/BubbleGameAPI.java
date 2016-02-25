@@ -365,6 +365,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     public void onDisable() {
         setState(State.RESTARTING);
         chosen = null;
+        KitSelection.unregister();
         setInstance(null);
     }
 

@@ -34,7 +34,7 @@ public class VoteInventory extends Menu {
     public VoteInventory(int gamemaps) {
         super(display, MenuManager.getRoundedInventorySize(gamemaps));
         update();
-        BubbleNetwork.getInstance().getManager().addMenu("Game_Vote", this);
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(),this);
     }
 
     public static VoteInventory getVoteInventory() {

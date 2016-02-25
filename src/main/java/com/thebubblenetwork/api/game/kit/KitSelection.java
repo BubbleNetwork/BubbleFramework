@@ -19,6 +19,8 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -36,15 +38,21 @@ public class KitSelection extends Menu {
     private BukkitBubblePlayer player;
     private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
 
+    private static Map<UUID,Menu> menuMap = new HashMap<>();
+
     public KitSelection(Player p) {
         super(inventoryname, MenuManager.getRoundedInventorySize(KitManager.getKits().size()));
         this.uuid = p.getUniqueId();
         this.player = BukkitBubblePlayer.getObject(p.getUniqueId());
-        BubbleNetwork.getInstance().getManager().addMenu(p.getUniqueId(), this);
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(),this);
     }
 
     public static String getInventoryname() {
         return inventoryname;
+    }
+
+    public static void unregister(){
+        menuMap.clear();
     }
 
     public static KitSelection openMenu(Player p) {
@@ -57,13 +65,13 @@ public class KitSelection extends Menu {
         plugin.registerListener(new Listener() {
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent e) {
-                BubbleNetwork.getInstance().getManager().remove(e.getPlayer().getUniqueId());
+                BubbleNetwork.getInstance().unregisterMenu(menuMap.get(e.getPlayer().getUniqueId()));
             }
         });
     }
 
     public static KitSelection getSelection(Player p) {
-        KitSelection k = (KitSelection) BubbleNetwork.getInstance().getManager().getMenu(p.getUniqueId());
+        KitSelection k = (KitSelection) menuMap.get(p.getUniqueId());
         if (k == null)
             k = new KitSelection(p);
         return k;
@@ -157,7 +165,7 @@ public class KitSelection extends Menu {
             } else if (type == ClickType.RIGHT) {
                 player.playSound(player.getLocation().getBlock().getLocation(), buykit, 1f, 1f);
                 if (k.isOwned(bubblePlayer)) {
-                    KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1, player);
+                    KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
                     kitLevelUpInventory.show(player);
                 } else {
                     k.getBuyInventory().show(player);

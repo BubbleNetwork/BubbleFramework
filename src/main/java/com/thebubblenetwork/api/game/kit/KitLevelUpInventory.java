@@ -37,9 +37,8 @@ public class KitLevelUpInventory extends BuyInventory {
     private boolean cancelled = false;
     private int level;
 
-    public KitLevelUpInventory(Kit k, int cost, int level, final Player player) {
-        super(ChatColor.GOLD + k.getNameClear() + ChatColor.DARK_GRAY + " -> Lv" + ChatColor.RED + String.valueOf(level) + ChatColor.DARK_GRAY + " T" +
-                ChatColor.GREEN + String.valueOf(k.getPrice()), "kit_levelup_" + player.getUniqueId());
+    public KitLevelUpInventory(Kit k, int cost, int level) {
+        super(k.getNameClear() + " Lv" + String.valueOf(level-1) + " -> Lv" + String.valueOf(level) + " " + String.valueOf(k.getPrice()) + "Tokens");
         this.k = k;
         this.cost = cost;
         this.level = level;
@@ -48,15 +47,11 @@ public class KitLevelUpInventory extends BuyInventory {
             public void onInventoryClose(InventoryCloseEvent e) {
                 if (e.getInventory() == getInventory()) {
                     cancelled = true;
-                    BubbleNetwork.getInstance().getManager().remove("kit_levelup_" + player.getUniqueId());
+                    BubbleNetwork.getInstance().unregisterMenu(KitLevelUpInventory.this);
                     HandlerList.unregisterAll(this);
                 }
             }
         });
-    }
-
-    public static KitLevelUpInventory getInventoryManual(Player p) {
-        return (KitLevelUpInventory) BubbleNetwork.getInstance().getManager().getMenu("kit_levelup_" + p.getUniqueId());
     }
 
     public Kit getKit() {
@@ -75,14 +70,12 @@ public class KitLevelUpInventory extends BuyInventory {
         return cancelled;
     }
 
-    @Override
     public void onCancel(Player player) {
         player.closeInventory();
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), CANCELBUY, 1f, 1f);
     }
 
-    @Override
     public void onAllow(Player player) {
         BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
         getKit().level(bubblePlayer,getLevel());

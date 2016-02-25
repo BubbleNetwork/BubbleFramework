@@ -20,14 +20,9 @@ public class KitBuyInventory extends BuyInventory {
 
     public KitBuyInventory(Kit kit) {
         super(ChatColor.DARK_GRAY + "Buy " + ChatColor.GOLD + kit.getNameClear() + ChatColor.DARK_GRAY + " T" +
-                ChatColor.GREEN + String.valueOf(kit.getPrice()), "kit_buy_" + kit.getNameClear());
+                ChatColor.GREEN + String.valueOf(kit.getPrice()));
         this.kit = kit;
     }
-
-    public static KitBuyInventory getViaMap(String name) {
-        return (KitBuyInventory) BubbleNetwork.getInstance().getManager().getMenu("kit_buy_" + ChatColorAppend.wipe(name));
-    }
-
     public void onCancel(Player player) {
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), CANCELBUY, 1f, 1f);

@@ -2,6 +2,7 @@ package com.thebubblenetwork.api.framework.util.mc.menu;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
+import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -35,7 +36,7 @@ public abstract class BuyInventory extends Menu {
     private ItemStackBuilder yesitem, noitem, background;
 
     public BuyInventory(
-            int size, String name, Object indentifier, int[] yesslots, int[] noslots, ItemStackBuilder yesitem,
+            int size, String name,int[] yesslots, int[] noslots, ItemStackBuilder yesitem,
             ItemStackBuilder noitem, ItemStackBuilder background) {
         super(name, size);
         this.name = name;
@@ -45,17 +46,17 @@ public abstract class BuyInventory extends Menu {
         this.noitem = noitem;
         this.background = background;
         update();
-        BubbleNetwork.getInstance().getManager().addMenu(indentifier, this);
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(),this);
     }
 
-    public BuyInventory(String name, Object indentifier, String yes, String no) {
-        this(getDefaultsize(), name, indentifier, getYesslotsdefault().clone(), getNoslotsdefault().clone(),
+    public BuyInventory(String name, String yes, String no) {
+        this(getDefaultsize(), name, getYesslotsdefault().clone(), getNoslotsdefault().clone(),
                 getYesitemdefault().clone().withName(ChatColor.GREEN + yes), getNoitemdefault().clone().withName(ChatColor.RED + no),
                 getBackgrounddefault().clone());
     }
 
-    public BuyInventory(String name, Object indentifier) {
-        this(defaultsize, name, indentifier, getYesslotsdefault().clone(), getNoslotsdefault().clone(), getYesitemdefault().clone(), getNoitemdefault().clone(), getBackgrounddefault().clone());
+    public BuyInventory(String name) {
+        this(defaultsize, name,getYesslotsdefault().clone(), getNoslotsdefault().clone(), getYesitemdefault().clone(), getNoitemdefault().clone(), getBackgrounddefault().clone());
     }
 
     public static int[] getYesslotsdefault() {

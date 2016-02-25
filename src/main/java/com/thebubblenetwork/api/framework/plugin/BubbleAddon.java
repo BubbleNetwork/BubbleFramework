@@ -5,6 +5,7 @@ import com.thebubblenetwork.api.framework.P;
 import com.thebubblenetwork.api.global.plugin.updater.FileUpdater;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -73,27 +74,27 @@ public abstract class BubbleAddon implements FileUpdater {
         return descriptionFile.getName();
     }
 
-    public void runTask(Runnable r){
-        BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,false);
+    public BukkitTask runTask(Runnable r){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,false);
     }
 
-    public void runTaskAsynchonrously(Runnable r){
-        BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,true);
+    public BukkitTask runTaskAsynchonrously(Runnable r){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, TimeUnit.MILLISECONDS,0L,false,true);
     }
 
-    public void runTaskLater(Runnable r,TimeUnit unit,long time){
-        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,false);
+    public BukkitTask runTaskLater(Runnable r,TimeUnit unit,long time){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,false);
     }
 
-    public void runTaskLaterAsynchronously(Runnable r,TimeUnit unit,long time){
-        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,true);
+    public BukkitTask runTaskLaterAsynchronously(Runnable r,TimeUnit unit,long time){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,false,true);
     }
-    public void runTaskTimer(Runnable r,TimeUnit unit,long time){
-        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,false);
+    public BukkitTask runTaskTimer(Runnable r,TimeUnit unit,long time){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,false);
     }
 
-    public void runTaskTimerAsynchronously(Runnable r,TimeUnit unit,long time){
-        BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,true);
+    public BukkitTask runTaskTimerAsynchronously(Runnable r,TimeUnit unit,long time){
+        return BubbleNetwork.getInstance().registerRunnable(this,r, unit,time,true,true);
     }
 
     public void registerListener(Listener l) {

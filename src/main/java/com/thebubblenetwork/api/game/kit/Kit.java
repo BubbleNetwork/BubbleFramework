@@ -51,7 +51,7 @@ public class Kit {
         if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(getNameClear())) {
             return player.getKits(BubbleGameAPI.getInstance().getName()).get(getNameClear());
         }
-        return 0;
+        return BubbleGameAPI.getInstance().getDefaultKit() == this ? 1 : 0;
     }
 
     public int getLevelUpcost(BukkitBubblePlayer player) {

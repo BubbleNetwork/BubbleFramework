@@ -9,6 +9,7 @@ import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddonLoader;
 import com.thebubblenetwork.api.framework.plugin.BukkitPlugman;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
+import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.framework.util.version.VersionUTIL;
 import com.thebubblenetwork.api.global.bubblepackets.PacketInfo;
@@ -62,7 +63,6 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     public int FINALID;
     private BubbleBarAPI api;
     private VersionUTIL util;
-    private MenuManager manager = new MenuManager();
     private ServerType type;
     private int id;
     private P plugin;
@@ -73,6 +73,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     private BukkitPlugman plugman;
     private Set<Listener> listeners = new HashSet<>();
     private Set<BukkitTask> executed = new HashSet<>();
+    private Set<Menu> registeredMenus = new HashSet<>();
+    private MenuManager manager = new MenuManager(registeredMenus);
 
     public BubbleNetwork(P plugin) {
         super();
@@ -87,6 +89,25 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             getPlugin().getServer().getPluginManager().registerEvents(listener,getPlugin());
         }
         else throw new IllegalArgumentException("Plugin not registered");
+    }
+
+    public void registerMenu(BubbleAddon addon, Menu menu){
+        if(getAssigned() == addon){
+            if(registeredMenus.contains(menu))throw new IllegalArgumentException("Menu already registered");
+            registeredMenus.add(menu);
+        }
+        else throw new IllegalArgumentException("Plugin not registered");
+    }
+
+    public void unregisterMenu(Menu menu){
+        if(registeredMenus.contains(menu)){
+            registeredMenus.remove(menu);
+        }
+        else throw new IllegalArgumentException("Menu not registered");
+    }
+
+    public void unregisterMenus(){
+        registeredMenus.clear();
     }
 
     public BukkitTask registerRunnable(BubbleAddon plugin, Runnable r, TimeUnit unit, long time, boolean timer, boolean async){
@@ -357,6 +378,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         getAssigned().onDisable();
         unregisterListener();
         unregisterTasks();
+        unregisterMenus();
         assigned = null;
     }
 
@@ -371,6 +393,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             return;
         }
         BubbleAddon plugin = loader.getPlugin();
+        plugin.__init__(loader);
         logInfo("Enabling addon: " + plugin.getName());
         assigned = plugin;
         getAssigned().onLoad();

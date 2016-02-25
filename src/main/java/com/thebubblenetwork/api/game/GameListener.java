@@ -55,11 +55,11 @@ public class GameListener implements Listener {
 
     private static String ghostteam = "GHOST";
 
-    private static int SPECTATORHUBSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, HUBSLOT = 8;
+    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
 
-    private static ItemStackBuilder HUBITEM = new ItemStackBuilder(Material.WOOD_DOOR)
-            .withName(ChatColor.DARK_RED + "Go back to hub")
-            .withLore(ChatColor.RED + "Click this to go back to hub")
+    private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR)
+            .withName(ChatColor.DARK_RED + "Go back to the lobby")
+            .withLore(ChatColor.RED + "Click this to go back to the lobby")
             .withAmount(1)
             .withGlow();
 
@@ -78,7 +78,7 @@ public class GameListener implements Listener {
         ItemStack[] is = new ItemStack[inventorysize];
         is[MAPSLOT] = mapselection.build();
         is[KITSLOT] = kitselection.build();
-        is[HUBSLOT] = HUBITEM.build();
+        is[LOBBYSLOT] = LOBBYITEM.build();
         return is;
     }
 
@@ -167,7 +167,7 @@ public class GameListener implements Listener {
         startGhost(p);
         p.getInventory().setContents(new ItemStack[4 * 9]);
         p.getInventory().setArmorContents(new ItemStack[4]);
-        p.getInventory().setItem(SPECTATORHUBSLOT, HUBITEM.build());
+        p.getInventory().setItem(SPECTATORLOBBYSLOT, LOBBYITEM.build());
         p.getInventory().setItem(SPECTATORPLAYERSSLOT, PLAYERS.build());
         p.setHealth(20d);
         p.setFoodLevel(20);
@@ -280,24 +280,6 @@ public class GameListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerDeathToSpectator(PlayerDeathEvent e) {
-        final Player p = e.getEntity();
-        final Location l = p.getLocation();
-        if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME) {
-            p.spigot().respawn();
-            BubbleGameAPI.getInstance().runTask(new Runnable() {
-                @Override
-                public void run() {
-                    if (p.isOnline()) {
-                        setSpectating(p, true);
-                        p.teleport(l);
-                    }
-                }
-            });
-        }
-    }
-
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
@@ -407,7 +389,7 @@ public class GameListener implements Listener {
                     VoteInventory.getVoteInventory().show(p);
                 } else if (slot == KITSLOT) {
                     KitSelection.openMenu(p);
-                } else if (slot == HUBSLOT) {
+                } else if (slot == LOBBYSLOT) {
                     BubbleGameAPI.getInstance().getHubInventory().show(p);
                 }
             }
@@ -415,7 +397,7 @@ public class GameListener implements Listener {
             e.setCancelled(true);
             int i = p.getInventory().getHeldItemSlot();
             if ((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL)) {
-                if (i == SPECTATORHUBSLOT) BubbleGameAPI.getInstance().getHubInventory().show(p);
+                if (i == SPECTATORLOBBYSLOT) BubbleGameAPI.getInstance().getHubInventory().show(p);
                 else if (i == SPECTATORPLAYERSSLOT) BubbleGameAPI.getInstance().getPlayerList().show(p);
             } else {
                 Block clicked = e.getClickedBlock();

@@ -23,7 +23,7 @@ public abstract class GameTimer {
                 left--;
             }
         };
-        BubbleGameAPI.getInstance().runTaskTimer(r, TimeUnit.MILLISECONDS,interval*50);
+        runnable = BubbleGameAPI.getInstance().runTaskTimer(r, TimeUnit.MILLISECONDS,interval*50);
         r.run();
     }
 
@@ -40,7 +40,7 @@ public abstract class GameTimer {
     }
 
     public void cancel() {
-        runnable.cancel();
+        if(runnable != null)runnable.cancel();
         runnable = null;
         left = 0;
     }
