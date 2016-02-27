@@ -2,6 +2,11 @@ package com.thebubblenetwork.api.framework.util.mc.world;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.util.NumberConversions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright Statement
@@ -18,7 +23,7 @@ import org.bukkit.World;
  * Date-created: 17/01/2016 11:07
  * Project: BubbleFramework
  */
-public class LocationObject implements Cloneable {
+public class LocationObject implements Cloneable,ConfigurationSerializable {
     private double x, y, z;
     private float pitch, yaw;
 
@@ -87,6 +92,36 @@ public class LocationObject implements Cloneable {
     public Location toLocation(World w) {
         return new Location(w, getX(), getY(), getZ(), getPitch(), getYaw());
     }
+
+    public Map<String, Object> serialize() {
+        Map<String,Object> map = new HashMap<>();
+        map.put("x",getX());
+        map.put("y",getY());
+        map.put("z",getZ());
+        map.put("pitch",getPitch());
+        map.put("yaw",getYaw());
+        return map;
+    }
+
+    public static LocationObject deserialize(Map<String, Object> args){
+        return new LocationObject(
+                NumberConversions.toDouble(args.get("x")),
+                NumberConversions.toDouble(args.get("y")),
+                NumberConversions.toDouble(args.get("z")),
+                NumberConversions.toFloat(args.get("pitch")),
+                NumberConversions.toFloat(args.get("yaw"))
+        );
+    }
+
+    @Override
+    public String toString(){
+        String contents = "";
+        for(Map.Entry<String,Object> objectEntry:serialize().entrySet()){
+            contents += " " + objectEntry.getKey() + "=" + String.valueOf(((Number)objectEntry.getValue()).intValue());
+        }
+        return "[" + contents + " ]";
+    }
+
 
     @Override
     public LocationObject clone() {
