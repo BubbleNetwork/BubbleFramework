@@ -74,7 +74,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     private Set<Listener> listeners = new HashSet<>();
     private Set<BukkitTask> executed = new HashSet<>();
     private Set<Menu> registeredMenus = new HashSet<>();
-    private MenuManager manager = new MenuManager(registeredMenus);
+    private MenuManager manager = new MenuManager();
 
     public BubbleNetwork(P plugin) {
         super();
@@ -167,6 +167,11 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
 
     public static BubbleNetwork getInstance() {
         return instance;
+    }
+
+    @Deprecated
+    public Set<Menu> listMenu(){
+        return registeredMenus;
     }
 
     public static BubbleAddonLoader register(AddonDescriptionFile plugin) {

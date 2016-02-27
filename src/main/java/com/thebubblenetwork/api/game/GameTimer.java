@@ -18,6 +18,7 @@ public abstract class GameTimer {
                 if (getLeft() == 0) {
                     GameTimer.this.cancel();
                     end();
+                    return;
                 }
                 GameTimer.this.run(getLeft());
                 left--;

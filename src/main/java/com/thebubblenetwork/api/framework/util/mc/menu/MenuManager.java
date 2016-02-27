@@ -4,6 +4,7 @@ package com.thebubblenetwork.api.framework.util.mc.menu;
  * Created by Jacob on 12/12/2015.
  */
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,12 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class MenuManager implements Listener {
-    private Set<Menu> menus;
-
-    public MenuManager(Set<Menu> menus) {
-        this.menus = menus;
-    }
-
     public static int getRoundedInventorySize(int items) {
         return items + (9 - (items % 9));
     }
@@ -36,7 +31,7 @@ public class MenuManager implements Listener {
     public void onClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
         Inventory inv = e.getView().getTopInventory();
-        for (Menu menu : menus) {
+        for (Menu menu : BubbleNetwork.getInstance().listMenu()) {
             if (menu.getInventory().equals(inv)) {
                 e.setCancelled(true);
                 if (e.getClickedInventory().equals(inv))
