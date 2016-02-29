@@ -188,6 +188,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     public void onBubbleEnable() {
         logInfo("Loading components");
 
+        file = getPlugin().getFile();
         api = new BubbleBarAPI();
         registerListener(getListener());
         commandPlugin.register(getPlugin());
@@ -273,6 +274,8 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     public BubbleListener getListener(){
         return listener;
     }
+
+    private File file;
 
     public void saveXServerDefaults() {
         int port;
@@ -488,7 +491,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public File getReplace() {
-        return getPlugin().getFile();
+        return file;
     }
 
     public String getArtifact() {
@@ -530,6 +533,14 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void onDisconnect(PacketInfo info) {
+    }
+
+    public void updateTaskBefore() {
+        getPlugman().unload(getPlugin());
+    }
+
+    public void updateTaskAfter() {
+        getPlugman().load(file);
     }
 
     public BukkitPlugman getPlugman() {
