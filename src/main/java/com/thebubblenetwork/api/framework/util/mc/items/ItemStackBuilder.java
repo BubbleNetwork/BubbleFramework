@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jacob on 12/12/2015.
@@ -117,6 +118,11 @@ public class ItemStackBuilder implements Cloneable {
 
     public ItemStackBuilder withEnchantment(Enchantment enchantment) {
         ITEM_STACK.addUnsafeEnchantment(enchantment, 1);
+        return this;
+    }
+
+    public ItemStackBuilder withEnchantments(Map<Enchantment,Integer> enchantmentIntegerMap){
+        ITEM_STACK.addUnsafeEnchantments(enchantmentIntegerMap);
         return this;
     }
 

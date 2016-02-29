@@ -14,7 +14,7 @@ public class LocationUtil {
         double z = getVar(section, "z");
         float pitch = (float) getVar(section, "pitch");
         float yaw = (float) getVar(section, "yaw");
-        return new LocationObject(x, y, z, pitch, yaw);
+        return new LocationObject(x, y, z, yaw, pitch);
     }
 
     private static double getVar(ConfigurationSection section, String var) {

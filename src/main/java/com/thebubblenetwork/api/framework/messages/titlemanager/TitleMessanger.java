@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework.messages.titlemanager;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.reflection.ReflectionUTIL;
 import org.bukkit.entity.Player;
 
@@ -7,6 +8,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by Jacob on 10/12/2015.
@@ -52,7 +55,7 @@ public class TitleMessanger {
             packettitletimesconstructor = ReflectionUTIL.getConstructor(packetinjector, true, packetaction, int
                     .class, int.class, int.class);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Logger.getGlobal().log(Level.WARNING,"Could not setup titlemanager",ex);
         }
     }
 
@@ -112,7 +115,7 @@ public class TitleMessanger {
         } catch (InstantiationException e) {
             throw e.getCause();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            //Cannot happen
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }

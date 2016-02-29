@@ -7,6 +7,8 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EnchantGlow extends EnchantmentWrapper {
     private static Enchantment glow;
@@ -16,7 +18,7 @@ public class EnchantGlow extends EnchantmentWrapper {
         try {
             acceptingNew = ReflectionUTIL.getField(Enchantment.class, "acceptingNew", true);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            Logger.getGlobal().log(Level.WARNING,"Could not setup EnchantGlow",e);
         }
     }
 

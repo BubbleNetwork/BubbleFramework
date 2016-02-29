@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework.util.version;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.reflection.ReflectionUTIL;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by Jacob on 15/11/2015.
@@ -33,7 +36,7 @@ public class VersionUTIL implements Listener {
             networkmanagerfield = ReflectionUTIL.getField(playerconnection,"networkManager",true);
         }
         catch (Exception ex){
-            ex.printStackTrace();
+            Logger.getGlobal().log(Level.WARNING,"Could not setup Version Util",ex);
         }
     }
 
@@ -61,7 +64,7 @@ public class VersionUTIL implements Listener {
             return (Integer)getVersionObject(p);
         }
         catch (Exception ex){
-            ex.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could get version of " + p.getName(),ex);
             return Version.V18.protocolmin;
         }
     }

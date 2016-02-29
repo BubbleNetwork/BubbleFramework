@@ -43,8 +43,8 @@ public class VoteInventory extends Menu {
         return inventory;
     }
 
-    public static void reset() {
-        inventory = null;
+    public static void reset(){
+
     }
 
     @Override
@@ -60,7 +60,7 @@ public class VoteInventory extends Menu {
                                 .append(map.getName())
                                 .withColor(ChatColor.GRAY)
                                 .withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        TextComponent.fromLegacyText(Joiner.on("\n").join(map.getDescription()))))
+                                        TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GOLD).join(map.getDescription()))))
                                 .build());
             } else {
                 BubbleGameAPI.getInstance().addVote(player.getUniqueId(), map);
@@ -70,7 +70,7 @@ public class VoteInventory extends Menu {
                                 .append(map.getName())
                                 .withColor(ChatColor.GRAY)
                                 .withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        TextComponent.fromLegacyText(Joiner.on("\n").join(map.getDescription()))))
+                                        TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GOLD).join(map.getDescription()))))
                                 .build());
             }
             player.playSound(player.getLocation(), click, 1f, 1f);

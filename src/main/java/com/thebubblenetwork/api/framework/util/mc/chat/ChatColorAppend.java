@@ -30,7 +30,6 @@ public class ChatColorAppend {
                     return format;
             }
         }
-        format.add(ChatColor.RESET);
         return format;
     }
 

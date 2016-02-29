@@ -51,8 +51,6 @@ public class ReflectionUTIL {
         try {
             return m.invoke(o, methodargs);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            ;
             //Cannot happen
         }
         return null;

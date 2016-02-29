@@ -38,7 +38,7 @@ public class KitLevelUpInventory extends BuyInventory {
     private int level;
 
     public KitLevelUpInventory(Kit k, int cost, int level) {
-        super(k.getNameClear() + " Lv" + String.valueOf(level-1) + " -> Lv" + String.valueOf(level) + " " + String.valueOf(k.getPrice()) + "Tokens");
+        super(ChatColor.GOLD + k.getNameClear() + " Lv" + String.valueOf(level-1) + " -> Lv" + String.valueOf(level) + " " + ChatColor.RED + String.valueOf(k.getPrice()) + "T");
         this.k = k;
         this.cost = cost;
         this.level = level;
@@ -81,6 +81,5 @@ public class KitLevelUpInventory extends BuyInventory {
         getKit().level(bubblePlayer,getLevel());
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
-
     }
 }

@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.maps;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.global.data.InvalidBaseException;
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Created by Jacob on 13/12/2015.
@@ -34,11 +36,6 @@ public abstract class GameMap {
     private Map settings;
 
     public GameMap(String name, MapData data, File yml, File zip) {
-        try {
-            SSLUtil.allowAnySSL();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
         this.name = name;
         this.data = data;
         this.yml = yml;
@@ -63,7 +60,7 @@ public abstract class GameMap {
             extractMaps();
             setupMaps();
         } catch (Exception e) {
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not setup maps",e);
         }
     }
 
@@ -72,7 +69,7 @@ public abstract class GameMap {
         try {
             SSLUtil.allowAnySSL();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not allow any SSL",ex);
         }
 
         if (!folder.exists())
@@ -85,7 +82,7 @@ public abstract class GameMap {
                 DownloadUtil.download(zip, data.getValue().getZip());
                 DownloadUtil.download(yml, data.getValue().getYaml());
             } catch (Exception e) {
-                e.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not download map",e);
             }
             registerMap(BubbleGameAPI.getInstance().loadMap(data.getKey(), data.getValue(), yml, zip));
         }
@@ -98,6 +95,7 @@ public abstract class GameMap {
     private static void extractMaps() {
         for (GameMap m : getMaps())
             extractMap(m);
+        FileUTIL.deleteDir(folder);
     }
 
     private static void extractMap(GameMap map) {
@@ -108,13 +106,12 @@ public abstract class GameMap {
         try {
             FileUTIL.unZip(map.getZip().getPath(), temp.getPath());
         } catch (IOException e) {
-            //Automatic Catch Statement
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not extract map",e);
         }
         try {
-            FileUTIL.copy(new File(temp + File.separator + "world"), mapto);
+            FileUTIL.copy(new File(temp + File.separator + temp.list()[0]), mapto);
         } catch (IOException e) {
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not copy map",e);
         }
         FileUTIL.deleteDir(temp);
     }
@@ -142,7 +139,6 @@ public abstract class GameMap {
     }
 
     public abstract Map loadSetting(ConfigurationSection section);
-
 
     public String getName() {
         return name;

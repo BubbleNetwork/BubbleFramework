@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework.messages;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.messages.titlemanager.TitleMessanger;
 import com.thebubblenetwork.api.framework.util.version.VersionUTIL;
@@ -7,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
+import java.util.logging.Level;
 
 /**
  * Created by Jacob on 09/12/2015.
@@ -34,7 +36,7 @@ public class Messages {
             try {
                 TitleMessanger.sendActionBar(p, message);
             } catch (Throwable ex) {
-                ex.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send actionbar",ex);
             }
         }
     }
@@ -58,11 +60,7 @@ public class Messages {
         if (VersionUTIL.getVersion(p) == VersionUTIL.Version.V17) {
             setBar(p, title + "  " + subtitle);
         } else {
-            try {
-                sendTitleAndSubtitle(p, title, subtitle, timing);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-            }
+            sendTitleAndSubtitle(p, title, subtitle, timing);
         }
     }
 
@@ -74,7 +72,7 @@ public class Messages {
             TitleMessanger.sendTitle(p, TitleMessanger.ProtcolInjectorReflection.TIMES, timing.getIn(), timing.getShow(),
                     timing.getOut());
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send title/subtitle");
         }
     }
 

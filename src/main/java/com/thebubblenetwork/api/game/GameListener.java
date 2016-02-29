@@ -45,11 +45,11 @@ import java.util.*;
  */
 public class GameListener implements Listener {
     private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER)
-            .withName(ChatColor.DARK_AQUA + "" + ChatColor.UNDERLINE + "Maps")
+            .withName(ChatColor.DARK_AQUA + "Maps")
             .withLore(ChatColor.GRAY + "Click to vote for a map")
             .withAmount(1);
     private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE)
-            .withName(ChatColor.DARK_AQUA + "" + ChatColor.UNDERLINE + "Kits")
+            .withName(ChatColor.DARK_AQUA +  "Kits")
             .withLore(ChatColor.GRAY + "Click to select or buy a kit")
             .withAmount(1);
 
@@ -164,6 +164,9 @@ public class GameListener implements Listener {
             p.showPlayer(target);
         }
         if (p.isDead()) p.spigot().respawn();
+        for(PotionEffect effect:p.getActivePotionEffects()){
+            p.removePotionEffect(effect.getType());
+        }
         startGhost(p);
         p.getInventory().setContents(new ItemStack[4 * 9]);
         p.getInventory().setArmorContents(new ItemStack[4]);
@@ -393,35 +396,37 @@ public class GameListener implements Listener {
                     BubbleGameAPI.getInstance().getHubInventory().show(p);
                 }
             }
-        } else if (isSpectating(p)) {
+        }
+        else if (isSpectating(p)) {
             e.setCancelled(true);
             int i = p.getInventory().getHeldItemSlot();
-            if ((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL)) {
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL) {
                 if (i == SPECTATORLOBBYSLOT) BubbleGameAPI.getInstance().getHubInventory().show(p);
                 else if (i == SPECTATORPLAYERSSLOT) BubbleGameAPI.getInstance().getPlayerList().show(p);
-            } else {
-                Block clicked = e.getClickedBlock();
-                if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
-                    if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
-                        BlockState clickedstate = clicked.getState();
-                        if (clickedstate != null && clickedstate instanceof Chest) {
-                            Chest chest = (Chest) clickedstate;
-                            Location l = toBlockLocation(chest.getLocation());
-                            Inventory inventory;
-                            if (chests.containsKey(l)) {
-                                inventory = chests.get(l);
-                            } else {
-                                inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(), chest.getInventory().getName());
-                                inventory.setContents(chest.getInventory().getContents());
-                                chests.put(l, inventory);
+                else {
+                    Block clicked = e.getClickedBlock();
+                    if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
+                        if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
+                            BlockState clickedstate = clicked.getState();
+                            if (clickedstate != null && clickedstate instanceof Chest) {
+                                Chest chest = (Chest) clickedstate;
+                                Location l = toBlockLocation(chest.getLocation());
+                                Inventory inventory;
+                                if (chests.containsKey(l)) {
+                                    inventory = chests.get(l);
+                                } else {
+                                    inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(), chest.getInventory().getName());
+                                    inventory.setContents(chest.getInventory().getContents());
+                                    chests.put(l, inventory);
+                                }
+                                p.openInventory(inventory);
                             }
-                            p.openInventory(inventory);
-                        }
-                    } else {
-                        BlockState state = clicked.getState();
-                        if (state instanceof InventoryHolder) {
-                            InventoryHolder holder = (InventoryHolder) state;
-                            p.openInventory(holder.getInventory());
+                        } else {
+                            BlockState state = clicked.getState();
+                            if (state instanceof InventoryHolder) {
+                                InventoryHolder holder = (InventoryHolder) state;
+                                p.openInventory(holder.getInventory());
+                            }
                         }
                     }
                 }
@@ -431,6 +436,15 @@ public class GameListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerDamage(EntityDamageEvent e) {
+        if (e instanceof EntityDamageByEntityEvent) {
+            EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) e;
+            if (damageByEntityEvent.getDamager() instanceof Player) {
+                Player damager = (Player) damageByEntityEvent.getDamager();
+                if (isSpectating(damager)) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
         if (e.getEntity() instanceof Player) {
             if (canDefault()) e.setCancelled(true);
             else {
@@ -438,15 +452,6 @@ public class GameListener implements Listener {
                 if (isSpectating(p)) {
                     e.setCancelled(true);
                 } else {
-                    if (e instanceof EntityDamageByEntityEvent) {
-                        EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) e;
-                        if (damageByEntityEvent.getDamager() instanceof Player) {
-                            Player damager = (Player) damageByEntityEvent.getDamager();
-                            if (isSpectating(damager)) {
-                                e.setCancelled(true);
-                                return;
-                            }
-                        }
                     }
                     BubbleGameAPI.getInstance().runTask(new Runnable(){
                         public void run() {

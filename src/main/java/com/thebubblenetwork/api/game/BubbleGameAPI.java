@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
+import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.plugin.BubbleRunnable;
 import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
@@ -23,17 +24,21 @@ import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.FileUTIL;
 import com.thebubblenetwork.api.global.file.SSLUtil;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
+import de.mickare.xserver.XServerManager;
+import de.mickare.xserver.net.XServer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
@@ -41,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  * Created by Jacob on 12/12/2015.
@@ -101,6 +107,14 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 }
             }
             api.teleportPlayers(api.chosenmap, api.chosen);
+            for(Player p:Bukkit.getOnlinePlayers()){
+                PlayerInventory inventory = p.getInventory();
+                Kit k = KitSelection.getSelection(p).getKit();
+                BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
+                int level = k.getLevel(player);
+                inventory.setContents(k.getInventorypreset(level));
+                inventory.setArmorContents(k.getArmorpreset(level));
+            }
             api.timer = new GameTimer(20, 5) {
                 public void run(int seconds) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), ChatColor.AQUA + "The game is starting", new Messages.TitleTiming(5, 10, 2));
@@ -122,15 +136,13 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             try {
                 SSLUtil.allowAnySSL();
             } catch (Exception e) {
-                //Automatic Catch Statement
-                e.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not allow all SSL",e);
                 break Change;
             }
             try {
                 DownloadUtil.download(tempzip, LOBBYMAP);
             } catch (Exception e) {
-                //Automatic Catch Statement
-                e.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not download lobby",e);
                 break Change;
             }
             FileUTIL.setPermissions(tempzip, true, true, true);
@@ -138,8 +150,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             try {
                 FileUTIL.unZip(tempzip.getPath(), temp.getPath());
             } catch (IOException e) {
-                //Automatic Catch Statement
-                e.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not unzip files",e);
                 break Change;
             }
             if(!tempzip.delete()){
@@ -150,10 +161,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
             FileUTIL.setPermissions(temp, true, true, true);
             try {
-                FileUTIL.copy(new File(temp + File.separator + "world"), worldfolder);
+                FileUTIL.copy(new File(temp + File.separator + temp.list()[0]), worldfolder);
             } catch (IOException e) {
-                //Automatic Catch Statement
-                e.printStackTrace();
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not copy files",e);
                 break Change;
             }
             FileUTIL.deleteDir(temp);
@@ -320,13 +330,17 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if(getChosen() != null){
             File worldfolder = getChosen().getWorldFolder();
             Bukkit.unloadWorld(getChosen(),false);
-            if(!worldfolder.delete()){
-                worldfolder.deleteOnExit();
+            FileUTIL.deleteDir(worldfolder);
+        }
+        if(getChosenGameMap() != null) {
+            File f = new File(getChosenGameMap().getName());
+            if (f.exists()) {
+                FileUTIL.deleteDir(f);
             }
         }
         setState(State.RESTARTING);
-        chosen = null;
         KitSelection.unregister();
+        VoteInventory.reset();
         setInstance(null);
     }
 
@@ -478,5 +492,34 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 return BubbleGameAPI.getInstance().getScorePreset();
             return null;
         }
+    }
+
+    public void updateTaskAfter() {
+        XServer proxy = BubbleNetwork.getInstance().getProxy();
+        try {
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(proxy,new ServerShutdownRequest());
+        } catch (IOException e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
+            Bukkit.shutdown();
+            return;
+        }
+        try {
+            proxy.disconnect();
+        } catch (Exception e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
+            Bukkit.shutdown();
+            return;
+        }
+        try {
+            proxy.connect();
+        } catch (Exception e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not connect to proxy",e);
+            Bukkit.shutdown();
+        }
+    }
+
+    public void updateTaskBefore() {
+        BubbleNetwork network = BubbleNetwork.getInstance();
+        network.disableAddon();
     }
 }

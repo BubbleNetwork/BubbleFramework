@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework.messages.bossbar.bars;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -11,6 +12,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class FWither {
@@ -63,7 +66,7 @@ public class FWither {
             d = getMCClass("DataWatcher").getDeclaredField("d");
             d.setAccessible(true);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getGlobal().log(Level.WARNING, "Could setup bossbar", e);
         }
     }
 
@@ -107,7 +110,7 @@ public class FWither {
             Object nms_connection = playerConnection.get(nms_player);
             sendPacket.invoke(nms_connection, nms_packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not set bossbar text",e);
         }
     }
 
@@ -129,7 +132,7 @@ public class FWither {
             Object nms_connection = playerConnection.get(nms_player);
             sendPacket.invoke(nms_connection, nms_packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not set bossbar",e);
         }
     }
 
@@ -147,7 +150,7 @@ public class FWither {
             Object nms_connection = playerConnection.get(nms_player);
             sendPacket.invoke(nms_connection, nms_packet);
         } catch (Exception e) {
-            e.printStackTrace();
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not remove bossbar",e);
         }
     }
 
