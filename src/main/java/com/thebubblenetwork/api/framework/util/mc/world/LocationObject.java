@@ -27,12 +27,12 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
     private double x, y, z;
     private float pitch, yaw;
 
-    public LocationObject(double x, double y, double z, float pitch, float yaw) {
+    public LocationObject(double x, double y, double z, float yaw, float pitch) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.pitch = pitch;
         this.yaw = yaw;
+        this.pitch = pitch;
     }
 
     public double getX() {
@@ -59,20 +59,20 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
         this.z = z;
     }
 
-    public float getPitch() {
-        return pitch;
-    }
-
-    public void setPitch(float pitch) {
-        this.pitch = pitch;
-    }
-
     public float getYaw() {
         return yaw;
     }
 
     public void setYaw(float yaw) {
         this.yaw = yaw;
+    }
+
+    public float getPitch() {
+        return pitch;
+    }
+
+    public void setPitch(float pitch) {
+        this.pitch = pitch;
     }
 
     public LocationObject add(double x, double y, double z) {
@@ -98,8 +98,8 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
         map.put("x",getX());
         map.put("y",getY());
         map.put("z",getZ());
-        map.put("pitch",getPitch());
         map.put("yaw",getYaw());
+        map.put("pitch",getPitch());
         return map;
     }
 
@@ -108,8 +108,8 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
                 NumberConversions.toDouble(args.get("x")),
                 NumberConversions.toDouble(args.get("y")),
                 NumberConversions.toDouble(args.get("z")),
-                NumberConversions.toFloat(args.get("pitch")),
-                NumberConversions.toFloat(args.get("yaw"))
+                NumberConversions.toFloat(args.get("yaw")),
+                NumberConversions.toFloat(args.get("pitch"))
         );
     }
 
@@ -125,6 +125,6 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
 
     @Override
     public LocationObject clone() {
-        return new LocationObject(getX(), getY(), getZ(), getPitch(), getYaw());
+        return new LocationObject(getX(), getY(), getZ(), getYaw(), getPitch());
     }
 }
