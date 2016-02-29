@@ -493,33 +493,4 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             return null;
         }
     }
-
-    public void updateTaskAfter() {
-        XServer proxy = BubbleNetwork.getInstance().getProxy();
-        try {
-            BubbleNetwork.getInstance().getPacketHub().sendMessage(proxy,new ServerShutdownRequest());
-        } catch (IOException e) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
-            Bukkit.shutdown();
-            return;
-        }
-        try {
-            proxy.disconnect();
-        } catch (Exception e) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
-            Bukkit.shutdown();
-            return;
-        }
-        try {
-            proxy.connect();
-        } catch (Exception e) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not connect to proxy",e);
-            Bukkit.shutdown();
-        }
-    }
-
-    public void updateTaskBefore() {
-        BubbleNetwork network = BubbleNetwork.getInstance();
-        network.disableAddon();
-    }
 }

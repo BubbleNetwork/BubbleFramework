@@ -2,13 +2,18 @@ package com.thebubblenetwork.api.framework.plugin;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.P;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.plugin.updater.FileUpdater;
+import de.mickare.xserver.net.XServer;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  * Created by Jacob on 09/12/2015.
@@ -107,5 +112,34 @@ public abstract class BubbleAddon implements FileUpdater {
 
     public File getReplace() {
         return file;
+    }
+
+    public void updateTaskAfter() {
+        XServer proxy = BubbleNetwork.getInstance().getProxy();
+        try {
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(proxy,new ServerShutdownRequest());
+        } catch (IOException e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
+            Bukkit.shutdown();
+            return;
+        }
+        try {
+            proxy.disconnect();
+        } catch (Exception e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not disconnect from proxy",e);
+            Bukkit.shutdown();
+            return;
+        }
+        try {
+            proxy.connect();
+        } catch (Exception e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not connect to proxy",e);
+            Bukkit.shutdown();
+        }
+    }
+
+    public void updateTaskBefore() {
+        BubbleNetwork network = BubbleNetwork.getInstance();
+        network.disableAddon();
     }
 }
