@@ -4,15 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
-import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.plugin.BubbleRunnable;
-import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BubbleBoardAPI;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.util.BoardModuleBuilder;
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import com.thebubblenetwork.api.game.kit.Kit;
 import com.thebubblenetwork.api.game.kit.KitManager;
@@ -24,15 +20,12 @@ import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
-import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.FileUTIL;
 import com.thebubblenetwork.api.global.file.SSLUtil;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
-import de.mickare.xserver.XServerManager;
-import de.mickare.xserver.net.XServer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.entity.Firework;
@@ -53,22 +46,6 @@ import java.util.logging.Level;
  */
 public abstract class BubbleGameAPI extends BubbleAddon {
     private static final String LOBBYMAP = "https://www.dropbox.com/s/0f6o78rpvd2oka3/world.zip?dl=1";
-    private static BubbleGameAPI instance;
-    private LobbyPreset preset = new LobbyPreset();
-
-    private World chosen = null;
-    private GameMap chosenmap = null;
-    private Map<UUID, Vote> votes = new HashMap<UUID, Vote>();
-    private GameListener listener;
-    private VoteInventory voteInventory;
-    private GameTimer timer;
-    private LobbyInventory hubInventory;
-    private PlayersList list;
-    private GameMode defaultgamemode;
-    private String defaultkit;
-    private String type;
-    private int minplayers;
-    private static String lobbyworld = "Lobby";
 
     public static Vector getLobbySpawn() {
         return new Vector(0D, 50D, 0D);
@@ -82,32 +59,26 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         BubbleGameAPI.instance = instance;
     }
 
-    public BubbleGameAPI(String type,GameMode defaultgamemode,String defaultkit,int minplayers){
-        super();
-        this.minplayers = minplayers;
-        this.type = type;
-        this.defaultgamemode = defaultgamemode;
-        this.defaultkit = defaultkit;
-    }
-
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
-        if (newstate.getPreset() != null) for (Player p : Bukkit.getOnlinePlayers()) {
-            GameBoard.getBoard(p).enable(newstate.getPreset());
+        if (newstate.getPreset() != null) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                GameBoard.getBoard(p).enable(newstate.getPreset());
+            }
         }
         if (newstate == State.PREGAME) {
             api.chosenmap = calculateMap(api);
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             for (World w : Bukkit.getWorlds()) {
-                if (!w.getName().equals("world") && w.getName().equals(lobbyworld) && !w.getName().equals(api.chosenmap.getName())){
+                if (!w.getName().equals("world") && w.getName().equals(lobbyworld) && !w.getName().equals(api.chosenmap.getName())) {
                     File file = w.getWorldFolder();
                     Bukkit.unloadWorld(w, false);
-                    if(!file.delete()){
+                    if (!file.delete()) {
                         file.deleteOnExit();
                     }
                 }
             }
             api.teleportPlayers(api.chosenmap, api.chosen);
-            for(Player p:Bukkit.getOnlinePlayers()){
+            for (Player p : Bukkit.getOnlinePlayers()) {
                 PlayerInventory inventory = p.getInventory();
                 Kit k = KitSelection.getSelection(p).getKit();
                 BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
@@ -118,8 +89,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             api.timer = new GameTimer(20, 5) {
                 public void run(int seconds) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), ChatColor.AQUA + "The game is starting", new Messages.TitleTiming(5, 10, 2));
-                    for (Player p : Bukkit.getOnlinePlayers())
+                    for (Player p : Bukkit.getOnlinePlayers()) {
                         p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                    }
                 }
 
                 public void end() {
@@ -136,13 +108,13 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             try {
                 SSLUtil.allowAnySSL();
             } catch (Exception e) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not allow all SSL",e);
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not allow all SSL", e);
                 break Change;
             }
             try {
                 DownloadUtil.download(tempzip, LOBBYMAP);
             } catch (Exception e) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not download lobby",e);
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not download lobby", e);
                 break Change;
             }
             FileUTIL.setPermissions(tempzip, true, true, true);
@@ -150,12 +122,12 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             try {
                 FileUTIL.unZip(tempzip.getPath(), temp.getPath());
             } catch (IOException e) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not unzip files",e);
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not unzip files", e);
                 break Change;
             }
-            if(!tempzip.delete()){
+            if (!tempzip.delete()) {
                 System.gc();
-                if(!tempzip.delete()) {
+                if (!tempzip.delete()) {
                     tempzip.deleteOnExit();
                 }
             }
@@ -163,7 +135,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             try {
                 FileUTIL.copy(new File(temp + File.separator + temp.list()[0]), worldfolder);
             } catch (IOException e) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not copy files",e);
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not copy files", e);
                 break Change;
             }
             FileUTIL.deleteDir(temp);
@@ -175,14 +147,24 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             api.setState(State.LOBBY);
         }
 
-        if(newstate == State.RESTARTING){
+        if (newstate == State.RESTARTING) {
             api.cleanup();
-            if(api.getChosen() != null) {
+            if (api.getChosen() != null) {
                 File file = api.getChosen().getWorldFolder();
                 Bukkit.unloadWorld(api.getChosen(), false);
                 FileUTIL.deleteDir(file);
+                if (api.getChosen() != null) {
+                    File worldfolder = api.getChosen().getWorldFolder();
+                    Bukkit.unloadWorld(api.getChosen(), false);
+                    FileUTIL.deleteDir(worldfolder);
+                }
+                if (api.getChosenGameMap() != null) {
+                    File f = new File(api.getChosenGameMap().getName());
+                    if (f.exists()) {
+                        FileUTIL.deleteDir(f);
+                    }
+                }
             }
-            api.setState(State.LOBBY);
         }
 
         if (newstate == State.LOBBY) {
@@ -197,8 +179,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 p.setFoodLevel(20);
                 p.setLevel(0);
                 p.setSaturation(600);
-                Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI
-                        .getInstance().getName(), new Messages.TitleTiming(10, 20, 30));
+                Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), new Messages.TitleTiming(10, 20, 30));
                 p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
                 p.setGameMode(GameMode.SURVIVAL);
             }
@@ -213,8 +194,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         double current = 0;
         for (Map.Entry<GameMap, Double> entry : calculatePercentages(api).entrySet()) {
             current += entry.getValue();
-            if (current <= chance)
+            if (current <= chance) {
                 return entry.getKey();
+            }
         }
         //Hopefully shouldn't go past this point
         return GameMap.getMaps().get(0);
@@ -232,17 +214,43 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     private static Map<GameMap, Integer> calculateScores(BubbleGameAPI api) {
         Map<GameMap, Integer> maps = new HashMap<>();
-        for (GameMap map : GameMap.getMaps())
+        for (GameMap map : GameMap.getMaps()) {
             maps.put(map, 0);
+        }
         GameMap temp;
         for (Vote v : api.getVotes().values()) {
-            if ((temp = v.getMap()) != null && maps.containsKey(temp))
+            if ((temp = v.getMap()) != null && maps.containsKey(temp)) {
                 maps.put(temp, maps.get(temp) + 1);
+            }
         }
         return maps;
     }
 
-    public int getMinPlayers(){
+    private static BubbleGameAPI instance;
+    private static String lobbyworld = "Lobby";
+    private LobbyPreset preset = new LobbyPreset();
+    private World chosen = null;
+    private GameMap chosenmap = null;
+    private Map<UUID, Vote> votes = new HashMap<UUID, Vote>();
+    private GameListener listener;
+    private VoteInventory voteInventory;
+    private GameTimer timer;
+    private LobbyInventory hubInventory;
+    private PlayersList list;
+    private GameMode defaultgamemode;
+    private String defaultkit;
+    private String type;
+    private int minplayers;
+
+    public BubbleGameAPI(String type, GameMode defaultgamemode, String defaultkit, int minplayers) {
+        super();
+        this.minplayers = minplayers;
+        this.type = type;
+        this.defaultgamemode = defaultgamemode;
+        this.defaultkit = defaultkit;
+    }
+
+    public int getMinPlayers() {
         return minplayers;
     }
 
@@ -301,11 +309,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             if (!SQLUtil.tableExists(connection, MapData.maptable)) {
                 BubbleNetwork.getInstance().logInfo("Map table not found, creating new");
                 //TODO - dynamic table creation
-                SQLUtil.createTable(connection, MapData.maptable, new ImmutableMap.Builder<String, Map.Entry<SQLUtil.SQLDataType, Integer>>()
-                        .put("map", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, 32))
-                        .put("key",new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1))
-                        .put("value",new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1))
-                        .build());
+                SQLUtil.createTable(connection, MapData.maptable, new ImmutableMap.Builder<String, Map.Entry<SQLUtil.SQLDataType, Integer>>().put("map", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, 32)).put("key", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).put("value", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).build());
                 BubbleNetwork.getInstance().endSetup("Created map table");
                 return;
             }
@@ -325,19 +329,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     public void onDisable() {
-        Bukkit.unloadWorld(lobbyworld,false);
+        Bukkit.unloadWorld(lobbyworld, false);
         FileUTIL.deleteDir(new File(lobbyworld));
-        if(getChosen() != null){
-            File worldfolder = getChosen().getWorldFolder();
-            Bukkit.unloadWorld(getChosen(),false);
-            FileUTIL.deleteDir(worldfolder);
-        }
-        if(getChosenGameMap() != null) {
-            File f = new File(getChosenGameMap().getName());
-            if (f.exists()) {
-                FileUTIL.deleteDir(f);
-            }
-        }
         setState(State.RESTARTING);
         KitSelection.unregister();
         VoteInventory.reset();
@@ -346,7 +339,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
 
     public void startWaiting() {
-        if (timer != null) return;
+        if (timer != null) {
+            return;
+        }
         BoardModule module = getPreset().getModule("Status");
         for (GameBoard board : GameBoard.getBoards()) {
             BoardScore score = board.getScore(preset, module);
@@ -359,10 +354,12 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                     BoardScore score = board.getScore(preset, module);
                     score.getTeam().setSuffix(String.valueOf(seconds));
                 }
-                if (seconds <= 3 || seconds % 5 == 0)
+                if (seconds <= 3 || seconds % 5 == 0) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), "", new Messages.TitleTiming(5, 10, 2));
-                for (Player p : Bukkit.getOnlinePlayers())
+                }
+                for (Player p : Bukkit.getOnlinePlayers()) {
                     p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                }
             }
 
             public void end() {
@@ -372,7 +369,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     public void cancelWaiting() {
-        if (timer == null) return;
+        if (timer == null) {
+            return;
+        }
         timer.cancel();
         timer = null;
         BoardModule module = getPreset().getModule("Status");
@@ -397,66 +396,68 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     public void addVote(UUID u, GameMap vote) {
-        if (getVotes().containsKey(u))
+        if (getVotes().containsKey(u)) {
             getVotes().get(u).setVote(vote);
+        }
     }
 
     public void win(final Player p) {
-        if (getState() != State.INGAME) return;
+        if (getState() != State.INGAME) {
+            return;
+        }
         p.playSound(p.getLocation().getBlock().getLocation(), Sound.LEVEL_UP, 5F, 5F);
-        Messages.broadcastMessageTitle(ChatColor.BLUE + p.getName(), ChatColor.AQUA + "Has won the game",
-                new Messages.TitleTiming(5, 20, 20));
+        Messages.broadcastMessageTitle(ChatColor.BLUE + p.getName(), ChatColor.AQUA + "Has won the game", new Messages.TitleTiming(5, 20, 20));
         setState(State.ENDGAME);
         for (Player t : Bukkit.getOnlinePlayers()) {
-            if (t != p) t.teleport(p);
+            if (t != p) {
+                t.teleport(p);
+            }
         }
-        timer = new GameTimer(5,60) {
+        timer = new GameTimer(5, 60) {
             public void run(int left) {
-                if(!p.isOnline()){
+                if (!p.isOnline()) {
                     cancel();
                     end();
                     return;
                 }
-                getChosen().spigot().playEffect(p.getLocation(),Effect.FLAME);
+                getChosen().spigot().playEffect(p.getLocation(), Effect.FLAME);
                 Random r = BubbleNetwork.getRandom();
-                if(left % 20 == 0 || (left % 4 == 0 && left/4 < 5)){
-                    Messages.broadcastMessageAction(ChatColor.BLUE + "Restarting in " + ChatColor.AQUA + String.valueOf(left/4));
-                    final Firework firework = getChosen().spawn(p.getLocation(),Firework.class);
+                if (left % 20 == 0 || (left % 4 == 0 && left / 4 < 5)) {
+                    Messages.broadcastMessageAction(ChatColor.BLUE + "Restarting in " + ChatColor.AQUA + String.valueOf(left / 4));
+                    final Firework firework = getChosen().spawn(p.getLocation(), Firework.class);
                     FireworkMeta meta = firework.getFireworkMeta();
                     Set<Color> colorSet = new HashSet<>();
                     int random = r.nextInt(3);
-                    for(int i = 0;i < 2 + random;i++){
-                        colorSet.add(Color.fromRGB(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+                    for (int i = 0; i < 2 + random; i++) {
+                        colorSet.add(Color.fromRGB(r.nextInt(255), r.nextInt(255), r.nextInt(255)));
                     }
-                    meta.addEffect(FireworkEffect.builder()
-                            .flicker(r.nextBoolean())
-                            .trail(r.nextBoolean())
-                            .withColor(colorSet)
-                            .build()
-                    );
+                    meta.addEffect(FireworkEffect.builder().flicker(r.nextBoolean()).trail(r.nextBoolean()).withColor(colorSet).build());
                     firework.setFireworkMeta(meta);
                     firework.setVelocity(p.getLocation().getDirection().multiply(2 + r.nextInt(2)));
-                    new BubbleRunnable(){
+                    new BubbleRunnable() {
                         public void run() {
-                            if(!firework.isDead())firework.detonate();
+                            if (!firework.isDead()) {
+                                firework.detonate();
+                            }
                         }
-                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS,2 + r.nextInt(3));
+                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS, 2 + r.nextInt(3));
                 }
             }
 
             public void end() {
                 setState(State.RESTARTING);
+                setState(State.LOBBY);
             }
         };
         p.setAllowFlight(true);
         p.setFlying(true);
     }
 
-    public ServerType getType(){
+    public ServerType getType() {
         return ServerType.getType(type);
     }
 
-    public Kit getDefaultKit(){
+    public Kit getDefaultKit() {
         return KitManager.getKit(defaultkit);
     }
 
@@ -468,11 +469,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public abstract void teleportPlayers(GameMap map, World w);
 
-    public String getTablesuffix(){
+    public String getTablesuffix() {
         return getName().toLowerCase();
     }
 
-    public GameMode getGameMode(){
+    public GameMode getGameMode() {
         return defaultgamemode;
     }
 
@@ -486,10 +487,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         public BoardPreset getPreset() {
-            if (this == LOBBY)
+            if (this == LOBBY) {
                 return BubbleGameAPI.getInstance().getPreset();
-            else if (this == PREGAME || this == INGAME || this == ENDGAME)
+            } else if (this == PREGAME || this == INGAME || this == ENDGAME) {
                 return BubbleGameAPI.getInstance().getScorePreset();
+            }
             return null;
         }
     }

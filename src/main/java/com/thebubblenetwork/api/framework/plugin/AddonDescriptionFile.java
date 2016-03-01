@@ -32,8 +32,7 @@ public final class AddonDescriptionFile {
                 {
                     this.yamlConstructors.put(null, new AbstractConstruct() {
                         public Object construct(final Node node) {
-                            return !node.getTag().startsWith("!@") ? SafeConstructor.undefinedConstructor.construct
-                                    (node) : new PluginAwareness() {
+                            return !node.getTag().startsWith("!@") ? SafeConstructor.undefinedConstructor.construct(node) : new PluginAwareness() {
                                 public String toString() {
                                     return node.toString();
                                 }
@@ -56,6 +55,11 @@ public final class AddonDescriptionFile {
             });
         }
     };
+
+    public static org.bukkit.plugin.PluginDescriptionFile asMirror(AddonDescriptionFile f) {
+        return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getVersion(), f.getMain());
+    }
+
     String rawName = null;
     private String name = null;
     private String main = null;
@@ -74,15 +78,11 @@ public final class AddonDescriptionFile {
         this.loadMap(this.asMap(((Yaml) YAML.get()).load(reader)));
     }
 
+
     public AddonDescriptionFile(String pluginName, String pluginVersion, String mainClass) {
         this.name = pluginName.replace(' ', '_');
         this.version = pluginVersion;
         this.main = mainClass;
-    }
-
-
-    public static org.bukkit.plugin.PluginDescriptionFile asMirror(AddonDescriptionFile f) {
-        return new org.bukkit.plugin.PluginDescriptionFile(f.getName(), f.getVersion(), f.getMain());
     }
 
     public String getName() {

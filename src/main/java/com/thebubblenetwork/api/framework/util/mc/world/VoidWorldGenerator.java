@@ -14,19 +14,20 @@ import java.util.Random;
  * Created by Administrator on 21/12/2015.
  */
 public class VoidWorldGenerator extends ChunkGenerator implements Cloneable {
-    private static VoidWorldGenerator generator;
-
-    private VoidWorldGenerator() {
-    }
-
     public static String getName() {
         return BubbleNetwork.getInstance().getPlugin().getDescription().getName();
     }
 
     public static VoidWorldGenerator getGenerator() {
-        if (generator == null)
+        if (generator == null) {
             generator = new VoidWorldGenerator();
+        }
         return generator.clone();
+    }
+
+    private static VoidWorldGenerator generator;
+
+    private VoidWorldGenerator() {
     }
 
     @Override

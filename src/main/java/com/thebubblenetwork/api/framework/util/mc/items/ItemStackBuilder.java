@@ -49,8 +49,9 @@ public class ItemStackBuilder implements Cloneable {
 
 
     public ItemStackBuilder wipeEnchants() {
-        for (Enchantment enchantment : ITEM_STACK.getEnchantments().keySet())
+        for (Enchantment enchantment : ITEM_STACK.getEnchantments().keySet()) {
             ITEM_STACK.removeEnchantment(enchantment);
+        }
         return this;
     }
 
@@ -121,7 +122,7 @@ public class ItemStackBuilder implements Cloneable {
         return this;
     }
 
-    public ItemStackBuilder withEnchantments(Map<Enchantment,Integer> enchantmentIntegerMap){
+    public ItemStackBuilder withEnchantments(Map<Enchantment, Integer> enchantmentIntegerMap) {
         ITEM_STACK.addUnsafeEnchantments(enchantmentIntegerMap);
         return this;
     }
@@ -152,8 +153,7 @@ public class ItemStackBuilder implements Cloneable {
 
     public ItemStackBuilder withColor(Color color) {
         Material type = ITEM_STACK.getType();
-        if (type == Material.LEATHER_BOOTS || type == Material.LEATHER_CHESTPLATE || type == Material.LEATHER_HELMET
-                || type == Material.LEATHER_LEGGINGS) {
+        if (type == Material.LEATHER_BOOTS || type == Material.LEATHER_CHESTPLATE || type == Material.LEATHER_HELMET || type == Material.LEATHER_LEGGINGS) {
             LeatherArmorMeta meta = (LeatherArmorMeta) ITEM_STACK.getItemMeta();
             meta.setColor(color);
             ITEM_STACK.setItemMeta(meta);
@@ -163,7 +163,7 @@ public class ItemStackBuilder implements Cloneable {
         }
     }
 
-    public ItemStackBuilder withUnbreaking(boolean unbreaking){
+    public ItemStackBuilder withUnbreaking(boolean unbreaking) {
         ItemMeta meta = ITEM_STACK.getItemMeta();
         meta.spigot().setUnbreakable(unbreaking);
         ITEM_STACK.setItemMeta(meta);

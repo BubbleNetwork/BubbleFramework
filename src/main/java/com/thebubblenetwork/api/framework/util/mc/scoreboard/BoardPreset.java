@@ -7,6 +7,19 @@ import java.util.List;
  * Created by Jacob on 15/12/2015.
  */
 public abstract class BoardPreset {
+    public static BoardPreset getPreset(String s) {
+        for (BoardPreset preset : getPresetlist()) {
+            if (preset.getName().equalsIgnoreCase(s)) {
+                return preset;
+            }
+        }
+        return null;
+    }
+
+    public static List<BoardPreset> getPresetlist() {
+        return presetlist;
+    }
+
     private static List<BoardPreset> presetlist = new ArrayList<>();
     private String name;
     private BoardModule[] presets;
@@ -17,21 +30,11 @@ public abstract class BoardPreset {
         presetlist.add(this);
     }
 
-    public static BoardPreset getPreset(String s) {
-        for (BoardPreset preset : getPresetlist())
-            if (preset.getName().equalsIgnoreCase(s))
-                return preset;
-        return null;
-    }
-
-    public static List<BoardPreset> getPresetlist() {
-        return presetlist;
-    }
-
     public BoardModule getModule(String s) {
         for (BoardModule module : presets) {
-            if (module.getName().equals(s))
+            if (module.getName().equals(s)) {
                 return module;
+            }
         }
         return null;
     }

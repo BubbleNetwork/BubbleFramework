@@ -14,6 +14,25 @@ import java.util.*;
  * Created by Jacob on 14/12/2015.
  */
 public abstract class BubbleBoardAPI {
+    private static Collection<DisplaySlot> getObjectives() {
+        List<DisplaySlot> displaySlots = new ArrayList<>();
+        for (BoardPreset preset : BoardPreset.getPresetlist()) {
+            for (BoardModule module : preset.getPresets()) {
+                if (!displaySlots.contains(module.getSlot())) {
+                    displaySlots.add(module.getSlot());
+                }
+            }
+        }
+        return displaySlots;
+    }
+
+    public static ScoreboardManager getManager() {
+        if (manager == null) {
+            manager = Bukkit.getScoreboardManager();
+        }
+        return manager;
+    }
+
     private static ScoreboardManager manager;
     private RandomColorCombo colorCombo = new RandomColorCombo(3);
     private ScoreboardObject object;
@@ -53,23 +72,6 @@ public abstract class BubbleBoardAPI {
         }
     }
 
-    private static Collection<DisplaySlot> getObjectives() {
-        List<DisplaySlot> displaySlots = new ArrayList<>();
-        for (BoardPreset preset : BoardPreset.getPresetlist()) {
-            for (BoardModule module : preset.getPresets()) {
-                if (!displaySlots.contains(module.getSlot())) displaySlots.add(module.getSlot());
-            }
-        }
-        return displaySlots;
-    }
-
-    public static ScoreboardManager getManager() {
-        if (manager == null)
-            manager = Bukkit.getScoreboardManager();
-        return manager;
-    }
-
-
     public Map<BoardPreset, Map<BoardModule, BoardScore>> getModules() {
         return modules;
     }
@@ -79,14 +81,16 @@ public abstract class BubbleBoardAPI {
         for (Map.Entry<BoardPreset, Map<BoardModule, BoardScore>> presetEntry : getModules().entrySet()) {
             boolean b = presetEntry.getKey() == preset;
             for (final BoardScore score : presetEntry.getValue().values()) {
-                if (b)
+                if (b) {
                     updateList.add(new ObjectiveUpdate(score.getModule().getSlot()) {
                         @Override
                         public void update(Objective o) {
                             score.setScoreManual(o);
                         }
                     });
-                else score.unsetScore();
+                } else {
+                    score.unsetScore();
+                }
             }
         }
         getObject().update(updateList);

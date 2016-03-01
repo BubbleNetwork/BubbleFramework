@@ -5,6 +5,7 @@ import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.PlayerCountUpdate;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,6 +14,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.potion.PotionEffect;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,37 +35,39 @@ import java.util.Map;
  * Date-created: 30/01/2016 00:12
  * Project: BubbleFramework
  */
-public class BubbleListener implements Listener{
+public class BubbleListener implements Listener {
     private BubbleNetwork network;
 
-    private Map<String,Map<String,String>> data = new HashMap<>();
-
-    protected BubbleNetwork getNetwork(){
-        return network;
-    }
-
-    public Map<String,Map<String,String>> getData(){
-        return data;
-    }
+    private Map<String, Map<String, String>> data = new HashMap<>();
 
     public BubbleListener(BubbleNetwork network) {
         this.network = network;
     }
 
+    protected BubbleNetwork getNetwork() {
+        return network;
+    }
+
+    public Map<String, Map<String, String>> getData() {
+        return data;
+    }
+
     @EventHandler
-    public void onRainSnow(WeatherChangeEvent e){
-        if(e.toWeatherState())e.setCancelled(true);
+    public void onRainSnow(WeatherChangeEvent e) {
+        if (e.toWeatherState()) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPreJoin(AsyncPlayerPreLoginEvent e){
-        data.put(e.getName(),DataRequestTask.requestAsync(e.getName()));
+    public void onPreJoin(AsyncPlayerPreLoginEvent e) {
+        data.put(e.getName(), DataRequestTask.requestAsync(e.getName()));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerQuitPlayecount(PlayerQuitEvent e){
+    public void onPlayerQuitPlayecount(PlayerQuitEvent e) {
         try {
-            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(),new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()-1));
+            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size() - 1));
         } catch (IOException e1) {
             getNetwork().logSevere(e1.getMessage());
             getNetwork().logSevere("Could not send playercount update");
@@ -71,19 +75,36 @@ public class BubbleListener implements Listener{
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerQuitRemoval(PlayerQuitEvent e){
+    public void onPlayerQuitRemoval(PlayerQuitEvent e) {
         BukkitBubblePlayer.getPlayerObjectMap().remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerJoinEvent e){
+    public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(),new BukkitBubblePlayer(p.getUniqueId(),new PlayerData(data.remove(p.getName()))));
+        int i = 0;
+        while (!data.containsKey(p.getName())) {
+            if (i == 4000) {
+                e.setJoinMessage(null);
+                e.getPlayer().kickPlayer(ChatColor.RED + "Server timed out");
+                return;
+            }
+            try {
+                Thread.sleep(1L);
+            } catch (InterruptedException e1) {
+            }
+            i++;
+        }
+        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(), new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName()))));
         try {
-            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(),new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
+            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
         } catch (IOException e1) {
             getNetwork().logSevere(e1.getMessage());
             getNetwork().logSevere("Could not send playercount update");
+        }
+
+        for (PotionEffect effect : p.getActivePotionEffects()) {
+            p.removePotionEffect(effect.getType());
         }
     }
 

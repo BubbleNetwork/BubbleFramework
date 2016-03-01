@@ -27,31 +27,11 @@ import java.util.UUID;
  * Created by Jacob on 13/12/2015.
  */
 public class KitSelection extends Menu {
-    private static Sound selectkit = Sound.LEVEL_UP, buykit = Sound.NOTE_BASS, noaccess = Sound.BLAZE_DEATH;
-    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ")
-            .withColor(ChatColor.BLUE);
-    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ")
-            .withColor(ChatColor.RED);
-
-    private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
-    private UUID uuid;
-    private BukkitBubblePlayer player;
-    private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
-
-    private static Map<UUID,Menu> menuMap = new HashMap<>();
-
-    public KitSelection(Player p) {
-        super(inventoryname, MenuManager.getRoundedInventorySize(KitManager.getKits().size()));
-        this.uuid = p.getUniqueId();
-        this.player = BukkitBubblePlayer.getObject(p.getUniqueId());
-        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(),this);
-    }
-
     public static String getInventoryname() {
         return inventoryname;
     }
 
-    public static void unregister(){
+    public static void unregister() {
         menuMap.clear();
     }
 
@@ -72,9 +52,26 @@ public class KitSelection extends Menu {
 
     public static KitSelection getSelection(Player p) {
         KitSelection k = (KitSelection) menuMap.get(p.getUniqueId());
-        if (k == null)
+        if (k == null) {
             k = new KitSelection(p);
+        }
         return k;
+    }
+
+    private static Sound selectkit = Sound.LEVEL_UP, buykit = Sound.NOTE_BASS, noaccess = Sound.BLAZE_DEATH;
+    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ").withColor(ChatColor.BLUE);
+    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").withColor(ChatColor.RED);
+    private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
+    private static Map<UUID, Menu> menuMap = new HashMap<>();
+    private UUID uuid;
+    private BukkitBubblePlayer player;
+    private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
+
+    public KitSelection(Player p) {
+        super(inventoryname, MenuManager.getRoundedInventorySize(KitManager.getKits().size()));
+        this.uuid = p.getUniqueId();
+        this.player = BukkitBubblePlayer.getObject(p.getUniqueId());
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
     }
 
     public UUID getUuid() {
@@ -107,20 +104,24 @@ public class KitSelection extends Menu {
                 status += ChatColor.AQUA + "" + ChatColor.BOLD + "Equipped";
                 int level = k.getLevel(player);
                 builder.withLore(ChatColor.GREEN + "       Level: " +
-                        (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED : ChatColor.GRAY)
-                        + String.valueOf(level));
+                        (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED : ChatColor.GRAY) + String.valueOf(level));
                 leftclick = null;
-                if (k.getLevel(player) < k.getMaxlevel()) rightclick += "Upgrade this kit";
-                else rightclick = ChatColor.GOLD + "You have mastered this kit";
+                if (k.getLevel(player) < k.getMaxlevel()) {
+                    rightclick += "Upgrade this kit";
+                } else {
+                    rightclick = ChatColor.GOLD + "You have mastered this kit";
+                }
             } else if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear())) {
                 status += ChatColor.GRAY + "Unselected";
                 int level = k.getLevel(player);
                 builder.withLore(ChatColor.GREEN + "       Level: " +
-                        (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED : ChatColor.GRAY)
-                        + String.valueOf(level));
+                        (level == k.getMaxlevel() ? ChatColor.GOLD.toString() + ChatColor.BOLD : level == 0 ? ChatColor.RED : ChatColor.GRAY) + String.valueOf(level));
                 leftclick += "Select this kit";
-                if (k.getLevel(player) < k.getMaxlevel()) rightclick += "Upgrade this kit";
-                else rightclick = ChatColor.GOLD + "You have mastered this kit";
+                if (k.getLevel(player) < k.getMaxlevel()) {
+                    rightclick += "Upgrade this kit";
+                } else {
+                    rightclick = ChatColor.GOLD + "You have mastered this kit";
+                }
             } else {
                 status += ChatColor.RED + "You have not bought this kit";
                 builder.withLore(ChatColor.GREEN + "       Cost: " + ChatColor.GRAY + String.valueOf(k.getPrice()));
@@ -130,14 +131,18 @@ public class KitSelection extends Menu {
             builder.withLore(status);
             builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ", "");
             builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ");
-            for (String s : k.getDescription())
+            for (String s : k.getDescription()) {
                 builder.withLore(ChatColor.GRAY + "" + ChatColor.ITALIC + s);
+            }
             builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ", "");
-            if (leftclick != null) builder.withLore(leftclick);
+            if (leftclick != null) {
+                builder.withLore(leftclick);
+            }
             builder.withLore(rightclick);
             ItemStack item = builder.build();
-            if (k == kit)
+            if (k == kit) {
                 EnchantGlow.addGlow(item);
+            }
             is[i] = item;
             i++;
         }
@@ -151,8 +156,9 @@ public class KitSelection extends Menu {
             BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
             if (type == ClickType.LEFT) {
                 MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(k.getName()).append("\n").append("\n");
-                for (String s : k.getDescription())
+                for (String s : k.getDescription()) {
                     description.append(s).withColor(ChatColor.GRAY).append("\n");
+                }
                 if (k.isOwned(bubblePlayer)) {
                     player.playSound(player.getLocation().getBlock().getLocation(), selectkit, 1f, 1f);
                     this.kit = k;

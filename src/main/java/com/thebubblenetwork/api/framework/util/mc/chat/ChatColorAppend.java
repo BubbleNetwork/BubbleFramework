@@ -26,8 +26,9 @@ public class ChatColorAppend {
             if (s.charAt(i) == ChatColor.COLOR_CHAR) {
                 ChatColor color = ChatColor.getByChar(s.charAt(i + 1));
                 format.add(color);
-                if (!color.isFormat())
+                if (!color.isFormat()) {
                     return format;
+                }
             }
         }
         return format;

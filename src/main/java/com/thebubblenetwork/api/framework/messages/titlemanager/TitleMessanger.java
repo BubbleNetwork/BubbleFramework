@@ -1,6 +1,5 @@
 package com.thebubblenetwork.api.framework.messages.titlemanager;
 
-import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.reflection.ReflectionUTIL;
 import org.bukkit.entity.Player;
 
@@ -15,103 +14,26 @@ import java.util.logging.Logger;
  * Created by Jacob on 10/12/2015.
  */
 public class TitleMessanger {
-    private static Class<?> ichatbasecomponent, craftplayer, packet, packetplayoutchat, entityplayer,
-            entityplayerconnection, chatserializer,protcolinjector, packetinjector,packetaction;
-    ;
-    private static Method geticbc, getentityplayer, sendPacket;
-    private static Field playerconnectionfield,title,subtitle,times;
-    private static Constructor<?> packetinjectorconstructor, packetplayoutchatconstructor, packettitletimesconstructor;
-
-    static {
-        try {
-            //Needed classes
-            packet = ReflectionUTIL.getNMSClass("Packet");
-            ichatbasecomponent = ReflectionUTIL.getNMSClass("IChatBaseComponent");
-            packetplayoutchat = ReflectionUTIL.getNMSClass("PacketPlayOutChat");
-            entityplayer = ReflectionUTIL.getNMSClass("EntityPlayer");
-            entityplayerconnection = ReflectionUTIL.getNMSClass("PlayerConnection");
-            craftplayer = ReflectionUTIL.getCraftClass("entity.CraftPlayer");
-            protcolinjector = Class.forName("org.spigotmc.ProtocolInjector");
-            packetinjector = protcolinjector.getDeclaredClasses()[0];
-            packetaction = packetinjector.getDeclaredClasses()[0];
-
-            //Classes needed for methods and fields
-            chatserializer = ReflectionUTIL.getNMSClass("ChatSerializer");
-
-            //Fields
-            playerconnectionfield = ReflectionUTIL.getField(entityplayer, "playerConnection", true);
-            title = ReflectionUTIL.getField(packetaction,"TITLE",true);
-            subtitle = ReflectionUTIL.getField(packetaction,"SUBTITLE",true);
-            times = ReflectionUTIL.getField(packetaction,"TIMES",true);
-
-            //Methods
-            geticbc = ReflectionUTIL.getMethod(chatserializer, "a", true, String.class);
-            getentityplayer = ReflectionUTIL.getMethod(craftplayer, "getHandle", true);
-            sendPacket = ReflectionUTIL.getMethod(entityplayerconnection, "sendPacket", true, packet);
-
-            packetinjectorconstructor = ReflectionUTIL.getConstructor(packetinjector, true, packetaction,
-                    ichatbasecomponent);
-            packetplayoutchatconstructor = ReflectionUTIL.getConstructor(packetplayoutchat, true, ichatbasecomponent, int.class);
-            packettitletimesconstructor = ReflectionUTIL.getConstructor(packetinjector, true, packetaction, int
-                    .class, int.class, int.class);
-        } catch (Exception ex) {
-            Logger.getGlobal().log(Level.WARNING,"Could not setup titlemanager",ex);
-        }
-    }
-
     private static String toJSON(String message) {
         return "{\"text\": \"" + message + "\"}";
     }
 
     private static Object createComponentRaw(String json) throws Throwable {
         try {
-            return ReflectionUTIL.invoke(geticbc, null, json);
+            return ReflectionUTIL.invoke(getICBC, null, json);
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }
     }
 
-    /*
-        private static IChatBaseComponent createComponentRaw(String json){
-            return ChatSerializer.a(json);
-        }
-    */
     private static Object createComponent(String messsage) throws Throwable {
         return createComponentRaw(toJSON(messsage));
     }
 
-    /*
-        private static IChatBaseComponent createComponent(String message){
-            return createComponentRaw(toJSON(message));
-        }
-    */
-    private static Object createTitle(Object chatBaseComponent, Object action) throws
-            Exception {
-        return packetinjectorconstructor.newInstance(action, chatBaseComponent);
-    }
-
-    /*
-
-    private static ProtocolInjector.PacketTitle createTitle(IChatBaseComponent chatBaseComponent, ProtocolInjector
-    .PacketTitle.Action action) {
-        return new ProtocolInjector.PacketTitle(action, chatBaseComponent);
-    }*/
-
-    private static Object createTitle(String s, Object action) throws Throwable {
-        return createTitle(createComponent(s), action);
-    }
-
-    /*
-        private static ProtocolInjector.PacketTitle createTitle(String s,ProtocolInjector.PacketTitle.Action action){
-            return createTitle(createComponent(s),action);
-        }
-    */
-
-    private static Object createTitle(int in, int show, int out, Object action) throws
-            Throwable {
-        packettitletimesconstructor.setAccessible(true);
+    private static Object createTitleTiming(Object action, Object ichatbasecomponent, int in, int show, int out) throws Throwable {
+        PacketPlayOutTitleConstructorTiming.setAccessible(true);
         try {
-            return packettitletimesconstructor.newInstance(action, in, show, out);
+            return PacketPlayOutTitleConstructorTiming.newInstance(action, ichatbasecomponent, in, show, out);
         } catch (InstantiationException e) {
             throw e.getCause();
         } catch (IllegalAccessException e) {
@@ -123,11 +45,33 @@ public class TitleMessanger {
         return null;
     }
 
+    private static Object createTitleNormal(Object action, Object ichatbasecomponent) throws Throwable {
+        PacketPlayOutTitleConstructorNormal.setAccessible(true);
+        try {
+            return PacketPlayOutTitleConstructorNormal.newInstance(action, ichatbasecomponent);
+        } catch (InstantiationException e) {
+            throw e.getCause();
+        } catch (IllegalAccessException e) {
+            //Cannot happen
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+
+        return null;
+    }
+
+    private static Object createTitle(String s, Object action, int in, int show, int out) throws Throwable {
+        return createTitleTiming(createComponent(s), action, in, show, out);
+    }
+
+    private static Object createTitle(String s, Object action) throws Throwable {
+        return createTitleNormal(createComponent(s), action);
+    }
 
     private static Object createAction(Object o) throws Throwable {
 
         try {
-            return packetplayoutchatconstructor.newInstance(o, 2);
+            return PacketPlayOutChatConstructor.newInstance(o, 2);
         } catch (InstantiationException e) {
             throw e.getCause();
         } catch (IllegalAccessException e) {
@@ -138,24 +82,16 @@ public class TitleMessanger {
         return null;
     }
 
-    /*
-        private static PacketPlayOutChat createAction(IChatBaseComponent chatBaseComponent){
-            return new PacketPlayOutChat(chatBaseComponent);
-        }
-    */
+
     private static Object createAction(String s) throws Throwable {
         return createAction(createComponent(s));
     }
 
-    /*
-        private static PacketPlayOutChat createAction(String s){
-            return createAction(createComponent(s));
-        }
-    */
+
     private static void sendPacketEntity(Object player, Object packet) throws Throwable {
-        playerconnectionfield.setAccessible(true);
+        playerconnectionField.setAccessible(true);
         try {
-            ReflectionUTIL.invoke(sendPacket, playerconnectionfield.get(player), packet);
+            ReflectionUTIL.invoke(sendPacket, playerconnectionField.get(player), packet);
         } catch (IllegalAccessException ex) {
             //Cannot happen
         } catch (InvocationTargetException ex) {
@@ -163,91 +99,85 @@ public class TitleMessanger {
         }
     }
 
-    /*
-        private static void sendPacket(EntityPlayer player,Packet packet){
-            player.playerConnection.sendPacket(packet);
-        }
-    */
     private static void sendPacketCraft(Object player, Object packet) throws Throwable {
-        sendPacketEntity(ReflectionUTIL.invoke(getentityplayer, player), packet);
+        sendPacketEntity(ReflectionUTIL.invoke(getHandle, player), packet);
     }
 
-    /*
-        public static void sendPacket(CraftPlayer player,Packet packet){
-            sendPacket(player.getHandle(),packet);
-        }
-    */
+
     private static void sendPacket(Player p, Object packet) throws Throwable {
-        if (craftplayer.isInstance(p))
+        if (CraftPlayer.isInstance(p)) {
             sendPacketCraft(p, packet);
-        else
-            throw new Exception("Player is not instance");
+        } else {
+            throw new IllegalArgumentException("Player is not instance");
+        }
     }
 
-    /*
-        public static void sendPacket(Player p,Packet packet){
-            sendPacket((CraftPlayer)p,packet);
-        }
-    */
-    public static void sendTitle(Player p, ProtcolInjectorReflection action, String message) throws
-            Throwable {
+
+    public static void sendTitle(Player p, String message, ProtcolInjectorReflection action, int in, int show, int out) throws Throwable {
+        sendPacket(p, createTitle(message, action.get(), in, show, out));
+    }
+
+    public static void sendTitleNoTiming(Player p, String message, ProtcolInjectorReflection action) throws Throwable {
         sendPacket(p, createTitle(message, action.get()));
     }
 
-    public static void sendTitle(Player p, ProtcolInjectorReflection action, int in, int show, int out)
-            throws Throwable {
-        sendPacket(p, createTitle(in, show, out, action.get()));
-    }
-
-    /*
-        public static void sendTitle(Player p,ProtocolInjector.PacketTitle.Action action,String message){
-            sendPacket(p,createTitle(message,action));
-        }
-    */
     public static void sendActionBar(Player p, String message) throws Throwable {
         sendPacket(p, createAction(message));
     }
-/*
-    public static void sendActionBar(Player p,String message){
-        sendPacket(p,createAction(message));
-    }
-*/
-    /*
-    public static void sendTitle(Player player, String message){
-        IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-        ProtocolInjector.PacketTitle title = new ProtocolInjector.PacketTitle(ProtocolInjector.PacketTitle.Action
-        .TITLE, icbc);
-        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(title);
+
+    private static Class<?> IChatBaseComponent, CraftPlayer, Packet, PacketPlayOutChat, PacketPlayOutTitle, EntityPlayer, PlayerConnection, ChatSerializer, EnumTitleAction;
+    private static Method getICBC, getHandle, sendPacket;
+    private static Field playerconnectionField, TITLE, SUBTITLE, CLEAR;
+    private static Constructor<?> PacketPlayOutTitleConstructorTiming, PacketPlayOutChatConstructor, PacketPlayOutTitleConstructorNormal;
+
+    static {
+        try {
+            //Needed classes
+            Packet = ReflectionUTIL.getNMSClass("Packet");
+            IChatBaseComponent = ReflectionUTIL.getNMSClass("IChatBaseComponent");
+            PacketPlayOutChat = ReflectionUTIL.getNMSClass("PacketPlayOutChat");
+            EntityPlayer = ReflectionUTIL.getNMSClass("EntityPlayer");
+            PlayerConnection = ReflectionUTIL.getNMSClass("PlayerConnection");
+            CraftPlayer = ReflectionUTIL.getCraftClass("entity.CraftPlayer");
+            EnumTitleAction = ReflectionUTIL.getNMSClass("PacketPlayOutTitle$EnumTitleAction");
+            PacketPlayOutTitle = ReflectionUTIL.getNMSClass("PacketPlayOutTitle");
+
+            //Classes needed for methods and fields
+            ChatSerializer = ReflectionUTIL.getNMSClass("IChatBaseComponent$ChatSerializer");
+
+            //Fields
+            playerconnectionField = ReflectionUTIL.getField(EntityPlayer, "playerConnection", true);
+            TITLE = ReflectionUTIL.getField(EnumTitleAction, "TITLE", true);
+            SUBTITLE = ReflectionUTIL.getField(EnumTitleAction, "SUBTITLE", true);
+            CLEAR = ReflectionUTIL.getField(EnumTitleAction, "CLEAR", true);
+
+            //Methods
+            getICBC = ReflectionUTIL.getMethod(ChatSerializer, "a", true, String.class);
+            getHandle = ReflectionUTIL.getMethod(CraftPlayer, "getHandle", true);
+            sendPacket = ReflectionUTIL.getMethod(PlayerConnection, "sendPacket", true, Packet);
+
+            PacketPlayOutChatConstructor = ReflectionUTIL.getConstructor(PacketPlayOutChat, true, IChatBaseComponent, int.class);
+            PacketPlayOutTitleConstructorTiming = ReflectionUTIL.getConstructor(PacketPlayOutTitle, true, EnumTitleAction, IChatBaseComponent, int.class, int.class, int.class);
+            PacketPlayOutTitleConstructorNormal = ReflectionUTIL.getConstructor(PacketPlayOutTitle, true, EnumTitleAction, IChatBaseComponent);
+        } catch (Throwable ex) {
+            Logger.getGlobal().log(Level.WARNING, "Could not setup titlemanager", ex);
+        }
     }
 
-    public static void sendSubtitle(Player player, String message){
-        IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-        ProtocolInjector.PacketTitle subtitle = new ProtocolInjector.PacketTitle(ProtocolInjector.PacketTitle.Action
-        .SUBTITLE, icbc);
-        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(subtitle);
-    }
+    public enum ProtcolInjectorReflection {
+        TITLE, SUBTITLE, CLEAR;
 
-    public static void sendAction(Player player, String message){
-        IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-        PacketPlayOutChat bar = new PacketPlayOutChat(icbc);
-        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(bar);
-    }
-    */
-
-    public enum ProtcolInjectorReflection{
-        TITLE,SUBTITLE,TIMES;
-
-        protected Object get() throws IllegalAccessException{
-            switch(this){
+        protected Object get() throws IllegalAccessException {
+            switch (this) {
                 case TITLE:
-                    title.setAccessible(true);
-                    return title.get(null);
+                    TitleMessanger.TITLE.setAccessible(true);
+                    return TitleMessanger.TITLE.get(null);
                 case SUBTITLE:
-                    subtitle.setAccessible(true);
-                    return subtitle.get(null);
-                case TIMES:
-                    times.setAccessible(true);
-                    return times.get(null);
+                    TitleMessanger.SUBTITLE.setAccessible(true);
+                    return TitleMessanger.SUBTITLE.get(null);
+                case CLEAR:
+                    TitleMessanger.CLEAR.setAccessible(true);
+                    return TitleMessanger.CLEAR.get(null);
                 default:
                     return null;
             }

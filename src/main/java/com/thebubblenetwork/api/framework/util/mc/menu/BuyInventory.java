@@ -17,48 +17,6 @@ import java.util.List;
  * Created by Jacob on 13/12/2015.
  */
 public abstract class BuyInventory extends Menu {
-    private static ItemStackBuilder
-            backgrounddefault = new ItemStackBuilder(Material.STAINED_GLASS_PANE)
-            .withAmount(1)
-            .withColor(DyeColor.GRAY)
-            .withName(ChatColor.DARK_GRAY + "()"),
-            yesitemdefault = new ItemStackBuilder(Material.EMERALD_BLOCK)
-                    .withAmount(1)
-                    .withName(ChatColor.GREEN + "Yes"),
-            noitemdefault = new ItemStackBuilder(Material.REDSTONE_BLOCK)
-                    .withAmount(1)
-                    .withName(ChatColor.RED + "No");
-
-    private static int[] yesslotsdefault = new int[]{(9 * 2) + 3}, noslotsdefault = new int[]{(9 * 2) + 5};
-    private static int defaultsize = 9 * 5;
-    private String name;
-    private List<Integer> yesslots, noslots;
-    private ItemStackBuilder yesitem, noitem, background;
-
-    public BuyInventory(
-            int size, String name,int[] yesslots, int[] noslots, ItemStackBuilder yesitem,
-            ItemStackBuilder noitem, ItemStackBuilder background) {
-        super(name, size);
-        this.name = name;
-        this.yesslots = fromArray(yesslots);
-        this.noslots = fromArray(noslots);
-        this.yesitem = yesitem;
-        this.noitem = noitem;
-        this.background = background;
-        update();
-        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(),this);
-    }
-
-    public BuyInventory(String name, String yes, String no) {
-        this(getDefaultsize(), name, getYesslotsdefault().clone(), getNoslotsdefault().clone(),
-                getYesitemdefault().clone().withName(ChatColor.GREEN + yes), getNoitemdefault().clone().withName(ChatColor.RED + no),
-                getBackgrounddefault().clone());
-    }
-
-    public BuyInventory(String name) {
-        this(defaultsize, name,getYesslotsdefault().clone(), getNoslotsdefault().clone(), getYesitemdefault().clone(), getNoitemdefault().clone(), getBackgrounddefault().clone());
-    }
-
     public static int[] getYesslotsdefault() {
         return yesslotsdefault;
     }
@@ -89,6 +47,33 @@ public abstract class BuyInventory extends Menu {
             arrayList.add(o);
         }
         return arrayList;
+    }
+
+    private static ItemStackBuilder backgrounddefault = new ItemStackBuilder(Material.STAINED_GLASS_PANE).withAmount(1).withColor(DyeColor.GRAY).withName(ChatColor.DARK_GRAY + "()"), yesitemdefault = new ItemStackBuilder(Material.EMERALD_BLOCK).withAmount(1).withName(ChatColor.GREEN + "Yes"), noitemdefault = new ItemStackBuilder(Material.REDSTONE_BLOCK).withAmount(1).withName(ChatColor.RED + "No");
+    private static int[] yesslotsdefault = new int[]{(9 * 2) + 3}, noslotsdefault = new int[]{(9 * 2) + 5};
+    private static int defaultsize = 9 * 5;
+    private String name;
+    private List<Integer> yesslots, noslots;
+    private ItemStackBuilder yesitem, noitem, background;
+
+    public BuyInventory(int size, String name, int[] yesslots, int[] noslots, ItemStackBuilder yesitem, ItemStackBuilder noitem, ItemStackBuilder background) {
+        super(name, size);
+        this.name = name;
+        this.yesslots = fromArray(yesslots);
+        this.noslots = fromArray(noslots);
+        this.yesitem = yesitem;
+        this.noitem = noitem;
+        this.background = background;
+        update();
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
+    }
+
+    public BuyInventory(String name, String yes, String no) {
+        this(getDefaultsize(), name, getYesslotsdefault().clone(), getNoslotsdefault().clone(), getYesitemdefault().clone().withName(ChatColor.GREEN + yes), getNoitemdefault().clone().withName(ChatColor.RED + no), getBackgrounddefault().clone());
+    }
+
+    public BuyInventory(String name) {
+        this(defaultsize, name, getYesslotsdefault().clone(), getNoslotsdefault().clone(), getYesitemdefault().clone(), getNoitemdefault().clone(), getBackgrounddefault().clone());
     }
 
     public String getName() {
@@ -123,18 +108,23 @@ public abstract class BuyInventory extends Menu {
                 item = yesitem.build();
             } else if (noslots.contains(i)) {
                 item = noitem.build();
-            } else item = background.build();
+            } else {
+                item = background.build();
+            }
             is[i] = item;
         }
         return is;
     }
 
     public void click(Player p, ClickType type, int slot, ItemStack is) {
-        if (type != ClickType.LEFT) return;
-        if (yesslots.contains(slot))
+        if (type != ClickType.LEFT) {
+            return;
+        }
+        if (yesslots.contains(slot)) {
             onAllow(p);
-        else if (noslots.contains(slot))
+        } else if (noslots.contains(slot)) {
             onCancel(p);
+        }
     }
 
     public abstract void onCancel(Player p);

@@ -25,7 +25,7 @@ public class FakePlugin implements Plugin {
 
     @Deprecated
     public PluginDescriptionFile getDescription() {
-        return new PluginDescriptionFile("FakePlugin","0",getClass().getName());
+        return new PluginDescriptionFile("FakePlugin", "0", getClass().getName());
     }
 
     @Deprecated

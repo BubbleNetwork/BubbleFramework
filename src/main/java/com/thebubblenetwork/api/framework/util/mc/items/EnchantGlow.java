@@ -11,21 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class EnchantGlow extends EnchantmentWrapper {
-    private static Enchantment glow;
-    private static Field acceptingNew;
-
-    static {
-        try {
-            acceptingNew = ReflectionUTIL.getField(Enchantment.class, "acceptingNew", true);
-        } catch (NoSuchFieldException e) {
-            Logger.getGlobal().log(Level.WARNING,"Could not setup EnchantGlow",e);
-        }
-    }
-
-    public EnchantGlow(int var1) {
-        super(var1);
-    }
-
     public static void kill() {
         glow = null;
     }
@@ -45,6 +30,21 @@ public class EnchantGlow extends EnchantmentWrapper {
     public static void addGlow(ItemStack var0) {
         Enchantment var1 = getGlow();
         var0.addEnchantment(var1, 1);
+    }
+
+    private static Enchantment glow;
+    private static Field acceptingNew;
+
+    static {
+        try {
+            acceptingNew = ReflectionUTIL.getField(Enchantment.class, "acceptingNew", true);
+        } catch (NoSuchFieldException e) {
+            Logger.getGlobal().log(Level.WARNING, "Could not setup EnchantGlow", e);
+        }
+    }
+
+    public EnchantGlow(int var1) {
+        super(var1);
     }
 
     public boolean canEnchantItem(ItemStack var1) {

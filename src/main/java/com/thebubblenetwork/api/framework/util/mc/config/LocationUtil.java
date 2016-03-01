@@ -8,7 +8,9 @@ import org.bukkit.configuration.ConfigurationSection;
  */
 public class LocationUtil {
     public static LocationObject fromConfig(ConfigurationSection section) {
-        if(section == null)throw new IllegalArgumentException("Section cannot be null");
+        if (section == null) {
+            throw new IllegalArgumentException("Section cannot be null");
+        }
         double x = getVar(section, "x");
         double y = getVar(section, "y");
         double z = getVar(section, "z");

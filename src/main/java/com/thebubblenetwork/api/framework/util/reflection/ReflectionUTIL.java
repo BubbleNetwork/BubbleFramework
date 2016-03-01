@@ -41,8 +41,7 @@ public class ReflectionUTIL {
         }
     }
 
-    public static Method getMethod(Class<?> c, String method, boolean declared, Class<?>... args) throws
-            NoSuchMethodException {
+    public static Method getMethod(Class<?> c, String method, boolean declared, Class<?>... args) throws NoSuchMethodException {
         return declared ? c.getDeclaredMethod(method, args) : c.getMethod(method, args);
     }
 
@@ -56,8 +55,7 @@ public class ReflectionUTIL {
         return null;
     }
 
-    public static Constructor<?> getConstructor(Class<?> c, boolean declared, Class<?>... constructorargs) throws
-            NoSuchMethodException {
+    public static Constructor<?> getConstructor(Class<?> c, boolean declared, Class<?>... constructorargs) throws NoSuchMethodException {
         return declared ? c.getDeclaredConstructor(constructorargs) : c.getConstructor(constructorargs);
     }
 }

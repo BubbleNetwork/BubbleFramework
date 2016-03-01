@@ -13,8 +13,8 @@ import java.io.File;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.framework
@@ -24,28 +24,28 @@ import java.io.File;
 public class P extends JavaPlugin {
     private BubbleNetwork network;
 
-    public P(){
+    public P() {
         super();
         network = new BubbleNetwork(this);
     }
 
-    public void onLoad(){
+    public void onLoad() {
         network.onLoad();
     }
 
-    public void onEnable(){
+    public void onEnable() {
         network.onEnable();
     }
 
-    public void onDisable(){
+    public void onDisable() {
         network.onDisable();
     }
 
-    public ChunkGenerator getDefaultWorldGenerator(String s1,String s2){
+    public ChunkGenerator getDefaultWorldGenerator(String s1, String s2) {
         return VoidWorldGenerator.getGenerator();
     }
 
-    public File getFile(){
+    public File getFile() {
         return super.getFile();
     }
 }

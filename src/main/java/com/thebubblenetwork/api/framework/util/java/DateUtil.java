@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.bubblenetwork.api.framework.util.java

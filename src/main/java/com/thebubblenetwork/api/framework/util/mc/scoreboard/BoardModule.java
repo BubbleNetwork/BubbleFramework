@@ -9,6 +9,10 @@ import org.bukkit.scoreboard.DisplaySlot;
  * Created by Jacob on 14/12/2015.
  */
 public class BoardModule implements Cloneable {
+    public static RandomColorCombo getCombo() {
+        return combo;
+    }
+
     private static RandomColorCombo combo = new RandomColorCombo(4);
     private String name;
     private String display;
@@ -27,13 +31,10 @@ public class BoardModule implements Cloneable {
         this(name, combo.getRandomColorCombo(), defaultscore, DisplaySlot.SIDEBAR);
     }
 
-    public static RandomColorCombo getCombo() {
-        return combo;
-    }
-
     public OfflinePlayer getPlayer() {
-        if (player == null)
+        if (player == null) {
             player = Bukkit.getOfflinePlayer(display);
+        }
         return player;
     }
 

@@ -3,7 +3,6 @@ package com.thebubblenetwork.api.framework;
 import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.interaction.BubbleListener;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
-import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddonLoader;
@@ -11,7 +10,6 @@ import com.thebubblenetwork.api.framework.plugin.BukkitPlugman;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
-import com.thebubblenetwork.api.framework.util.version.VersionUTIL;
 import com.thebubblenetwork.api.global.bubblepackets.PacketInfo;
 import com.thebubblenetwork.api.global.bubblepackets.PacketListener;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.IPluginMessage;
@@ -51,99 +49,11 @@ import java.util.logging.Logger;
  * Created by Jacob on 09/12/2015.
  */
 
-public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin> ,PacketListener{
+public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin>, PacketListener {
     private static final Random random = new Random();
     private static final int VERSION = 9;
 
     protected static Map<AddonDescriptionFile, File> loaderList = new HashMap<>();
-    private static BubbleNetwork instance;
-    private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
-            ChatColor.BLUE + "] " + ChatColor.GRAY;
-    private static String chatFormat = "{prefix}{name}{suffix}{message}";
-    public int FINALID;
-    private BubbleBarAPI api;
-    private VersionUTIL util;
-    private ServerType type;
-    private int id;
-    private P plugin;
-    private CommandPlugin commandPlugin;
-    private XServer proxy;
-    private BubbleAddon assigned;
-    private BubbleListener listener = new BubbleListener(this);
-    private BukkitPlugman plugman;
-    private Set<Listener> listeners = new HashSet<>();
-    private Set<BukkitTask> executed = new HashSet<>();
-    private Set<Menu> registeredMenus = new HashSet<>();
-    private MenuManager manager = new MenuManager();
-
-    public BubbleNetwork(P plugin) {
-        super();
-        instance = this;
-        this.plugin = plugin;
-    }
-
-    public void registerListener(BubbleAddon plugin, Listener listener){
-        if(getAssigned() == plugin){
-            if(listeners.contains(listener))throw new IllegalArgumentException("Listener already registered");
-            listeners.add(listener);
-            getPlugin().getServer().getPluginManager().registerEvents(listener,getPlugin());
-        }
-        else throw new IllegalArgumentException("Plugin not registered");
-    }
-
-    public void registerMenu(BubbleAddon addon, Menu menu){
-        if(getAssigned() == addon){
-            if(registeredMenus.contains(menu))throw new IllegalArgumentException("Menu already registered");
-            registeredMenus.add(menu);
-        }
-        else throw new IllegalArgumentException("Plugin not registered");
-    }
-
-    public void unregisterMenu(Menu menu){
-        if(registeredMenus.contains(menu)){
-            registeredMenus.remove(menu);
-        }
-        else throw new IllegalArgumentException("Menu not registered");
-    }
-
-    public void unregisterMenus(){
-        registeredMenus.clear();
-    }
-
-    public BukkitTask registerRunnable(BubbleAddon plugin, Runnable r, TimeUnit unit, long time, boolean timer, boolean async){
-        if(getAssigned() == plugin){
-            long ticks = unit.toMillis(time)/50;
-            BukkitScheduler scheduler = getPlugin().getServer().getScheduler();
-            BukkitTask task;
-            if(async) {
-                if (timer) task = scheduler.runTaskTimerAsynchronously(getPlugin(), r, ticks, ticks);
-                else task = scheduler.runTaskLater(getPlugin(), r, ticks);
-            }
-            else if(timer) task = scheduler.runTaskTimer(getPlugin(),r,ticks,ticks);
-            else task = scheduler.runTaskLater(getPlugin(),r,ticks);
-            executed.add(task);
-            return task;
-        }
-        else throw new IllegalArgumentException("Plugin not registered");
-    }
-
-    private void unregisterTasks(){
-        for(BukkitTask task:executed){
-            try {
-                task.cancel();
-            }
-            catch (Throwable throwable){
-            }
-        }
-        executed.clear();
-    }
-
-    private void unregisterListener(){
-        for(Listener listener: listeners){
-            HandlerList.unregisterAll(listener);
-        }
-        listeners.clear();
-    }
 
     public static String getChatFormat() {
         return chatFormat;
@@ -169,34 +79,133 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         return instance;
     }
 
-    @Deprecated
-    public Set<Menu> listMenu(){
-        return registeredMenus;
-    }
-
     public static BubbleAddonLoader register(AddonDescriptionFile plugin) {
-        if(plugin == null)throw new IllegalArgumentException("Plugin cannot be null");
+        if (plugin == null) {
+            throw new IllegalArgumentException("Plugin cannot be null");
+        }
         File file = getLoaderList().get(plugin);
-        if(file == null)throw new IllegalArgumentException("Could not find file");
+        if (file == null) {
+            throw new IllegalArgumentException("Could not find file");
+        }
         try {
-            return new BubbleAddonLoader(file,plugin);
+            return new BubbleAddonLoader(file, plugin);
         } catch (Throwable throwable) {
             throw new IllegalArgumentException(throwable);
         }
+    }
+
+    private static BubbleNetwork instance;
+    private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
+            ChatColor.BLUE + "] " + ChatColor.GRAY;
+    private static String chatFormat = "{prefix}{name}{suffix}{message}";
+    public int FINALID;
+    private ServerType type;
+    private int id;
+    private P plugin;
+    private CommandPlugin commandPlugin;
+    private XServer proxy;
+    private BubbleAddon assigned;
+    private BubbleListener listener = new BubbleListener(this);
+    private BukkitPlugman plugman;
+    private Set<Listener> listeners = new HashSet<>();
+    private Set<BukkitTask> executed = new HashSet<>();
+    private Set<Menu> registeredMenus = new HashSet<>();
+    private MenuManager manager = new MenuManager();
+    private File file;
+
+    public BubbleNetwork(P plugin) {
+        super();
+        instance = this;
+        this.plugin = plugin;
+    }
+
+    public void registerListener(BubbleAddon plugin, Listener listener) {
+        if (getAssigned() == plugin) {
+            if (listeners.contains(listener)) {
+                throw new IllegalArgumentException("Listener already registered");
+            }
+            listeners.add(listener);
+            getPlugin().getServer().getPluginManager().registerEvents(listener, getPlugin());
+        } else {
+            throw new IllegalArgumentException("Plugin not registered");
+        }
+    }
+
+    public void registerMenu(BubbleAddon addon, Menu menu) {
+        if (getAssigned() == addon) {
+            if (registeredMenus.contains(menu)) {
+                throw new IllegalArgumentException("Menu already registered");
+            }
+            registeredMenus.add(menu);
+        } else {
+            throw new IllegalArgumentException("Plugin not registered");
+        }
+    }
+
+    public void unregisterMenu(Menu menu) {
+        if (registeredMenus.contains(menu)) {
+            registeredMenus.remove(menu);
+        } else {
+            throw new IllegalArgumentException("Menu not registered");
+        }
+    }
+
+    public void unregisterMenus() {
+        registeredMenus.clear();
+    }
+
+    public BukkitTask registerRunnable(BubbleAddon plugin, Runnable r, TimeUnit unit, long time, boolean timer, boolean async) {
+        if (getAssigned() == plugin) {
+            long ticks = unit.toMillis(time) / 50;
+            BukkitScheduler scheduler = getPlugin().getServer().getScheduler();
+            BukkitTask task;
+            if (async) {
+                if (timer) {
+                    task = scheduler.runTaskTimerAsynchronously(getPlugin(), r, ticks, ticks);
+                } else {
+                    task = scheduler.runTaskLater(getPlugin(), r, ticks);
+                }
+            } else if (timer) {
+                task = scheduler.runTaskTimer(getPlugin(), r, ticks, ticks);
+            } else {
+                task = scheduler.runTaskLater(getPlugin(), r, ticks);
+            }
+            executed.add(task);
+            return task;
+        } else {
+            throw new IllegalArgumentException("Plugin not registered");
+        }
+    }
+
+    private void unregisterTasks() {
+        for (BukkitTask task : executed) {
+            try {
+                task.cancel();
+            } catch (Throwable throwable) {
+            }
+        }
+        executed.clear();
+    }
+
+    private void unregisterListener() {
+        for (Listener listener : listeners) {
+            HandlerList.unregisterAll(listener);
+        }
+        listeners.clear();
+    }
+
+    @Deprecated
+    public Set<Menu> listMenu() {
+        return registeredMenus;
     }
 
     public void onBubbleEnable() {
         logInfo("Loading components");
 
         file = getPlugin().getFile();
-        api = new BubbleBarAPI();
         registerListener(getListener());
         commandPlugin.register(getPlugin());
-        util = new VersionUTIL();
         EnchantGlow.getGlow();
-        registerListener(api);
-        api.DragonBarTask();
-        registerListener(util);
         manager.register(getPlugin());
         getPacketHub().registerListener(this);
         plugman = new BukkitPlugman(getPlugin().getServer());
@@ -209,22 +218,24 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
 
         logInfo("Finding addon folder");
 
-        if (!getPlugin().getDataFolder().exists()){
+        if (!getPlugin().getDataFolder().exists()) {
             logInfo("Creating addon folder");
             getPlugin().getDataFolder().mkdir();
         }
 
         logInfo("Finding addons");
 
-        if(!getPlugin().getDataFolder().isDirectory())endSetup("Addon folder is not a directory");
+        if (!getPlugin().getDataFolder().isDirectory()) {
+            endSetup("Addon folder is not a directory");
+        }
 
         for (File f : getPlugin().getDataFolder().listFiles()) {
             if (f.getName().endsWith(".jar")) {
                 try {
                     AddonDescriptionFile file = BubbleAddonLoader.getPluginDescription(f);
-                    getLoaderList().put(file,f);
+                    getLoaderList().put(file, f);
                 } catch (Throwable ex) {
-                    getLogger().log(Level.WARNING,"Error whilst finding addon " + f.getName(),ex);
+                    getLogger().log(Level.WARNING, "Error whilst finding addon " + f.getName(), ex);
                 }
             }
         }
@@ -232,23 +243,16 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void onBubbleDisable() {
-        if(getAssigned() != null)getAssigned().onDisable();
+        if (getAssigned() != null) {
+            getAssigned().onDisable();
+        }
         EnchantGlow.kill();
         try {
-            getPacketHub().sendMessage(getProxy(),new ServerShutdownRequest());
+            getPacketHub().sendMessage(getProxy(), new ServerShutdownRequest());
         } catch (IOException e) {
             logSevere(e.getMessage());
             logSevere("Could not send shutdown request");
         }
-    }
-
-
-    public BubbleBarAPI getBossApi() {
-        return api;
-    }
-
-    public VersionUTIL getVersionUtil() {
-        return util;
     }
 
     private void registerListener(Listener l) {
@@ -259,23 +263,13 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         return plugin;
     }
 
-    public BubbleBarAPI getApi() {
-        return api;
-    }
-
-    public VersionUTIL getUtil() {
-        return util;
-    }
-
     public MenuManager getManager() {
         return manager;
     }
 
-    public BubbleListener getListener(){
+    public BubbleListener getListener() {
         return listener;
     }
-
-    private File file;
 
     public void saveXServerDefaults() {
         int port;
@@ -296,21 +290,25 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
 
         logInfo("Found default server properties");
 
-        this.FINALID = port-10000;
+        this.FINALID = port - 10000;
 
         logInfo("Creating xserver files");
 
         File xserverfolder = new File("plugins" + File.separator + "Xserver");
 
-        if(!xserverfolder.exists())xserverfolder.mkdir();
+        if (!xserverfolder.exists()) {
+            xserverfolder.mkdir();
+        }
 
         File config = new File(xserverfolder + File.separator + "config.yml");
 
-        if(!config.exists()) try {
-            config.createNewFile();
-        } catch (IOException e) {
-            logSevere(e.getMessage());
-            endSetup("Could not create xserver configuration");
+        if (!config.exists()) {
+            try {
+                config.createNewFile();
+            } catch (IOException e) {
+                logSevere(e.getMessage());
+                endSetup("Could not create xserver configuration");
+            }
         }
 
         logInfo("Loading XServer configuration...");
@@ -351,37 +349,49 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         throw new RuntimeException(s);
     }
 
-    public Logger getLogger(){
-        if(getPlugin() != null && getPlugin().isEnabled())return getPlugin().getLogger();
+    public Logger getLogger() {
+        if (getPlugin() != null && getPlugin().isEnabled()) {
+            return getPlugin().getLogger();
+        }
         return null;
     }
 
     public void logInfo(String s) {
         Logger l = getLogger();
-        if(l != null)l.info(s);
-        else System.out.println("[BubbleFramework] " + s);
+        if (l != null) {
+            l.info(s);
+        } else {
+            System.out.println("[BubbleFramework] " + s);
+        }
     }
 
     public void logSevere(String s) {
         Logger l = getLogger();
-        if(l != null)l.severe(s);
-        else System.err.println("[BubbleFramework] " + s);
+        if (l != null) {
+            l.severe(s);
+        } else {
+            System.err.println("[BubbleFramework] " + s);
+        }
     }
 
-    public AddonDescriptionFile getPlugin(String s){
-        for(AddonDescriptionFile bubblePlugin:getLoaderList().keySet()){
-            if(bubblePlugin.getName().equalsIgnoreCase(s))return bubblePlugin;
+    public AddonDescriptionFile getPlugin(String s) {
+        for (AddonDescriptionFile bubblePlugin : getLoaderList().keySet()) {
+            if (bubblePlugin.getName().equalsIgnoreCase(s)) {
+                return bubblePlugin;
+            }
         }
         return null;
     }
 
-    public void disableAddon(){
-        if(getAssigned() == null)throw new IllegalArgumentException("No addon found");
+    public void disableAddon() {
+        if (getAssigned() == null) {
+            throw new IllegalArgumentException("No addon found");
+        }
         logInfo("Disabling addon : " + getAssigned().getName());
         try {
             getAssigned().getLoader().close();
         } catch (IOException e) {
-            getPlugin().getLogger().log(Level.WARNING,"Error while disabling plugin");
+            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin");
         }
         getAssigned().onDisable();
         unregisterListener();
@@ -390,13 +400,15 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         assigned = null;
     }
 
-    public void enableAddon(AddonDescriptionFile addonfile){
-        if(getAssigned() != null)disableAddon();
-        if(addonfile == null){
+    public void enableAddon(AddonDescriptionFile addonfile) {
+        if (getAssigned() != null) {
+            disableAddon();
+        }
+        if (addonfile == null) {
             endSetup("Could not find assigned addon");
         }
         BubbleAddonLoader loader = register(addonfile);
-        if(loader == null){
+        if (loader == null) {
             endSetup("Could not find assigned addon");
             return;
         }
@@ -411,9 +423,9 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void onMessage(PacketInfo info, IPluginMessage message) {
-        if(message instanceof AssignMessage){
+        if (message instanceof AssignMessage) {
             logInfo("Received assign message");
-            AssignMessage assignMessage = (AssignMessage)message;
+            AssignMessage assignMessage = (AssignMessage) message;
             this.type = assignMessage.getWrapperType();
             this.id = assignMessage.getId();
             logInfo("ServerType: " + getType().getName() + " ID: " + String.valueOf(id));
@@ -421,55 +433,57 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             AddonDescriptionFile addonfile = getPlugin(getType().getName());
             enableAddon(addonfile);
             try {
-                getPacketHub().sendMessage(info.getServer(),new AssignMessage(id,type));
+                getPacketHub().sendMessage(info.getServer(), new AssignMessage(id, type));
             } catch (IOException e) {
                 logSevere(e.getMessage());
                 endSetup("Could not send assign message");
             }
             logInfo("Sent assign message!");
-        }
-        else if(message instanceof RankDataUpdate){
-            RankDataUpdate rankDataUpdate = (RankDataUpdate)message;
-            Rank.loadRank(rankDataUpdate.getName(),rankDataUpdate.getData());
+        } else if (message instanceof RankDataUpdate) {
+            RankDataUpdate rankDataUpdate = (RankDataUpdate) message;
+            Rank.loadRank(rankDataUpdate.getName(), rankDataUpdate.getData());
             logInfo("Loaded rank: " + rankDataUpdate.getName());
-        }
-        else if(message instanceof PlayerDataResponse){
-            PlayerDataResponse dataResponse = (PlayerDataResponse)message;
+        } else if (message instanceof PlayerDataResponse) {
+            PlayerDataResponse dataResponse = (PlayerDataResponse) message;
             Player player = Bukkit.getPlayer(dataResponse.getName());
-            if(player != null) {
+            if (player != null) {
                 BubblePlayer<Player> bukkitBubblePlayer;
-                if((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
+                if ((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
                     logSevere("Received data for a player which is not online " + dataResponse.getName());
+                } else {
+                    bukkitBubblePlayer.setData(dataResponse.getData());
                 }
-                else bukkitBubblePlayer.setData(dataResponse.getData());
+            } else {
+                DataRequestTask.setData(dataResponse.getName(), dataResponse.getData());
             }
-            else DataRequestTask.setData(dataResponse.getName(),dataResponse.getData());
-        }
-        else if(message instanceof PlayerDataRequest){
-            PlayerDataRequest request = (PlayerDataRequest)message;
+        } else if (message instanceof PlayerDataRequest) {
+            PlayerDataRequest request = (PlayerDataRequest) message;
             Player p = Bukkit.getPlayer(request.getName());
-            if(p != null) {
+            if (p != null) {
                 BubblePlayer<Player> player = BukkitBubblePlayer.getObject(p.getUniqueId());
-                if(player != null) {
+                if (player != null) {
                     try {
                         getPacketHub().sendMessage(getProxy(), new PlayerDataResponse(request.getName(), player.getData().getRaw()));
                     } catch (IOException e1) {
                         logSevere(e1.getMessage());
                         logSevere("Could not save playerdata for " + request.getName());
                     }
+                } else {
+                    logSevere("BubblePlayer not found for data request " + request.getName());
                 }
-                else logSevere("BubblePlayer not found for data request " + request.getName());
+            } else {
+                logSevere("Player not found for data request " + request.getName());
             }
-            else logSevere("Player not found for data request " + request.getName());
+        } else {
+            logSevere("Unsupported message " + message.getType().getName());
         }
-        else logSevere("Unsupported message " + message.getType().getName());
     }
 
     public XServer getProxy() {
         return proxy;
     }
 
-    public BubbleAddon getAssigned(){
+    public BubbleAddon getAssigned() {
         return assigned;
     }
 
@@ -482,12 +496,14 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public XServerPlugin getXPlugin() {
-        if(!getPlugin().getServer().getPluginManager().isPluginEnabled("XServer"))endSetup("Could not find XServer");
+        if (!getPlugin().getServer().getPluginManager().isPluginEnabled("XServer")) {
+            endSetup("Could not find XServer");
+        }
         return (XServerPlugin) getPlugin().getServer().getPluginManager().getPlugin("XServer");
     }
 
     public void runTaskLater(Runnable runnable, long l, TimeUnit timeUnit) {
-        getPlugin().getServer().getScheduler().runTaskLater(getPlugin(),runnable,timeUnit.toMillis(l)/50);
+        getPlugin().getServer().getScheduler().runTaskLater(getPlugin(), runnable, timeUnit.toMillis(l) / 50);
     }
 
     public File getReplace() {
@@ -503,29 +519,30 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void update(Runnable update) {
-        if(getAssigned() != null){
-            runTaskLater(update,getAssigned().finishUp(),TimeUnit.SECONDS);
+        if (getAssigned() != null) {
+            runTaskLater(update, getAssigned().finishUp(), TimeUnit.SECONDS);
+        } else {
+            runTaskLater(update, 0L, TimeUnit.SECONDS);
         }
-        else runTaskLater(update,0L,TimeUnit.SECONDS);
     }
 
-    public void sendPlayer(Player p,String server){
+    public void sendPlayer(Player p, String server) {
         try {
-            getPacketHub().sendMessage(getProxy(),new PlayerMoveRequest(p.getName(),server));
+            getPacketHub().sendMessage(getProxy(), new PlayerMoveRequest(p.getName(), server));
         } catch (IOException e) {
             logSevere("Could not move player " + e.getMessage());
         }
     }
 
-    public void sendPlayer(Player p,ServerType server){
+    public void sendPlayer(Player p, ServerType server) {
         try {
-            getPacketHub().sendMessage(getProxy(),new PlayerMoveTypeRequest(p.getName(),server));
+            getPacketHub().sendMessage(getProxy(), new PlayerMoveTypeRequest(p.getName(), server));
         } catch (IOException e) {
             logSevere("Could not move player " + e.getMessage());
         }
     }
 
-    public boolean bungee(){
+    public boolean bungee() {
         return false;
     }
 

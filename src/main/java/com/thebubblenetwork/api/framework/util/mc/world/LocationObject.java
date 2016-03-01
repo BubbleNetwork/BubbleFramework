@@ -15,15 +15,19 @@ import java.util.Map;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.framework.util.mc.world
  * Date-created: 17/01/2016 11:07
  * Project: BubbleFramework
  */
-public class LocationObject implements Cloneable,ConfigurationSerializable {
+public class LocationObject implements Cloneable, ConfigurationSerializable {
+    public static LocationObject deserialize(Map<String, Object> args) {
+        return new LocationObject(NumberConversions.toDouble(args.get("x")), NumberConversions.toDouble(args.get("y")), NumberConversions.toDouble(args.get("z")), NumberConversions.toFloat(args.get("yaw")), NumberConversions.toFloat(args.get("pitch")));
+    }
+
     private double x, y, z;
     private float pitch, yaw;
 
@@ -94,30 +98,20 @@ public class LocationObject implements Cloneable,ConfigurationSerializable {
     }
 
     public Map<String, Object> serialize() {
-        Map<String,Object> map = new HashMap<>();
-        map.put("x",getX());
-        map.put("y",getY());
-        map.put("z",getZ());
-        map.put("yaw",getYaw());
-        map.put("pitch",getPitch());
+        Map<String, Object> map = new HashMap<>();
+        map.put("x", getX());
+        map.put("y", getY());
+        map.put("z", getZ());
+        map.put("yaw", getYaw());
+        map.put("pitch", getPitch());
         return map;
     }
 
-    public static LocationObject deserialize(Map<String, Object> args){
-        return new LocationObject(
-                NumberConversions.toDouble(args.get("x")),
-                NumberConversions.toDouble(args.get("y")),
-                NumberConversions.toDouble(args.get("z")),
-                NumberConversions.toFloat(args.get("yaw")),
-                NumberConversions.toFloat(args.get("pitch"))
-        );
-    }
-
     @Override
-    public String toString(){
+    public String toString() {
         String contents = "";
-        for(Map.Entry<String,Object> objectEntry:serialize().entrySet()){
-            contents += " " + objectEntry.getKey() + "=" + String.valueOf(((Number)objectEntry.getValue()).intValue());
+        for (Map.Entry<String, Object> objectEntry : serialize().entrySet()) {
+            contents += " " + objectEntry.getKey() + "=" + String.valueOf(((Number) objectEntry.getValue()).intValue());
         }
         return "[" + contents + " ]";
     }

@@ -15,9 +15,11 @@ public class Vote {
     }
 
     public GameMap getMap() {
-        for (GameMap map : GameMap.getMaps())
-            if (map.getName().equals(voted))
+        for (GameMap map : GameMap.getMaps()) {
+            if (map.getName().equals(voted)) {
                 return map;
+            }
+        }
         return null;
     }
 }

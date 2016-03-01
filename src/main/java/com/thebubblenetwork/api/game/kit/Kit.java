@@ -23,8 +23,12 @@ public class Kit {
     private KitBuyInventory buyInventory;
 
     public Kit(Material display, List<ItemStack[]> inventorypreset, List<ItemStack[]> armorpreset, String name, String[] description, int maxlevel, int price) {
-        if(maxlevel < 1)throw new IllegalArgumentException("Maxlevel too low");
-        if(inventorypreset.size() != maxlevel || armorpreset.size() != maxlevel)throw new IllegalArgumentException("Invalid levels");
+        if (maxlevel < 1) {
+            throw new IllegalArgumentException("Maxlevel too low");
+        }
+        if (inventorypreset.size() != maxlevel || armorpreset.size() != maxlevel) {
+            throw new IllegalArgumentException("Invalid levels");
+        }
         this.display = display;
         this.inventorypreset = new ItemStack[maxlevel][];
         this.name = name;
@@ -33,7 +37,7 @@ public class Kit {
         this.maxlevel = maxlevel;
         this.armorpreset = new ItemStack[maxlevel][];
         buyInventory = new KitBuyInventory(this);
-        for(int i = 0;i < maxlevel;i++){
+        for (int i = 0; i < maxlevel; i++) {
             this.inventorypreset[i] = inventorypreset.get(i);
             this.armorpreset[i] = armorpreset.get(i);
         }
@@ -56,8 +60,9 @@ public class Kit {
 
     public int getLevelUpcost(BukkitBubblePlayer player) {
         int level = getLevel(player);
-        if (level == maxlevel)
+        if (level == maxlevel) {
             return -1;
+        }
         return (price * (level + 1)) / (maxlevel - level);
     }
 
@@ -70,12 +75,12 @@ public class Kit {
         bukkitPlayer.getInventory().setContents(getInventorypreset(level));
     }
 
-    public void buy(BukkitBubblePlayer player){
-        level(player,1);
+    public void buy(BukkitBubblePlayer player) {
+        level(player, 1);
     }
 
-    public void level(BukkitBubblePlayer player,int level){
-        player.setKit(BubbleGameAPI.getInstance().getName(),getNameClear(),level);
+    public void level(BukkitBubblePlayer player, int level) {
+        player.setKit(BubbleGameAPI.getInstance().getName(), getNameClear(), level);
         player.save();
     }
 
@@ -92,18 +97,18 @@ public class Kit {
     }
 
     public ItemStack[] getInventorypreset(int level) {
-        return inventorypreset[level-1];
+        return inventorypreset[level - 1];
     }
 
-    public ItemStack[] getArmorpreset(int level){
-        return armorpreset[level-1];
+    public ItemStack[] getArmorpreset(int level) {
+        return armorpreset[level - 1];
     }
 
-    public void setInventorypreset(ItemStack[] inventorypreset,int level) {
-        this.inventorypreset[level-1] = inventorypreset;
+    public void setInventorypreset(ItemStack[] inventorypreset, int level) {
+        this.inventorypreset[level - 1] = inventorypreset;
     }
 
-    public void setInventorypreset(ItemStack[][] inventorypreset){
+    public void setInventorypreset(ItemStack[][] inventorypreset) {
         this.inventorypreset = inventorypreset;
     }
 

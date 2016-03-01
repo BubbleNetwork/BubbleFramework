@@ -19,14 +19,16 @@ public class BoardScore {
         this.module = module;
         this.api = api;
         String name = module.getName();
-        if (name.length() > 16)
+        if (name.length() > 16) {
             name = name.substring(16);
+        }
         team = api.getObject().getBoard().getTeam(name);
-        if (team == null)
+        if (team == null) {
             team = api.getObject().getBoard().registerNewTeam(name);
-        else {
-            if (name.length() > 6)
+        } else {
+            if (name.length() > 6) {
                 name = name.substring(6);
+            }
             team = api.getObject().getBoard().registerNewTeam(name + api.getColorCombo().getRandomColorCombo() +
                     ChatColor.RESET);
         }
@@ -41,9 +43,11 @@ public class BoardScore {
     public void delete() {
         unsetScore();
         getTeam().unregister();
-        for (Map<BoardModule, BoardScore> map : getApi().getModules().values())
-            if (map.containsKey(getModule()) && map.containsValue(this))
+        for (Map<BoardModule, BoardScore> map : getApi().getModules().values()) {
+            if (map.containsKey(getModule()) && map.containsValue(this)) {
                 map.put(getModule(), new BoardScore(getModule(), api));
+            }
+        }
         api = null;
         module = null;
         team = null;

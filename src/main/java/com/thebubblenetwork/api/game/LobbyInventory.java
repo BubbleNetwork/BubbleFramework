@@ -13,8 +13,8 @@ import org.bukkit.entity.Player;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.game
@@ -23,7 +23,7 @@ import org.bukkit.entity.Player;
  */
 public class LobbyInventory extends BuyInventory {
     public LobbyInventory() {
-        super(ChatColor.GOLD + "Teleport to lobby","Teleport me to lobby", "Cancel");
+        super(ChatColor.GOLD + "Teleport to lobby", "Teleport me to lobby", "Cancel");
     }
 
     public void onCancel(Player p) {

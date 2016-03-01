@@ -13,7 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.ArrayList;
 
 public class MenuManager implements Listener {
     public static int getRoundedInventorySize(int items) {
@@ -31,8 +31,9 @@ public class MenuManager implements Listener {
         for (Menu menu : new ArrayList<>(BubbleNetwork.getInstance().listMenu())) {
             if (menu.getInventory() == inv) {
                 e.setCancelled(true);
-                if (e.getClickedInventory() == inv)
+                if (e.getClickedInventory() == inv) {
                     menu.click(player, e.getClick(), e.getSlot(), e.getCurrentItem());
+                }
             }
         }
     }

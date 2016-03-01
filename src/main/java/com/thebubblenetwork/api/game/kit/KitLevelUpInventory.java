@@ -19,8 +19,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.game.kit
@@ -29,16 +29,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
  */
 
 public class KitLevelUpInventory extends BuyInventory {
-    private static final Sound
-            BUYKIT = Sound.LEVEL_UP,
-            CANCELBUY = Sound.BLAZE_HIT;
+    private static final Sound BUYKIT = Sound.LEVEL_UP, CANCELBUY = Sound.BLAZE_HIT;
     private int cost;
     private Kit k;
     private boolean cancelled = false;
     private int level;
 
     public KitLevelUpInventory(Kit k, int cost, int level) {
-        super(ChatColor.GOLD + k.getNameClear() + " Lv" + String.valueOf(level-1) + " -> Lv" + String.valueOf(level) + " " + ChatColor.RED + String.valueOf(k.getPrice()) + "T");
+        super(ChatColor.GOLD + k.getNameClear() + " Lv" + String.valueOf(level - 1) + " -> Lv" + String.valueOf(level) + " " + ChatColor.RED + String.valueOf(k.getPrice()) + "T");
         this.k = k;
         this.cost = cost;
         this.level = level;
@@ -62,7 +60,7 @@ public class KitLevelUpInventory extends BuyInventory {
         return cost;
     }
 
-    public int getLevel(){
+    public int getLevel() {
         return level;
     }
 
@@ -78,7 +76,7 @@ public class KitLevelUpInventory extends BuyInventory {
 
     public void onAllow(Player player) {
         BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
-        getKit().level(bubblePlayer,getLevel());
+        getKit().level(bubblePlayer, getLevel());
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
     }

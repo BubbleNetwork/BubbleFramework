@@ -24,7 +24,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -44,42 +47,25 @@ import java.util.*;
  * Created by Jacob on 26/12/2015.
  */
 public class GameListener implements Listener {
-    private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER)
-            .withName(ChatColor.DARK_AQUA + "Maps")
-            .withLore(ChatColor.GRAY + "Click to vote for a map")
-            .withAmount(1);
-    private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE)
-            .withName(ChatColor.DARK_AQUA +  "Kits")
-            .withLore(ChatColor.GRAY + "Click to select or buy a kit")
-            .withAmount(1);
-
-    private static String ghostteam = "GHOST";
-
-    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
-
-    private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR)
-            .withName(ChatColor.DARK_RED + "Go back to the lobby")
-            .withLore(ChatColor.RED + "Click this to go back to the lobby")
-            .withAmount(1)
-            .withGlow();
-
-    private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS)
-            .withName(ChatColor.DARK_AQUA + "Spectator menu")
-            .withLore(ChatColor.GRAY + "Click this to open the spectator menu")
-            .withAmount(1);
-    private List<UUID> spectators = new ArrayList<>();
-    private Map<Location, Inventory> chests = new HashMap<>();
-
-    public GameListener() {
-        BubbleGameAPI.getInstance().registerListener(this);
-    }
-
     public static ItemStack[] generateSpawnInventory(int inventorysize) {
         ItemStack[] is = new ItemStack[inventorysize];
         is[MAPSLOT] = mapselection.build();
         is[KITSLOT] = kitselection.build();
         is[LOBBYSLOT] = LOBBYITEM.build();
         return is;
+    }
+
+    private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER).withName(ChatColor.DARK_AQUA + "Maps").withLore(ChatColor.GRAY + "Click to vote for a map").withAmount(1);
+    private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE).withName(ChatColor.DARK_AQUA + "Kits").withLore(ChatColor.GRAY + "Click to select or buy a kit").withAmount(1);
+    private static String ghostteam = "GHOST";
+    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
+    private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR).withName(ChatColor.DARK_RED + "Go back to the lobby").withLore(ChatColor.RED + "Click this to go back to the lobby").withAmount(1).withGlow();
+    private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS).withName(ChatColor.DARK_AQUA + "Spectator menu").withLore(ChatColor.GRAY + "Click this to open the spectator menu").withAmount(1);
+    private List<UUID> spectators = new ArrayList<>();
+    private Map<Location, Inventory> chests = new HashMap<>();
+
+    public GameListener() {
+        BubbleGameAPI.getInstance().registerListener(this);
     }
 
     public boolean isSpectating(Player p) {
@@ -109,14 +95,19 @@ public class GameListener implements Listener {
     }
 
     public void setSpectating(Player p, boolean spectating) {
-        if (spectating) enableSpectate(p);
-        else disableSpectate(p);
+        if (spectating) {
+            enableSpectate(p);
+        } else {
+            disableSpectate(p);
+        }
     }
 
     private void startGhost(Player p) {
         Scoreboard board = p.getScoreboard();
         Team t = board.getTeam(ghostteam);
-        if (t != null) t.unregister();
+        if (t != null) {
+            t.unregister();
+        }
         ;
         t = board.registerNewTeam(ghostteam);
         t.setPrefix(ChatColor.RED.toString());
@@ -143,7 +134,9 @@ public class GameListener implements Listener {
     }
 
     private void enableSpectate(final Player p) {
-        if (isSpectating(p)) return;
+        if (isSpectating(p)) {
+            return;
+        }
         spectators.add(p.getUniqueId());
         Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
@@ -163,8 +156,10 @@ public class GameListener implements Listener {
             }
             p.showPlayer(target);
         }
-        if (p.isDead()) p.spigot().respawn();
-        for(PotionEffect effect:p.getActivePotionEffects()){
+        if (p.isDead()) {
+            p.spigot().respawn();
+        }
+        for (PotionEffect effect : p.getActivePotionEffects()) {
             p.removePotionEffect(effect.getType());
         }
         startGhost(p);
@@ -187,14 +182,18 @@ public class GameListener implements Listener {
     }
 
     private void disableSpectate(final Player p) {
-        if (!isSpectating(p)) return;
+        if (!isSpectating(p)) {
+            return;
+        }
         spectators.remove(p.getUniqueId());
         endGhost(p);
         p.spigot().setCollidesWithEntities(true);
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (isSpectating(target)) {
                 p.hidePlayer(target);
-            } else p.showPlayer(target);
+            } else {
+                p.showPlayer(target);
+            }
             target.showPlayer(p);
         }
         p.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -208,14 +207,18 @@ public class GameListener implements Listener {
             if (p != t) {
                 if (isSpectating(t)) {
                     p.hidePlayer(t);
-                } else p.showPlayer(t);
+                } else {
+                    p.showPlayer(t);
+                }
             }
         }
     }
 
     @EventHandler
     public void onEntityTargetSpectator(EntityTargetEvent e) {
-        if (e.getTarget() instanceof Player && isSpectating((Player) e.getTarget())) e.setCancelled(true);
+        if (e.getTarget() instanceof Player && isSpectating((Player) e.getTarget())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -273,7 +276,7 @@ public class GameListener implements Listener {
                 Location l = toBlockLocation(c.getLocation());
                 if (chests.containsKey(l)) {
                     final Inventory change = chests.get(l);
-                    BubbleGameAPI.getInstance().runTask(new Runnable(){
+                    BubbleGameAPI.getInstance().runTask(new Runnable() {
                         public void run() {
                             change.setContents(clicked.getContents());
                         }
@@ -286,24 +289,30 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
-        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked())))
+        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked()))) {
             e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked())))
+        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked()))) {
             e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent e) {
-        if (canDefault() || isSpectating(e.getPlayer())) e.setCancelled(true);
+        if (canDefault() || isSpectating(e.getPlayer())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent e) {
-        if (canDefault() || isSpectating(e.getPlayer())) e.setCancelled(true);
+        if (canDefault() || isSpectating(e.getPlayer())) {
+            e.setCancelled(true);
+        }
     }
 
 
@@ -328,8 +337,7 @@ public class GameListener implements Listener {
         if (!BubbleGameAPI.getInstance().getState().joinable()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "You cannot join at " +
                     "this time");
-        } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY && Bukkit.getOnlinePlayers()
-                .size() == BubbleGameAPI.getInstance().getType().getMaxPlayers()) {
+        } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY && Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getType().getMaxPlayers()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "This game is " +
                     "currently full");
         }
@@ -347,8 +355,7 @@ public class GameListener implements Listener {
         p.setFoodLevel(20);
         p.setLevel(0);
         p.setSaturation(600);
-        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance
-                ().getName(), new Messages.TitleTiming(10, 20, 30));
+        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), new Messages.TitleTiming(10, 20, 30));
         if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
             p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld("world")));
             p.setGameMode(GameMode.SURVIVAL);
@@ -358,7 +365,7 @@ public class GameListener implements Listener {
         } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME) {
             setSpectating(p, true);
         } else {
-            BubbleGameAPI.getInstance().runTask(new Runnable(){
+            BubbleGameAPI.getInstance().runTask(new Runnable() {
                 public void run() {
                     BubbleNetwork.getInstance().sendPlayer(p, ServerType.getType("Lobby"));
                 }
@@ -396,14 +403,15 @@ public class GameListener implements Listener {
                     BubbleGameAPI.getInstance().getHubInventory().show(p);
                 }
             }
-        }
-        else if (isSpectating(p)) {
+        } else if (isSpectating(p)) {
             e.setCancelled(true);
             int i = p.getInventory().getHeldItemSlot();
             if (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.PHYSICAL) {
-                if (i == SPECTATORLOBBYSLOT) BubbleGameAPI.getInstance().getHubInventory().show(p);
-                else if (i == SPECTATORPLAYERSSLOT) BubbleGameAPI.getInstance().getPlayerList().show(p);
-                else {
+                if (i == SPECTATORLOBBYSLOT) {
+                    BubbleGameAPI.getInstance().getHubInventory().show(p);
+                } else if (i == SPECTATORPLAYERSSLOT) {
+                    BubbleGameAPI.getInstance().getPlayerList().show(p);
+                } else {
                     Block clicked = e.getClickedBlock();
                     if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clicked != null) {
                         if (clicked.getType() == Material.CHEST || clicked.getType() == Material.TRAPPED_CHEST) {
@@ -445,18 +453,20 @@ public class GameListener implements Listener {
                     return;
                 }
             }
-        if (e.getEntity() instanceof Player) {
-            if (canDefault()) e.setCancelled(true);
-            else {
-                final Player p = (Player) e.getEntity();
-                if (isSpectating(p)) {
+            if (e.getEntity() instanceof Player) {
+                if (canDefault()) {
                     e.setCancelled(true);
                 } else {
+                    final Player p = (Player) e.getEntity();
+                    if (isSpectating(p)) {
+                        e.setCancelled(true);
+                    } else {
                     }
-                    BubbleGameAPI.getInstance().runTask(new Runnable(){
+                    BubbleGameAPI.getInstance().runTask(new Runnable() {
                         public void run() {
-                            if (p.isOnline() && !isSpectating(p))
+                            if (p.isOnline() && !isSpectating(p)) {
                                 BubbleGameAPI.getInstance().getPlayerList().update(p);
+                            }
                         }
                     });
                 }
@@ -484,7 +494,9 @@ public class GameListener implements Listener {
             final Player p = (Player) e.getEntity();
             BubbleGameAPI.getInstance().runTask(new Runnable() {
                 public void run() {
-                    if (p.isOnline() && !isSpectating(p)) BubbleGameAPI.getInstance().getPlayerList().update(p);
+                    if (p.isOnline() && !isSpectating(p)) {
+                        BubbleGameAPI.getInstance().getPlayerList().update(p);
+                    }
                 }
             });
         }

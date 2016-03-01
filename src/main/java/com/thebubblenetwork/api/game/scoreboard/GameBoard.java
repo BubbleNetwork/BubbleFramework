@@ -20,15 +20,6 @@ import java.util.*;
  * Created by Jacob on 14/12/2015.
  */
 public class GameBoard extends SingleBubbleBoard {
-    private static Map<DisplaySlot, String> displayname = Collections.singletonMap(DisplaySlot.SIDEBAR, BubbleNetwork
-            .getPrefix());
-    //CUSTOM LOGGING
-    private static Map<UUID, GameBoard> boardMap = new HashMap<>();
-
-    public GameBoard(Player p) {
-        super(p, displayname);
-    }
-
     public static Collection<GameBoard> getBoards() {
         return boardMap.values();
     }
@@ -56,5 +47,13 @@ public class GameBoard extends SingleBubbleBoard {
                 boardMap.remove(e.getPlayer().getUniqueId());
             }
         });
+    }
+
+    private static Map<DisplaySlot, String> displayname = Collections.singletonMap(DisplaySlot.SIDEBAR, BubbleNetwork.getPrefix());
+    //CUSTOM LOGGING
+    private static Map<UUID, GameBoard> boardMap = new HashMap<>();
+
+    public GameBoard(Player p) {
+        super(p, displayname);
     }
 }

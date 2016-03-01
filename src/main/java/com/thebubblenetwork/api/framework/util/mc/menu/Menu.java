@@ -20,8 +20,7 @@ public abstract class Menu implements InventoryHolder {
     private int size;
 
     public Menu(String title, int size) {
-        Validate.isTrue(size <= 54 && size > 0 && size % 9 == 0, "Inventory size must be divisble by 9, smaller or "
-                + "equal to 54 and bigger than 0");
+        Validate.isTrue(size <= 54 && size > 0 && size % 9 == 0, "Inventory size must be divisble by 9, smaller or " + "equal to 54 and bigger than 0");
         inventory = Bukkit.createInventory(this, size, ChatColorAppend.translate(title));
         this.size = size;
     }

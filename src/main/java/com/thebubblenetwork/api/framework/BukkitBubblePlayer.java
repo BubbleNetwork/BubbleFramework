@@ -16,8 +16,8 @@ import java.util.UUID;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.framework
@@ -25,21 +25,21 @@ import java.util.UUID;
  * Project: BubbleFramework
  */
 public class BukkitBubblePlayer extends BubblePlayerObject<Player> implements BubblePlayer<Player> {
-    public BukkitBubblePlayer(UUID u, PlayerData data) {
-        super(u, data);
-    }
-
     public static BukkitBubblePlayer getObject(UUID u) {
         return (BukkitBubblePlayer) getPlayerObjectMap().get(u);
     }
 
-    public String getName(){
+    public BukkitBubblePlayer(UUID u, PlayerData data) {
+        super(u, data);
+    }
+
+    public String getName() {
         return getPlayer().getName();
     }
 
-    public void save(){
+    public void save() {
         try {
-            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataResponse(getName(),getData().getRaw()));
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getData().getRaw()));
         } catch (IOException e) {
             BubbleNetwork.getInstance().logSevere("Failed to send data update: " + e.getMessage());
         }

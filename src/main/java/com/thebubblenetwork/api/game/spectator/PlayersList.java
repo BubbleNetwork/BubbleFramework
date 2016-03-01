@@ -25,8 +25,8 @@ import java.util.UUID;
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Wrote by Jacob Evans <jacobevansminor@gmail.com>, 01 2016
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * Class information
  * ---------------------
  * Package: com.thebubblenetwork.api.game.spectator
@@ -37,6 +37,7 @@ public class PlayersList extends Menu implements Listener {
     private Map<String, ItemStack> skulls = new HashMap<>();
     private Map<UUID, Integer> index;
     private Map<Integer, UUID> slots;
+
     public PlayersList() {
         super(ChatColor.BLUE + "Playing", 9);
         update();
@@ -82,24 +83,22 @@ public class PlayersList extends Menu implements Listener {
     public void update(Player p) {
         if (!index.containsKey(p.getUniqueId())) {
             update();
-        } else getInventory().setItem(index.get(p.getUniqueId()), generate(p));
+        } else {
+            getInventory().setItem(index.get(p.getUniqueId()), generate(p));
+        }
     }
 
     protected ItemStack generate(Player p) {
         ItemStack is = generateSkull(p.getName());
         withName(is, ChatColor.AQUA + p.getName());
-        withLore(is,
-                ChatColor.DARK_RED + "Health: " + ChatColor.GRAY + String.valueOf(p.getHealth()) + "/" + String.valueOf(p.getMaxHealth()),
-                ChatColor.YELLOW + "Hunger: " + ChatColor.GRAY + String.valueOf(p.getFoodLevel()) + "/20",
-                "",
-                ChatColor.DARK_PURPLE + "Left Click -> Spectate",
-                ChatColor.DARK_AQUA + "Right Click -> View inventory"
-        );
+        withLore(is, ChatColor.DARK_RED + "Health: " + ChatColor.GRAY + String.valueOf(p.getHealth()) + "/" + String.valueOf(p.getMaxHealth()), ChatColor.YELLOW + "Hunger: " + ChatColor.GRAY + String.valueOf(p.getFoodLevel()) + "/20", "", ChatColor.DARK_PURPLE + "Left Click -> Spectate", ChatColor.DARK_AQUA + "Right Click -> View inventory");
         return is;
     }
 
     private ItemStack generateSkull(String name) {
-        if (skulls.containsKey(name)) return skulls.get(name);
+        if (skulls.containsKey(name)) {
+            return skulls.get(name);
+        }
         ItemStack is = new ItemStack(Material.SKULL_ITEM);
         SkullMeta meta = (SkullMeta) is.getItemMeta();
         meta.setOwner(name);

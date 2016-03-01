@@ -15,8 +15,9 @@ public class RandomColorCombo {
     private List<List<ChatColor>> colors = new ArrayList<>();
 
     public RandomColorCombo(int amt) {
-        for (int i = 0; i < amt + 1; i++)
+        for (int i = 0; i < amt + 1; i++) {
             colors.add(generateNewChatColors());
+        }
     }
 
     public String getRandomColorCombo() {
@@ -29,8 +30,9 @@ public class RandomColorCombo {
     }
 
     private ChatColor fromList(List<ChatColor> chatColorList) {
-        if (chatColorList.isEmpty())
+        if (chatColorList.isEmpty()) {
             chatColorList.addAll(Arrays.asList(ChatColor.values()));
+        }
         return chatColorList.remove(BubbleNetwork.getRandom().nextInt(chatColorList.size()));
     }
 

@@ -20,37 +20,6 @@ import java.util.jar.JarFile;
  * Created by Jacob on 12/12/2015.
  */
 public class BubbleAddonLoader extends URLClassLoader {
-    private BubbleAddon plugin;
-    private AddonDescriptionFile file;
-    private File jar;
-
-    public BubbleAddonLoader(File jar, AddonDescriptionFile file) throws MalformedURLException,
-            InvalidDescriptionException, InvalidPluginException {
-        super(new URL[]{jar.toURI().toURL()}, BubbleNetwork.class.getClassLoader());
-        this.jar = jar;
-        Class ex;
-        this.file = file;
-        try {
-            ex = loadClass(file.getMain());
-        } catch (Exception e) {
-            throw new InvalidPluginException("Cannot find main class via ex`" + file.getMain() + "\'", e);
-        }
-        if (ex == null) {
-            throw new InvalidPluginException("Cannot find main class no ex `" + file.getMain() + "\'");
-        }
-        Class<? extends BubbleAddon> subclass;
-        try {
-            subclass = ex.asSubclass(BubbleAddon.class);
-        } catch (Exception e) {
-            throw new InvalidPluginException("main class `" + file.getMain() + "\' does not extend BubblePlugin", e);
-        }
-        try {
-            plugin = (BubbleAddon) subclass.newInstance();
-        } catch (Exception e) {
-            throw new InvalidPluginException("Error loading main class`" + file.getMain(), e);
-        }
-    }
-
     public static AddonDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
         Validate.notNull(file, "File cannot be null");
         JarFile jar = null;
@@ -61,8 +30,7 @@ public class BubbleAddonLoader extends URLClassLoader {
             jar = new JarFile(file);
             JarEntry ex = jar.getJarEntry("bubbleplugin.yml");
             if (ex == null) {
-                throw new InvalidDescriptionException(new FileNotFoundException("Jar does not contain bubbleplugin" +
-                        ".yml"));
+                throw new InvalidDescriptionException(new FileNotFoundException("Jar does not contain bubbleplugin" + ".yml"));
             }
 
             stream = jar.getInputStream(ex);
@@ -93,7 +61,37 @@ public class BubbleAddonLoader extends URLClassLoader {
         return var6;
     }
 
-    public File getJar(){
+    private BubbleAddon plugin;
+    private AddonDescriptionFile file;
+    private File jar;
+
+    public BubbleAddonLoader(File jar, AddonDescriptionFile file) throws MalformedURLException, InvalidDescriptionException, InvalidPluginException {
+        super(new URL[]{jar.toURI().toURL()}, BubbleNetwork.class.getClassLoader());
+        this.jar = jar;
+        Class ex;
+        this.file = file;
+        try {
+            ex = loadClass(file.getMain());
+        } catch (Exception e) {
+            throw new InvalidPluginException("Cannot find main class via ex`" + file.getMain() + "\'", e);
+        }
+        if (ex == null) {
+            throw new InvalidPluginException("Cannot find main class no ex `" + file.getMain() + "\'");
+        }
+        Class<? extends BubbleAddon> subclass;
+        try {
+            subclass = ex.asSubclass(BubbleAddon.class);
+        } catch (Exception e) {
+            throw new InvalidPluginException("main class `" + file.getMain() + "\' does not extend BubblePlugin", e);
+        }
+        try {
+            plugin = (BubbleAddon) subclass.newInstance();
+        } catch (Exception e) {
+            throw new InvalidPluginException("Error loading main class`" + file.getMain(), e);
+        }
+    }
+
+    public File getJar() {
         return jar;
     }
 

@@ -1,9 +1,8 @@
 package com.thebubblenetwork.api.framework.messages;
 
+import com.sun.istack.internal.Nullable;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.messages.bossbar.BubbleBarAPI;
 import com.thebubblenetwork.api.framework.messages.titlemanager.TitleMessanger;
-import com.thebubblenetwork.api.framework.util.version.VersionUTIL;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -30,14 +29,10 @@ public class Messages {
     }
 
     public static void sendMessageAction(Player p, String message) {
-        if (VersionUTIL.getVersion(p) == VersionUTIL.Version.V17) {
-            setBar(p, message);
-        } else {
-            try {
-                TitleMessanger.sendActionBar(p, message);
-            } catch (Throwable ex) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send actionbar",ex);
-            }
+        try {
+            TitleMessanger.sendActionBar(p, message);
+        } catch (Throwable ex) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send actionbar", ex);
         }
     }
 
@@ -49,35 +44,21 @@ public class Messages {
         sendMessageTitle(Arrays.asList(ps), title, subtitle, timing);
     }
 
-    public static void sendMessageTitle(
-            Iterable<? extends Player> ps, String title, String subtitle, TitleTiming timing) {
+    public static void sendMessageTitle(Iterable<? extends Player> ps, String title, String subtitle, TitleTiming timing) {
         for (Player p : ps) {
             sendMessageTitle(p, title, subtitle, timing);
         }
     }
 
-    public static void sendMessageTitle(Player p, String title, String subtitle, TitleTiming timing) {
-        if (VersionUTIL.getVersion(p) == VersionUTIL.Version.V17) {
-            setBar(p, title + "  " + subtitle);
-        } else {
-            sendTitleAndSubtitle(p, title, subtitle, timing);
-        }
-    }
-
-    @Deprecated
-    public static void sendTitleAndSubtitle(Player p, String title, String subtitle, TitleTiming timing) {
+    public static void sendMessageTitle(Player p, String title, @Nullable String subtitle, TitleTiming timing) {
         try {
-            TitleMessanger.sendTitle(p, TitleMessanger.ProtcolInjectorReflection.TITLE, title);
-            TitleMessanger.sendTitle(p, TitleMessanger.ProtcolInjectorReflection.SUBTITLE, subtitle);
-            TitleMessanger.sendTitle(p, TitleMessanger.ProtcolInjectorReflection.TIMES, timing.getIn(), timing.getShow(),
-                    timing.getOut());
+            TitleMessanger.sendTitle(p, title, TitleMessanger.ProtcolInjectorReflection.TITLE, timing.getIn(), timing.getShow(), timing.getOut());
+            if (subtitle != null) {
+                TitleMessanger.sendTitleNoTiming(p, subtitle, TitleMessanger.ProtcolInjectorReflection.SUBTITLE);
+            }
         } catch (Throwable throwable) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send title/subtitle");
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send title/subtitle");
         }
-    }
-
-    private static void setBar(Player p, String message) {
-        BubbleBarAPI.setBarDragonTimer(p, message, 2);
     }
 
     public static class TitleTiming {

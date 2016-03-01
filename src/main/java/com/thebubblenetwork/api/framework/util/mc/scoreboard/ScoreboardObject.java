@@ -20,16 +20,18 @@ public abstract class ScoreboardObject {
     }
 
     private void swapBuffer() {
-        for (Map.Entry<DisplaySlot, Objective> entry : buffer.entrySet())
+        for (Map.Entry<DisplaySlot, Objective> entry : buffer.entrySet()) {
             entry.getValue().setDisplaySlot(entry.getKey());
+        }
         Map<DisplaySlot, Objective> tempObjective = buffer;
         buffer = objective;
         objective = tempObjective;
     }
 
     private void updateBuffer(Iterable<ObjectiveUpdate> updates) {
-        for (ObjectiveUpdate update : updates)
+        for (ObjectiveUpdate update : updates) {
             updateBuffer(update);
+        }
     }
 
     private void updateBuffer(ObjectiveUpdate update) {
