@@ -3,11 +3,11 @@ package com.thebubblenetwork.api.framework;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
-import com.thebubblenetwork.api.global.player.BubblePlayerObject;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Copyright Statement
@@ -24,7 +24,7 @@ import java.util.UUID;
  * Date-created: 29/01/2016 16:56
  * Project: BubbleFramework
  */
-public class BukkitBubblePlayer extends BubblePlayerObject<Player> implements BubblePlayer<Player> {
+public class BukkitBubblePlayer extends BubblePlayer<Player>{
     public static BukkitBubblePlayer getObject(UUID u) {
         return (BukkitBubblePlayer) getPlayerObjectMap().get(u);
     }
@@ -42,6 +42,15 @@ public class BukkitBubblePlayer extends BubblePlayerObject<Player> implements Bu
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getData().getRaw()));
         } catch (IOException e) {
             BubbleNetwork.getInstance().logSevere("Failed to send data update: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(){
+        try {
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataResponse(getName(),getData().getRaw()));
+        } catch (IOException e) {
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send player data update",e);
         }
     }
 }
