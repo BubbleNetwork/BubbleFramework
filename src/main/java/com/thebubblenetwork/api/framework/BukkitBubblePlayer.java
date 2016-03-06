@@ -24,7 +24,7 @@ import java.util.logging.Level;
  * Date-created: 29/01/2016 16:56
  * Project: BubbleFramework
  */
-public class BukkitBubblePlayer extends BubblePlayer<Player>{
+public class BukkitBubblePlayer extends BubblePlayer<Player> {
     public static BukkitBubblePlayer getObject(UUID u) {
         return (BukkitBubblePlayer) getPlayerObjectMap().get(u);
     }
@@ -41,16 +41,12 @@ public class BukkitBubblePlayer extends BubblePlayer<Player>{
         try {
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getData().getRaw()));
         } catch (IOException e) {
-            BubbleNetwork.getInstance().logSevere("Failed to send data update: " + e.getMessage());
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Failed to send data update: ", e);
         }
     }
 
     @Override
-    public void update(){
-        try {
-            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(),new PlayerDataResponse(getName(),getData().getRaw()));
-        } catch (IOException e) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING,"Could not send player data update",e);
-        }
+    public void update() {
+        save();
     }
 }

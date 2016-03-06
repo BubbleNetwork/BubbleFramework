@@ -305,9 +305,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         setInstance(this);
         SQLConnection connection = BubbleNetwork.getInstance().getConnection();
         try {
-            BubbleNetwork.getInstance().logInfo("Finding map table");
+            BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Finding map table");
             if (!SQLUtil.tableExists(connection, MapData.maptable)) {
-                BubbleNetwork.getInstance().logInfo("Map table not found, creating new");
+                BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Map table not found, creating new");
                 //TODO - dynamic table creation
                 SQLUtil.createTable(connection, MapData.maptable, new ImmutableMap.Builder<String, Map.Entry<SQLUtil.SQLDataType, Integer>>().put("map", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, 32)).put("key", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).put("value", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).build());
                 BubbleNetwork.getInstance().endSetup("Created map table");

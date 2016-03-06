@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffect;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Copyright Statement
@@ -69,8 +70,7 @@ public class BubbleListener implements Listener {
         try {
             getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size() - 1));
         } catch (IOException e1) {
-            getNetwork().logSevere(e1.getMessage());
-            getNetwork().logSevere("Could not send playercount update");
+            getNetwork().getLogger().log(Level.WARNING, "Could not send playercount update", e1);
         }
     }
 
@@ -99,8 +99,7 @@ public class BubbleListener implements Listener {
         try {
             getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
         } catch (IOException e1) {
-            getNetwork().logSevere(e1.getMessage());
-            getNetwork().logSevere("Could not send playercount update");
+            getNetwork().getLogger().log(Level.INFO, "Could not send playercount update", e1);
         }
 
         for (PotionEffect effect : p.getActivePotionEffects()) {

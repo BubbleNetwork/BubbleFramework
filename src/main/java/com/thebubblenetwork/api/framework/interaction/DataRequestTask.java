@@ -7,6 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Copyright Statement
@@ -27,21 +28,21 @@ public class DataRequestTask extends BukkitRunnable {
     public static void setData(String name, Map<String, String> received) {
         if (taskMap.containsKey(name.toLowerCase())) {
             taskMap.remove(name.toLowerCase()).setResult(received);
-            BubbleNetwork.getInstance().logInfo("Received pending data for " + name);
+            BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Received pending data for " + name);
         } else {
-            BubbleNetwork.getInstance().logSevere("Set data for invalid player " + name);
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Set data for invalid player " + name);
         }
     }
 
     public static Map<String, String> requestAsync(String name) {
-        BubbleNetwork.getInstance().logInfo("Requesting data for " + name);
+        BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Requesting data for " + name);
         DataRequestTask task = new DataRequestTask(name);
         taskMap.put(name.toLowerCase(), task);
         task.runTask(BubbleNetwork.getInstance().getPlugin());
         while (taskMap.containsKey(name.toLowerCase())) {
 
         }
-        BubbleNetwork.getInstance().logInfo("Found data for " + name);
+        BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Found data for " + name);
         return task.getResult();
     }
 

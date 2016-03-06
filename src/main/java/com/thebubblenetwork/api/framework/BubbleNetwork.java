@@ -23,7 +23,6 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response
 import com.thebubblenetwork.api.global.file.PropertiesFile;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.plugin.BubbleHub;
-import com.thebubblenetwork.api.global.plugin.BubbleHubObject;
 import com.thebubblenetwork.api.global.ranks.Rank;
 import com.thebubblenetwork.api.global.type.ServerType;
 import de.mickare.xserver.XServerPlugin;
@@ -49,7 +48,7 @@ import java.util.logging.Logger;
  * Created by Jacob on 09/12/2015.
  */
 
-public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements BubbleHub<JavaPlugin>, PacketListener {
+public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListener {
     private static final Random random = new Random();
     private static final int VERSION = 9;
 
@@ -200,7 +199,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
     }
 
     public void onBubbleEnable() {
-        logInfo("Loading components");
+        getLogger().log(Level.INFO, "Loading components");
 
         file = getPlugin().getFile();
         registerListener(getListener());
@@ -209,21 +208,19 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         manager.register(getPlugin());
         getPacketHub().registerListener(this);
         plugman = new BukkitPlugman(getPlugin().getServer());
-
-        logInfo("Components have been loaded");
     }
 
     public void onBubbleLoad() {
         commandPlugin = new CommandPlugin();
 
-        logInfo("Finding addon folder");
+        getLogger().log(Level.INFO, "Loading the plugin...");
 
         if (!getPlugin().getDataFolder().exists()) {
-            logInfo("Creating addon folder");
+            getLogger().log(Level.INFO, "Creating addon folder");
             getPlugin().getDataFolder().mkdir();
         }
 
-        logInfo("Finding addons");
+        getLogger().log(Level.INFO, "Finding addons...");
 
         if (!getPlugin().getDataFolder().isDirectory()) {
             endSetup("Addon folder is not a directory");
@@ -239,7 +236,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
                 }
             }
         }
-        logInfo("Finished finding addons");
+        getLogger().log(Level.INFO, "Finished finding addons");
     }
 
     public void onBubbleDisable() {
@@ -250,8 +247,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         try {
             getPacketHub().sendMessage(getProxy(), new ServerShutdownRequest());
         } catch (IOException e) {
-            logSevere(e.getMessage());
-            logSevere("Could not send shutdown request");
+            getLogger().log(Level.WARNING, "Could not send shutdown request", e);
         }
     }
 
@@ -275,24 +271,23 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         int port;
         String ip;
 
-        logInfo("Finding default server properties...");
+        getLogger().log(Level.INFO, "Finding default server properties...");
 
         try {
             PropertiesFile thisserver = new PropertiesFile(new File("server.properties"));
             port = thisserver.getNumber("server-port").intValue();
             ip = (ip = thisserver.getString("server-ip")).equals("") ? "localhost" : ip;
         } catch (Exception e) {
-            //Automatic Catch Statement
-            logSevere(e.getMessage());
+            getLogger().log(Level.SEVERE, "Could not load this servers properties", e);
             endSetup("Could not load this servers properties");
             return;
         }
 
-        logInfo("Found default server properties");
+        getLogger().log(Level.INFO, "Found default server properties");
 
         this.FINALID = port - 10000;
 
-        logInfo("Creating xserver files");
+        getLogger().log(Level.INFO, "Creating xserver files");
 
         File xserverfolder = new File("plugins" + File.separator + "Xserver");
 
@@ -306,12 +301,12 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             try {
                 config.createNewFile();
             } catch (IOException e) {
-                logSevere(e.getMessage());
+                getLogger().log(Level.WARNING, "Could not create XServer configuration", e);
                 endSetup("Could not create xserver configuration");
             }
         }
 
-        logInfo("Loading XServer configuration...");
+        getLogger().log(Level.INFO, "Loading XServer configuration...");
 
         YamlConfiguration xserverconfig = YamlConfiguration.loadConfiguration(config);
         xserverconfig.set("useMotdForServername", false);
@@ -325,28 +320,24 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         xserverconfig.set("mysql.TableXGroups", "xserver_groups");
         xserverconfig.set("mysql.TableXServersGroups", "xserver_servergroups");
 
-        logInfo("Loaded XServer configuration");
-
-        logInfo("Saving XServer configuration...");
+        getLogger().log(Level.INFO, "Saving XServer configuration...");
 
         try {
             xserverconfig.save(config);
         } catch (IOException e) {
-            //Automatic Catch Statement
-            logSevere(e.getMessage());
-            endSetup("Could not save xserver files, plugin is disabling");
+            getLogger().log(Level.WARNING, "Could not save xserver files", e);
+            endSetup("Could not save xserver files");
         }
 
-        logSevere("Saved XServer configuration");
+        getLogger().log(Level.INFO, "Saved XServer configuration");
     }
 
     public Player getPlayer(UUID uuid) {
         return getPlugin().getServer().getPlayer(uuid);
     }
 
-    public void endSetup(String s) throws RuntimeException {
+    public void stop() {
         getPlugin().getServer().shutdown();
-        throw new RuntimeException(s);
     }
 
     public Logger getLogger() {
@@ -354,24 +345,6 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
             return getPlugin().getLogger();
         }
         return null;
-    }
-
-    public void logInfo(String s) {
-        Logger l = getLogger();
-        if (l != null) {
-            l.info(s);
-        } else {
-            System.out.println("[BubbleFramework] " + s);
-        }
-    }
-
-    public void logSevere(String s) {
-        Logger l = getLogger();
-        if (l != null) {
-            l.severe(s);
-        } else {
-            System.err.println("[BubbleFramework] " + s);
-        }
     }
 
     public AddonDescriptionFile getPlugin(String s) {
@@ -387,7 +360,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         if (getAssigned() == null) {
             throw new IllegalArgumentException("No addon found");
         }
-        logInfo("Disabling addon : " + getAssigned().getName());
+        getLogger().log(Level.INFO, "Disabling addon : " + getAssigned().getName());
         try {
             getAssigned().getLoader().close();
         } catch (IOException e) {
@@ -414,42 +387,51 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         }
         BubbleAddon plugin = loader.getPlugin();
         plugin.__init__(loader);
-        logInfo("Enabling addon: " + plugin.getName());
+        getLogger().log(Level.INFO, "Enabling addon: " + plugin.getName());
         assigned = plugin;
-        getAssigned().onLoad();
-        logInfo("Addon is loaded");
-        getAssigned().onEnable();
-        logInfo("Addon is enabled");
+        try {
+            getAssigned().onLoad();
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Error whilst loading " + plugin.getName(), e);
+            return;
+        }
+        getLogger().log(Level.INFO, "{0} is loaded");
+        try {
+            getAssigned().onEnable();
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Error whilst enabling " + plugin.getName(), e);
+            return;
+        }
+        getLogger().log(Level.INFO, "{0} is enabled");
     }
 
     public void onMessage(PacketInfo info, IPluginMessage message) {
         if (message instanceof AssignMessage) {
-            logInfo("Received assign message");
+            getLogger().log(Level.INFO, "Received assign message");
             AssignMessage assignMessage = (AssignMessage) message;
             this.type = assignMessage.getWrapperType();
             this.id = assignMessage.getId();
-            logInfo("ServerType: " + getType().getName() + " ID: " + String.valueOf(id));
+            getLogger().log(Level.INFO, "ServerType: {0} ID: {1}", new Object[]{type.getName(), id});
             this.proxy = info.getServer();
             AddonDescriptionFile addonfile = getPlugin(getType().getName());
             enableAddon(addonfile);
             try {
                 getPacketHub().sendMessage(info.getServer(), new AssignMessage(id, type));
             } catch (IOException e) {
-                logSevere(e.getMessage());
+                getLogger().log(Level.WARNING, "Could not send assign message", e);
                 endSetup("Could not send assign message");
             }
-            logInfo("Sent assign message!");
         } else if (message instanceof RankDataUpdate) {
             RankDataUpdate rankDataUpdate = (RankDataUpdate) message;
             Rank.loadRank(rankDataUpdate.getName(), rankDataUpdate.getData());
-            logInfo("Loaded rank: " + rankDataUpdate.getName());
+            getLogger().log(Level.INFO, "Loaded rank: " + rankDataUpdate.getName());
         } else if (message instanceof PlayerDataResponse) {
             PlayerDataResponse dataResponse = (PlayerDataResponse) message;
             Player player = Bukkit.getPlayer(dataResponse.getName());
             if (player != null) {
                 BubblePlayer<Player> bukkitBubblePlayer;
                 if ((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
-                    logSevere("Received data for a player which is not online " + dataResponse.getName());
+                    getLogger().log(Level.WARNING, "Received data for a player which is not online " + dataResponse.getName());
                 } else {
                     bukkitBubblePlayer.setData(dataResponse.getData());
                 }
@@ -465,17 +447,16 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
                     try {
                         getPacketHub().sendMessage(getProxy(), new PlayerDataResponse(request.getName(), player.getData().getRaw()));
                     } catch (IOException e1) {
-                        logSevere(e1.getMessage());
-                        logSevere("Could not save playerdata for " + request.getName());
+                        getLogger().log(Level.WARNING, "Could not save playerdata for " + request.getName(), e1);
                     }
                 } else {
-                    logSevere("BubblePlayer not found for data request " + request.getName());
+                    getLogger().log(Level.WARNING, "BubblePlayer not found for data request " + request.getName());
                 }
             } else {
-                logSevere("Player not found for data request " + request.getName());
+                getLogger().log(Level.WARNING, "Player not found for data request " + request.getName());
             }
         } else {
-            logSevere("Unsupported message " + message.getType().getName());
+            getLogger().log(Level.WARNING, "Unsupported message " + message.getType().getName());
         }
     }
 
@@ -530,7 +511,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         try {
             getPacketHub().sendMessage(getProxy(), new PlayerMoveRequest(p.getName(), server));
         } catch (IOException e) {
-            logSevere("Could not move player " + e.getMessage());
+            getLogger().log(Level.WARNING, "Could not move player ", e);
         }
     }
 
@@ -538,7 +519,7 @@ public class BubbleNetwork extends BubbleHubObject<JavaPlugin> implements Bubble
         try {
             getPacketHub().sendMessage(getProxy(), new PlayerMoveTypeRequest(p.getName(), server));
         } catch (IOException e) {
-            logSevere("Could not move player " + e.getMessage());
+            getLogger().log(Level.SEVERE, "Could not move player ", e);
         }
     }
 
