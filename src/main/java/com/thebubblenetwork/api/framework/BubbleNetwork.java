@@ -341,10 +341,10 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
     }
 
     public Logger getLogger() {
-        if (getPlugin() != null && getPlugin().isEnabled()) {
+        if (getPlugin() != null) {
             return getPlugin().getLogger();
         }
-        return null;
+        return Logger.getLogger("Minecraft","BubbleNetwork");
     }
 
     public AddonDescriptionFile getPlugin(String s) {
