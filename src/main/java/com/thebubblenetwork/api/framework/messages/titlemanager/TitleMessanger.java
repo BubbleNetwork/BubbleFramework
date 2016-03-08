@@ -60,18 +60,18 @@ public class TitleMessanger {
         return null;
     }
 
-    private static Object createTitle(String s, Object action, int in, int show, int out) throws Throwable {
-        return createTitleTiming(createComponent(s), action, in, show, out);
+    private static Object createTitle(String s, ProtcolInjectorReflection action, int in, int show, int out) throws Throwable {
+        return createTitleTiming(createComponent(s), action.get(), in, show, out);
     }
 
-    private static Object createTitle(String s, Object action) throws Throwable {
-        return createTitleNormal(createComponent(s), action);
+    private static Object createTitle(String s, ProtcolInjectorReflection action) throws Throwable {
+        return createTitleNormal(createComponent(s), action.get());
     }
 
     private static Object createAction(Object o) throws Throwable {
 
         try {
-            return PacketPlayOutChatConstructor.newInstance(o, 2);
+            return PacketPlayOutChatConstructor.newInstance(o, (byte)2);
         } catch (InstantiationException e) {
             throw e.getCause();
         } catch (IllegalAccessException e) {
@@ -114,11 +114,11 @@ public class TitleMessanger {
 
 
     public static void sendTitle(Player p, String message, ProtcolInjectorReflection action, int in, int show, int out) throws Throwable {
-        sendPacket(p, createTitle(message, action.get(), in, show, out));
+        sendPacket(p, createTitle(message, action, in, show, out));
     }
 
     public static void sendTitleNoTiming(Player p, String message, ProtcolInjectorReflection action) throws Throwable {
-        sendPacket(p, createTitle(message, action.get()));
+        sendPacket(p, createTitle(message, action));
     }
 
     public static void sendActionBar(Player p, String message) throws Throwable {
@@ -126,8 +126,8 @@ public class TitleMessanger {
     }
 
     private static Class<?> IChatBaseComponent, CraftPlayer, Packet, PacketPlayOutChat, PacketPlayOutTitle, EntityPlayer, PlayerConnection, ChatSerializer, EnumTitleAction;
-    private static Method getICBC, getHandle, sendPacket;
-    private static Field playerconnectionField, TITLE, SUBTITLE, CLEAR;
+    private static Method getICBC, getHandle, sendPacket,getEnumTitleAction;
+    private static Field playerconnectionField;
     private static Constructor<?> PacketPlayOutTitleConstructorTiming, PacketPlayOutChatConstructor, PacketPlayOutTitleConstructorNormal;
 
     static {
@@ -147,16 +147,14 @@ public class TitleMessanger {
 
             //Fields
             playerconnectionField = ReflectionUTIL.getField(EntityPlayer, "playerConnection", true);
-            TITLE = ReflectionUTIL.getField(EnumTitleAction, "TITLE", true);
-            SUBTITLE = ReflectionUTIL.getField(EnumTitleAction, "SUBTITLE", true);
-            CLEAR = ReflectionUTIL.getField(EnumTitleAction, "CLEAR", true);
 
             //Methods
             getICBC = ReflectionUTIL.getMethod(ChatSerializer, "a", true, String.class);
             getHandle = ReflectionUTIL.getMethod(CraftPlayer, "getHandle", true);
             sendPacket = ReflectionUTIL.getMethod(PlayerConnection, "sendPacket", true, Packet);
+            getEnumTitleAction = ReflectionUTIL.getMethod(EnumTitleAction,"a",true,String.class);
 
-            PacketPlayOutChatConstructor = ReflectionUTIL.getConstructor(PacketPlayOutChat, true, IChatBaseComponent, int.class);
+            PacketPlayOutChatConstructor = ReflectionUTIL.getConstructor(PacketPlayOutChat, true, IChatBaseComponent, byte.class);
             PacketPlayOutTitleConstructorTiming = ReflectionUTIL.getConstructor(PacketPlayOutTitle, true, EnumTitleAction, IChatBaseComponent, int.class, int.class, int.class);
             PacketPlayOutTitleConstructorNormal = ReflectionUTIL.getConstructor(PacketPlayOutTitle, true, EnumTitleAction, IChatBaseComponent);
         } catch (Throwable ex) {
@@ -167,20 +165,9 @@ public class TitleMessanger {
     public enum ProtcolInjectorReflection {
         TITLE, SUBTITLE, CLEAR;
 
-        protected Object get() throws IllegalAccessException {
-            switch (this) {
-                case TITLE:
-                    TitleMessanger.TITLE.setAccessible(true);
-                    return TitleMessanger.TITLE.get(null);
-                case SUBTITLE:
-                    TitleMessanger.SUBTITLE.setAccessible(true);
-                    return TitleMessanger.SUBTITLE.get(null);
-                case CLEAR:
-                    TitleMessanger.CLEAR.setAccessible(true);
-                    return TitleMessanger.CLEAR.get(null);
-                default:
-                    return null;
-            }
+        protected Object get() throws IllegalAccessException, InvocationTargetException {
+            getEnumTitleAction.setAccessible(true);
+            return TitleMessanger.getEnumTitleAction.invoke(null,toString());
         }
     }
 }

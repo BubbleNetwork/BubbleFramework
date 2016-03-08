@@ -57,7 +57,7 @@ public class Messages {
                 TitleMessanger.sendTitleNoTiming(p, subtitle, TitleMessanger.ProtcolInjectorReflection.SUBTITLE);
             }
         } catch (Throwable throwable) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send title/subtitle");
+            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send title/subtitle",throwable);
         }
     }
 
