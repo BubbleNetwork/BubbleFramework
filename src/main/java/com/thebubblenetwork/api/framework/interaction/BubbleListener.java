@@ -4,6 +4,7 @@ import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.PlayerCountUpdate;
 import com.thebubblenetwork.api.global.data.PlayerData;
+import com.thebubblenetwork.api.global.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -15,7 +16,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -96,7 +99,37 @@ public class BubbleListener implements Listener {
             }
             i++;
         }
-        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(), new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName()))));
+        BukkitBubblePlayer player = new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName())));
+        BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(), player);
+        //Sets up new permission attachment
+        final PermissionAttachment attachment = p.addAttachment(getNetwork().getPlugin());
+        //Doing async to prevent lag
+        final Rank playerRank = player.getRank();
+        new BukkitRunnable() {
+            public void run() {
+                Rank r = playerRank;
+                boolean b;
+                //Loop through all the rank permissions, top to bottom
+                while(r != null){
+                    for(Map.Entry<String,String> entry:r.getData().getRaw().entrySet()){
+                        String permission = entry.getKey();
+                        try{
+                            b = Boolean.parseBoolean(entry.getValue());
+                        }
+                        catch (Exception ex){
+                            //If parse fails
+                            continue;
+                        }
+                        //Skip if permission has been set in higher inheritance
+                        if(!attachment.getPermissible().isPermissionSet(permission)){
+                            //Set permission
+                            attachment.setPermission(permission,b);
+                        }
+                    }
+                    r = r.getInheritance();
+                }
+            }
+        }.runTaskAsynchronously(BubbleNetwork.getInstance().getPlugin());
         try {
             getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
         } catch (IOException e1) {
