@@ -1,7 +1,6 @@
 package com.thebubblenetwork.api.game.spectator;
 
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
-import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -62,7 +61,7 @@ public class PlayersList extends Menu implements Listener {
 
     @Override
     public ItemStack[] generate() {
-        ItemStack[] is = new ItemStack[MenuManager.getRoundedInventorySize(Bukkit.getOnlinePlayers().size() - BubbleGameAPI.getInstance().getGame().getSpectatorList().size())];
+        ItemStack[] is = new ItemStack[getRoundedInventorySize(Bukkit.getOnlinePlayers().size() - BubbleGameAPI.getInstance().getGame().getSpectatorList().size())];
         index = new HashMap<>();
         slots = new HashMap<>();
         int i = 0;

@@ -1,7 +1,6 @@
 package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.commands.CommandPlugin;
-import com.thebubblenetwork.api.framework.interaction.BubbleListener;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
@@ -9,7 +8,6 @@ import com.thebubblenetwork.api.framework.plugin.BubbleAddonLoader;
 import com.thebubblenetwork.api.framework.plugin.BukkitPlugman;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
-import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.global.bubblepackets.PacketInfo;
 import com.thebubblenetwork.api.global.bubblepackets.PacketListener;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.IPluginMessage;
@@ -109,7 +107,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
     private Set<Listener> listeners = new HashSet<>();
     private Set<BukkitTask> executed = new HashSet<>();
     private Set<Menu> registeredMenus = new HashSet<>();
-    private MenuManager manager = new MenuManager();
     private File file;
 
     public BubbleNetwork(P plugin) {
@@ -193,8 +190,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         listeners.clear();
     }
 
-    @Deprecated
-    public Set<Menu> listMenu() {
+    protected Set<Menu> listMenu() {
         return registeredMenus;
     }
 
@@ -205,7 +201,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         registerListener(getListener());
         commandPlugin.register(getPlugin());
         EnchantGlow.getGlow();
-        manager.register(getPlugin());
         getPacketHub().registerListener(this);
         plugman = new BukkitPlugman(getPlugin().getServer());
     }
@@ -257,10 +252,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
 
     public P getPlugin() {
         return plugin;
-    }
-
-    public MenuManager getManager() {
-        return manager;
     }
 
     public BubbleListener getListener() {

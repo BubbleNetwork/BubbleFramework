@@ -7,7 +7,6 @@ import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
-import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -68,7 +67,7 @@ public class KitSelection extends Menu {
     private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
 
     public KitSelection(Player p) {
-        super(inventoryname, MenuManager.getRoundedInventorySize(KitManager.getKits().size()));
+        super(inventoryname, getRoundedInventorySize(KitManager.getKits().size()));
         this.uuid = p.getUniqueId();
         this.player = BukkitBubblePlayer.getObject(p.getUniqueId());
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);

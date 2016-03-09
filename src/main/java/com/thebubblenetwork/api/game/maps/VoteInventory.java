@@ -5,7 +5,6 @@ import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
-import com.thebubblenetwork.api.framework.util.mc.menu.MenuManager;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -43,7 +42,7 @@ public class VoteInventory extends Menu {
     private static VoteInventory inventory;
 
     public VoteInventory(int gamemaps) {
-        super(display, MenuManager.getRoundedInventorySize(gamemaps));
+        super(display, getRoundedInventorySize(gamemaps));
         update();
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
     }

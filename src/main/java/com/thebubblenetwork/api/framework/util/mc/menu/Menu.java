@@ -15,6 +15,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class Menu implements InventoryHolder {
+    public static int getRoundedInventorySize(int items) {
+        return items + (9 - (items % 9));
+    }
 
     protected Inventory inventory;
     private int size;

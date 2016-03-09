@@ -1,7 +1,9 @@
-package com.thebubblenetwork.api.framework.interaction;
+package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
+import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.handshake.PlayerCountUpdate;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.ranks.Rank;
@@ -11,16 +13,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -81,6 +86,20 @@ public class BubbleListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitRemoval(PlayerQuitEvent e) {
         BukkitBubblePlayer.getPlayerObjectMap().remove(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
+        Player player = (Player) e.getWhoClicked();
+        Inventory inv = e.getView().getTopInventory();
+        for (Menu menu : new ArrayList<>(BubbleNetwork.getInstance().listMenu())) {
+            if (menu.getInventory() == inv) {
+                e.setCancelled(true);
+                if (e.getClickedInventory() == inv) {
+                    menu.click(player, e.getClick(), e.getSlot(), e.getCurrentItem());
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
