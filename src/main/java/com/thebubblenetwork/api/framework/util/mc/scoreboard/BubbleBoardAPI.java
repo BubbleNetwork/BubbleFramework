@@ -1,12 +1,10 @@
 package com.thebubblenetwork.api.framework.util.mc.scoreboard;
 
 import com.thebubblenetwork.api.framework.util.mc.chat.RandomColorCombo;
+import com.thebubblenetwork.api.global.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.*;
 
 import java.util.*;
 
@@ -37,6 +35,7 @@ public abstract class BubbleBoardAPI {
     private RandomColorCombo colorCombo = new RandomColorCombo(3);
     private ScoreboardObject object;
     private String name;
+    private Map<String,Team> rankteams = new HashMap<>();
     private Map<BoardPreset, Map<BoardModule, BoardScore>> modules = new HashMap<>();
 
     public BubbleBoardAPI(final String name, Map<DisplaySlot, String> displaynames) {
@@ -69,6 +68,25 @@ public abstract class BubbleBoardAPI {
                 scoreMap.put(module, new BoardScore(module, this));
             }
             modules.put(preset, scoreMap);
+        }
+    }
+
+    private Team setupTeam(Rank r){
+        Team t = getObject().getBoard().getTeam(r.getName());
+        if(t == null)t = getObject().getBoard().registerNewTeam(r.getName());
+        t.setPrefix(r.getPrefix() + " ");
+        rankteams.put(r.getName(),t);
+        return t;
+    }
+
+    public void applyRank(Rank r,Player p){
+        Team t = rankteams.containsKey(r.getName()) ? rankteams.get(r.getName()) : setupTeam(r);
+        t.addPlayer(p);
+    }
+
+    public void removeRank(Rank r,Player p){
+        if(rankteams.containsKey(r.getName())){
+            rankteams.get(r.getName()).removePlayer(p);
         }
     }
 
