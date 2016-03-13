@@ -2,7 +2,12 @@ package com.thebubblenetwork.api.framework.messages;
 
 import com.sun.istack.internal.Nullable;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.messages.titlemanager.TitleMessanger;
+import com.thebubblenetwork.api.framework.messages.titlemanager.ActionType;
+import com.thebubblenetwork.api.framework.messages.titlemanager.NMSTitles;
+import com.thebubblenetwork.api.framework.messages.titlemanager.types.SubtitleTitle;
+import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
+import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTitle;
+import com.thebubblenetwork.api.framework.messages.titlemanager.types.TitleTitle;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -29,70 +34,36 @@ public class Messages {
     }
 
     public static void sendMessageAction(Player p, String message) {
-        try {
-            TitleMessanger.sendActionBar(p, message);
-        } catch (Throwable ex) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send actionbar", ex);
-        }
+        NMSTitles.sendChat(p, ActionType.ACTION, message);
     }
 
-    public static void broadcastMessageTitle(String title, String subtitle, TitleTiming timing) {
+    public static void broadcastMessageTitle(@Nullable String title,@Nullable String subtitle,@Nullable TimingTicks timing) {
         sendMessageTitle(Bukkit.getOnlinePlayers(), title, subtitle, timing);
     }
 
-    public static void sendMessageTitle(Player[] ps, String title, String subtitle, TitleTiming timing) {
+    public static void sendMessageTitle(Player[] ps, String title,@Nullable String subtitle,@Nullable TimingTicks timing) {
         sendMessageTitle(Arrays.asList(ps), title, subtitle, timing);
     }
 
-    public static void sendMessageTitle(Iterable<? extends Player> ps, String title, String subtitle, TitleTiming timing) {
+    public static void sendMessageTitle(Iterable<? extends Player> ps,@Nullable String title,@Nullable String subtitle,@Nullable TimingTicks timing) {
         for (Player p : ps) {
             sendMessageTitle(p, title, subtitle, timing);
         }
     }
 
-    public static void sendMessageTitle(Player p, String title, @Nullable String subtitle, TitleTiming timing) {
+    public static void sendMessageTitle(Player p,@Nullable String title, @Nullable String subtitle,@Nullable TimingTicks timing) {
         try {
-            TitleMessanger.sendTitle(p, title, TitleMessanger.ProtcolInjectorReflection.TITLE, timing.getIn(), timing.getShow(), timing.getOut());
+            if(title != null) {
+                NMSTitles.sendTitle(p, new TitleTitle(title));
+            }
             if (subtitle != null) {
-                TitleMessanger.sendTitleNoTiming(p, subtitle, TitleMessanger.ProtcolInjectorReflection.SUBTITLE);
+                NMSTitles.sendTitle(p,new SubtitleTitle(subtitle));
+            }
+            if(timing != null){
+                NMSTitles.sendTitle(p,new TimingTitle(timing));
             }
         } catch (Throwable throwable) {
             BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not send title/subtitle",throwable);
-        }
-    }
-
-    public static class TitleTiming {
-        private int in, show, out;
-
-        public TitleTiming(int in, int show, int out) {
-            this.in = in;
-            this.show = show;
-            this.out = out;
-        }
-
-
-        public int getIn() {
-            return in;
-        }
-
-        public void setIn(int in) {
-            this.in = in;
-        }
-
-        public int getShow() {
-            return show;
-        }
-
-        public void setShow(int show) {
-            this.show = show;
-        }
-
-        public int getOut() {
-            return out;
-        }
-
-        public void setOut(int out) {
-            this.out = out;
         }
     }
 
