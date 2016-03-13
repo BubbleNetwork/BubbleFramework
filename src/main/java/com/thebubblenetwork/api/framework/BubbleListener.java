@@ -91,12 +91,14 @@ public class BubbleListener implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
-        Inventory inv = e.getView().getTopInventory();
-        for (Menu menu : new ArrayList<>(BubbleNetwork.getInstance().listMenu())) {
-            if (menu.getInventory() == inv) {
-                e.setCancelled(true);
-                if (e.getClickedInventory() == inv) {
-                    menu.click(player, e.getClick(), e.getSlot(), e.getCurrentItem());
+        Inventory inv = e.getInventory();
+        if(inv != null && e.getClickedInventory() != null) {
+            for (Menu menu : BubbleNetwork.getInstance().listMenu()) {
+                if (menu.getInventory().equals(inv)) {
+                    e.setCancelled(true);
+                    if (e.getClickedInventory().equals(inv)) {
+                        menu.click(player, e.getClick(), e.getSlot(), e.getCurrentItem());
+                    }
                 }
             }
         }
@@ -106,27 +108,22 @@ public class BubbleListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         int i = 0;
-        while (!data.containsKey(p.getName())) {
-            if (i == 4000) {
-                e.setJoinMessage(null);
-                e.getPlayer().kickPlayer(ChatColor.RED + "Server timed out");
-                return;
-            }
-            try {
-                Thread.sleep(1L);
-            } catch (InterruptedException e1) {
-            }
-            i++;
+        if(!data.containsKey(p.getName())){
+            p.kickPlayer("Server timed out");
+            throw new IllegalArgumentException("Player not found");
         }
-        BukkitBubblePlayer player = new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName())));
+        for (PotionEffect effect : p.getActivePotionEffects()) {
+            p.removePotionEffect(effect.getType());
+        }
+
+        final BukkitBubblePlayer player = new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName())));
         BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(), player);
         //Sets up new permission attachment
         final PermissionAttachment attachment = p.addAttachment(getNetwork().getPlugin());
-        //Doing async to prevent lag
-        final Rank playerRank = player.getRank();
-        new BukkitRunnable() {
-            public void run() {
-                Rank r = playerRank;
+        new Thread(){
+            @Override
+            public void run(){
+                Rank r = player.getRank();
                 boolean b;
                 //Loop through all the rank permissions, top to bottom
                 while(r != null){
@@ -140,25 +137,20 @@ public class BubbleListener implements Listener {
                             continue;
                         }
                         //Skip if permission has been set in higher inheritance
-                        if(!attachment.getPermissible().isPermissionSet(permission)){
+                        if(!attachment.getPermissions().containsKey(permission)){
                             //Set permission
                             attachment.setPermission(permission,b);
                         }
                     }
                     r = r.getInheritance();
                 }
+                try {
+                    getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
+                } catch (IOException e1) {
+                    getNetwork().getLogger().log(Level.INFO, "Could not send playercount update", e1);
+                }
             }
-        }.runTaskAsynchronously(BubbleNetwork.getInstance().getPlugin());
-        try {
-            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
-        } catch (IOException e1) {
-            getNetwork().getLogger().log(Level.INFO, "Could not send playercount update", e1);
-        }
-
-        for (PotionEffect effect : p.getActivePotionEffects()) {
-            p.removePotionEffect(effect.getType());
-        }
+        }.start();
     }
-
 
 }
