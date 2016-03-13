@@ -15,14 +15,26 @@ public class LobbyPreset extends BoardPreset {
     public static final String PLAYINGTITLE = ChatColor.BLUE + "" + ChatColor.BOLD + "Playing", RANKTITLE = ChatColor.BLUE + "" + ChatColor.BOLD + "Rank", TOKENSTITLE = ChatColor.BLUE + "" + ChatColor.BOLD + "Tokens", SITE = "thebubblenetwork", PLAYERNEED = "Players needed", STARTING = "Starting in";
 
     public LobbyPreset() {
-        super("Lobby", new BoardModuleBuilder("Playing", 12).withDisplay(PLAYINGTITLE).build(), new BoardModuleBuilder("PlayingValue", 11).withRandomDisplay().build(), new BoardModuleBuilder("Spacer1", 10).withRandomDisplay().build(), new BoardModuleBuilder("Rank", 9).withDisplay(RANKTITLE).build(), new BoardModuleBuilder("RankValue", 8).withRandomDisplay().
-                build(), new BoardModuleBuilder("Spacer2", 7).withRandomDisplay().build(), new BoardModuleBuilder("Tokens", 6).withDisplay(TOKENSTITLE).build(), new BoardModuleBuilder("TokensValue", 5).withRandomDisplay().build(), new BoardModuleBuilder("Spacer3", 4).withRandomDisplay().build(), new BoardModuleBuilder("Status", 3).withDisplay(ChatColor.BLUE.toString() + ChatColor.BOLD.toString()).build(), new BoardModuleBuilder("StatusValue", 2).withRandomDisplay().build(), new BoardModuleBuilder("Spacer4", 1).withRandomDisplay().build(), new BoardModuleBuilder("address", 0).withDisplay(SITE).build());
+        super("Lobby",
+                new BoardModuleBuilder("Playing", 12).withDisplay(PLAYINGTITLE).build(),
+                new BoardModuleBuilder("PlayingValue", 11).withRandomDisplay().build(),
+                new BoardModuleBuilder("Spacer1", 10).withRandomDisplay().build(),
+                new BoardModuleBuilder("Rank", 9).withDisplay(RANKTITLE).build(),
+                new BoardModuleBuilder("RankValue", 8).withRandomDisplay().
+                build(), new BoardModuleBuilder("Spacer2", 7).withRandomDisplay().build(),
+                new BoardModuleBuilder("Tokens", 6).withDisplay(TOKENSTITLE).build(),
+                new BoardModuleBuilder("TokensValue", 5).withRandomDisplay().build(),
+                new BoardModuleBuilder("Spacer3", 4).withRandomDisplay().build(),
+                new BoardModuleBuilder("Status", 3).withDisplay(ChatColor.BLUE.toString() + ChatColor.BOLD.toString()).build(),
+                new BoardModuleBuilder("StatusValue", 2).withRandomDisplay().build(),
+                new BoardModuleBuilder("Spacer4", 1).withRandomDisplay().build(),
+                new BoardModuleBuilder("address", 0).withRandomDisplay().build());
     }
 
     public void onEnable(BubbleBoardAPI board) {
         Team address = board.getScore(this, getModule("address")).getTeam();
-        address.setPrefix(ChatColor.GRAY + "play.");
-        address.setSuffix(".com");
+        address.setPrefix(ChatColor.GRAY + "play.thebubble");
+        address.setSuffix(ChatColor.GRAY + "network.com");
         BukkitBubblePlayer player = BukkitBubblePlayer.getObject(Bukkit.getPlayer(board.getName()).getUniqueId());
         BoardScore playingValue = board.getScore(this, getModule("PlayingValue"));
         playingValue.getTeam().setSuffix(BubbleGameAPI.getInstance().getName());
