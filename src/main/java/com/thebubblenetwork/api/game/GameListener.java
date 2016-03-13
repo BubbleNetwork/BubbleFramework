@@ -40,6 +40,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.*;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -61,7 +63,7 @@ public class GameListener implements Listener {
     private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
     private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR).withName(ChatColor.DARK_RED + "Go back to the lobby").withLore(ChatColor.RED + "Click this to go back to the lobby").withAmount(1).withGlow();
     private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS).withName(ChatColor.DARK_AQUA + "Spectator menu").withLore(ChatColor.GRAY + "Click this to open the spectator menu").withAmount(1);
-    private List<UUID> spectators = new ArrayList<>();
+    private List<UUID> spectators = Collections.synchronizedList(new ArrayList<UUID>());
     private Map<Location, Inventory> chests = new HashMap<>();
 
     public GameListener() {
@@ -178,7 +180,7 @@ public class GameListener implements Listener {
         p.spigot().setCollidesWithEntities(false);
         p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1), false);
         BubbleGameAPI.getInstance().getPlayerList().update();
-        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "You are now spectating", new Messages.TitleTiming(10, 30, 20));
+        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "You are now spectating", null);
     }
 
     private void disableSpectate(final Player p) {
@@ -201,10 +203,10 @@ public class GameListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerMetaSet(PlayerJoinEvent e) {
+    public void onSpectatorJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         for (Player t : Bukkit.getOnlinePlayers()) {
-            if (p != t) {
+            if (p.getUniqueId() != t.getUniqueId()) {
                 if (isSpectating(t)) {
                     p.hidePlayer(t);
                 } else {
@@ -239,6 +241,37 @@ public class GameListener implements Listener {
                 final Location l = toBlockLocation(c.getLocation());
                 if (chests.containsKey(l) && i.getViewers().size() <= 1) {
                     chests.remove(l);
+                }
+            }
+        }
+    }
+
+
+    @EventHandler
+    public void onPlayerVoidFall(PlayerMoveEvent e){
+        //Player is about to fall into the void
+        Player p = e.getPlayer();
+        if(e.getTo().getY() < 0) {
+            e.setCancelled(true);
+            if(isSpectating(p)){
+                //Facing direction, with upward Y
+                p.setVelocity(p.getLocation().getDirection().multiply(2.0D).setY(5.0D));
+            }
+            else {
+                switch (BubbleGameAPI.getInstance().getState()) {
+                    case LOBBY:
+                        p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
+                        break;
+                    case INGAME:
+                        //Fake Damage cause
+                        p.setLastDamageCause(new EntityDamageEvent(p, EntityDamageEvent.DamageCause.VOID, p.getHealth()));
+                        p.setHealth(0.0D);
+                        break;
+                    case ENDGAME:
+                        //Facing direction, with upward Y
+                        p.setVelocity(p.getLocation().getDirection().multiply(2.0D).setY(5.0D));
+                    default:
+                        break;
                 }
             }
         }
@@ -355,7 +388,7 @@ public class GameListener implements Listener {
         p.setFoodLevel(20);
         p.setLevel(0);
         p.setSaturation(600);
-        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), new Messages.TitleTiming(10, 20, 30));
+        Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), null);
         if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
             p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld("world")));
             p.setGameMode(GameMode.SURVIVAL);
@@ -460,7 +493,6 @@ public class GameListener implements Listener {
                     final Player p = (Player) e.getEntity();
                     if (isSpectating(p)) {
                         e.setCancelled(true);
-                    } else {
                     }
                     BubbleGameAPI.getInstance().runTask(new Runnable() {
                         public void run() {
