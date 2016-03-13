@@ -191,7 +191,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
     }
 
     protected Set<Menu> listMenu() {
-        return registeredMenus;
+        return new HashSet<>(registeredMenus);
     }
 
     public void onBubbleEnable() {
@@ -236,7 +236,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
 
     public void onBubbleDisable() {
         if (getAssigned() != null) {
-            getAssigned().onDisable();
+            disableAddon();
         }
         EnchantGlow.kill();
         try {
@@ -378,40 +378,41 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         }
         BubbleAddon plugin = loader.getPlugin();
         plugin.__init__(loader);
-        getLogger().log(Level.INFO, "Enabling addon: " + plugin.getName());
+        getLogger().log(Level.INFO, "{0} has been selected",addonfile.getName());
         assigned = plugin;
         try {
             getAssigned().onLoad();
         } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Error whilst loading " + plugin.getName(), e);
+            getLogger().log(Level.WARNING, "Error whilst loading " + addonfile.getName(), e);
             return;
         }
-        getLogger().log(Level.INFO, "{0} is loaded");
+        getLogger().log(Level.INFO, "{0} is loaded", addonfile.getName());
         try {
             getAssigned().onEnable();
         } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Error whilst enabling " + plugin.getName(), e);
+            getLogger().log(Level.WARNING, "Error whilst enabling " + addonfile.getName(), e);
             return;
         }
-        getLogger().log(Level.INFO, "{0} is enabled");
+        getLogger().log(Level.INFO, "{0} is enabled", addonfile.getName());
     }
 
     public void onMessage(PacketInfo info, IPluginMessage message) {
         if (message instanceof AssignMessage) {
             getLogger().log(Level.INFO, "Received assign message");
             AssignMessage assignMessage = (AssignMessage) message;
-            this.type = assignMessage.getWrapperType();
-            this.id = assignMessage.getId();
+            type = assignMessage.getWrapperType();
+            id = assignMessage.getId();
             getLogger().log(Level.INFO, "ServerType: {0} ID: {1}", new Object[]{type.getName(), id});
-            this.proxy = info.getServer();
-            AddonDescriptionFile addonfile = getPlugin(getType().getName());
-            enableAddon(addonfile);
+            proxy = info.getServer();
+            //Instant reply so Joinable update works
             try {
-                getPacketHub().sendMessage(info.getServer(), new AssignMessage(id, type));
+                getPacketHub().sendMessage(proxy, new AssignMessage(id, type));
             } catch (IOException e) {
                 getLogger().log(Level.WARNING, "Could not send assign message", e);
                 endSetup("Could not send assign message");
             }
+            AddonDescriptionFile addonfile = getPlugin(getType().getName());
+            enableAddon(addonfile);
         } else if (message instanceof RankDataUpdate) {
             RankDataUpdate rankDataUpdate = (RankDataUpdate) message;
             Rank.loadRank(rankDataUpdate.getName(), rankDataUpdate.getData());
