@@ -7,6 +7,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 /**
@@ -46,7 +48,7 @@ public class DataRequestTask extends BukkitRunnable {
         return task.getResult();
     }
 
-    private static Map<String, DataRequestTask> taskMap = new HashMap<>();
+    private static ConcurrentMap<String, DataRequestTask> taskMap = new ConcurrentHashMap<>();
     private String name;
     private Map<String, String> result = null;
 
