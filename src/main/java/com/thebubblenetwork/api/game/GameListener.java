@@ -1,10 +1,14 @@
 package com.thebubblenetwork.api.game;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
+import com.thebubblenetwork.api.game.scoreboard.GameBoard;
+import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -216,6 +220,8 @@ public class GameListener implements Listener {
         }
     }
 
+
+
     @EventHandler
     public void onEntityTargetSpectator(EntityTargetEvent e) {
         if (e.getTarget() instanceof Player && isSpectating((Player) e.getTarget())) {
@@ -379,6 +385,14 @@ public class GameListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerJoin(PlayerJoinEvent e) {
         final Player p = e.getPlayer();
+        BukkitBubblePlayer player = BukkitBubblePlayer.getObject(e.getPlayer().getUniqueId());
+        final GameBoard scoreboard = new GameBoard(player.getPlayer());
+        GameBoard.setBoard(p, scoreboard);
+        BoardPreset preset = BubbleGameAPI.getInstance().getState().getPreset();
+        if (preset != null) {
+            scoreboard.enable(preset);
+        }
+        player.getPlayer().setScoreboard(scoreboard.getObject().getBoard());
         p.setGameMode(GameMode.SURVIVAL);
         p.getInventory().setContents(generateSpawnInventory(4 * 9));
         p.getInventory().setArmorContents(new ItemStack[4]);
@@ -404,14 +418,42 @@ public class GameListener implements Listener {
                 }
             });
         }
+        new Thread(){
+            @Override
+            public void run() {
+                if(p.isOnline()) {
+                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(u);
+                    if (player != null) {
+                        for(GameBoard other: GameBoard.getBoards()){
+                            other.applyRank(player.getRank(),p);
+                        }
+                    }
+                    for(BubblePlayer other:BukkitBubblePlayer.getPlayerObjectMap().values()){
+                        scoreboard.applyRank(other.getRank(),(Player)other.getPlayer());
+                    }
+                }
+            }
+        }.start();
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
+        final Player p = e.getPlayer();
         setSpectating(e.getPlayer(), false);
         if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
             BubbleGameAPI.getInstance().cancelWaiting();
         }
+        GameBoard.removeBoard(p);
+        new Thread(){
+            @Override
+            public void run(){
+                for(GameBoard other:GameBoard.getBoards()){
+                    for(Team t:other.getObject().getBoard().getTeams()){
+                        t.removePlayer(p);
+                    }
+                }
+            }
+        }.start();
     }
 
     public boolean canDefault() {

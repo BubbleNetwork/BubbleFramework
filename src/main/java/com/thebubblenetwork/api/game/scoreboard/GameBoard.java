@@ -24,29 +24,16 @@ public class GameBoard extends SingleBubbleBoard {
         return boardMap.values();
     }
 
-    public static GameBoard getBoard(Player p) {
-        return boardMap.get(p.getUniqueId());
+    public static void setBoard(Player p,GameBoard board){
+        boardMap.put(p.getUniqueId(),board);
     }
 
-    public static void registerlistener(BubbleAddon api) {
-        api.registerListener(new Listener() {
-            @EventHandler
-            public void onPlayerJoin(PlayerJoinEvent e) {
-                BubblePlayer<Player> player = BukkitBubblePlayer.getObject(e.getPlayer().getUniqueId());
-                GameBoard board = new GameBoard(player.getPlayer());
-                boardMap.put(player.getPlayer().getUniqueId(), board);
-                BoardPreset preset = BubbleGameAPI.getInstance().getState().getPreset();
-                if (preset != null) {
-                    board.enable(preset);
-                }
-                player.getPlayer().setScoreboard(board.getObject().getBoard());
-            }
+    public static void removeBoard(Player p){
+        boardMap.remove(p.getUniqueId());
+    }
 
-            @EventHandler
-            public void onPlayerQuit(PlayerQuitEvent e) {
-                boardMap.remove(e.getPlayer().getUniqueId());
-            }
-        });
+    public static GameBoard getBoard(Player p) {
+        return boardMap.get(p.getUniqueId());
     }
 
     private static Map<DisplaySlot, String> displayname = Collections.singletonMap(DisplaySlot.SIDEBAR, BubbleNetwork.getPrefix());

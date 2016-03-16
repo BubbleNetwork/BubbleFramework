@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.kit;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
@@ -48,12 +49,13 @@ public class Kit {
     }
 
     public boolean isOwned(BukkitBubblePlayer player) {
-        return this == BubbleGameAPI.getInstance().getDefaultKit() || player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(getNameClear());
+        return this == BubbleGameAPI.getInstance().getDefaultKit() || getLevel(player) > 0;
     }
 
     public int getLevel(BukkitBubblePlayer player) {
-        if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(getNameClear())) {
-            return player.getKits(BubbleGameAPI.getInstance().getName()).get(getNameClear());
+        int level = player.getKit(BubbleGameAPI.getInstance().getName(),getName());
+        if(level > 0){
+            return level;
         }
         return BubbleGameAPI.getInstance().getDefaultKit() == this ? 1 : 0;
     }

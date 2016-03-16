@@ -21,6 +21,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -107,7 +109,6 @@ public class BubbleListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        int i = 0;
         if(!data.containsKey(p.getName())){
             p.kickPlayer("Server timed out");
             throw new IllegalArgumentException("Player not found");
@@ -116,41 +117,14 @@ public class BubbleListener implements Listener {
             p.removePotionEffect(effect.getType());
         }
 
-        final BukkitBubblePlayer player = new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName())));
+        BukkitBubblePlayer player = new BukkitBubblePlayer(p.getUniqueId(), new PlayerData(data.remove(p.getName())));
         BukkitBubblePlayer.getPlayerObjectMap().put(p.getUniqueId(), player);
-        //Sets up new permission attachment
-        final PermissionAttachment attachment = p.addAttachment(getNetwork().getPlugin());
-        new Thread(){
-            @Override
-            public void run(){
-                Rank r = player.getRank();
-                boolean b;
-                //Loop through all the rank permissions, top to bottom
-                while(r != null){
-                    for(Map.Entry<String,String> entry:r.getData().getRaw().entrySet()){
-                        String permission = entry.getKey();
-                        try{
-                            b = Boolean.parseBoolean(entry.getValue());
-                        }
-                        catch (Exception ex){
-                            //If parse fails
-                            continue;
-                        }
-                        //Skip if permission has been set in higher inheritance
-                        if(!attachment.getPermissions().containsKey(permission)){
-                            //Set permission
-                            attachment.setPermission(permission,b);
-                        }
-                    }
-                    r = r.getInheritance();
-                }
-                try {
-                    getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
-                } catch (IOException e1) {
-                    getNetwork().getLogger().log(Level.INFO, "Could not send playercount update", e1);
-                }
-            }
-        }.start();
+
+        try {
+            getNetwork().getPacketHub().sendMessage(getNetwork().getProxy(), new PlayerCountUpdate(Bukkit.getOnlinePlayers().size()));
+        } catch (IOException e1) {
+            getNetwork().getLogger().log(Level.INFO, "Could not send playercount update", e1);
+        }
     }
 
 }

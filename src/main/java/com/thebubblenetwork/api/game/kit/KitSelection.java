@@ -110,7 +110,7 @@ public class KitSelection extends Menu {
                 } else {
                     rightclick = ChatColor.GOLD + "You have mastered this kit";
                 }
-            } else if (player.getKits(BubbleGameAPI.getInstance().getName()).containsKey(k.getNameClear())) {
+            } else if (k.isOwned(player)) {
                 status += ChatColor.GRAY + "Unselected";
                 int level = k.getLevel(player);
                 builder.withLore(ChatColor.GREEN + "       Level: " +
