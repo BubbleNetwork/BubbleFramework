@@ -15,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -103,6 +104,15 @@ public class BubbleListener implements Listener {
                     }
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerPreproccessCommand(PlayerCommandPreprocessEvent e){
+        BukkitBubblePlayer player = BukkitBubblePlayer.getObject(e.getPlayer().getUniqueId());
+        if(!player.isAuthorized("ingame.bypass")){
+            e.getPlayer().sendMessage(ChatColor.DARK_AQUA + "(!) Could not find a command with that name");
+            e.setCancelled(true);
         }
     }
 

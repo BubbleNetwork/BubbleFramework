@@ -44,7 +44,12 @@ public class KitSelection extends Menu {
         plugin.registerListener(new Listener() {
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent e) {
-                BubbleNetwork.getInstance().unregisterMenu(menuMap.get(e.getPlayer().getUniqueId()));
+                try {
+                    BubbleNetwork.getInstance().unregisterMenu(menuMap.get(e.getPlayer().getUniqueId()));
+                }
+                catch (Exception ex){
+
+                }
             }
         });
     }

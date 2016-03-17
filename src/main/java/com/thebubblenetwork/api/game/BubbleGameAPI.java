@@ -351,7 +351,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             BubbleNetwork.getInstance().endSetup("Could not get map table");
         }
         KitSelection.register(this);
-        GameBoard.registerlistener(this);
         listener = new GameListener();
         hubInventory = new LobbyInventory();
         list = new PlayersList();

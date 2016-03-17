@@ -1,6 +1,5 @@
 package com.thebubblenetwork.api.framework;
 
-import com.thebubblenetwork.api.framework.commands.CommandPlugin;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
@@ -93,13 +92,12 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
 
     private static BubbleNetwork instance;
     private static String prefix = ChatColor.BLUE + "[" + ChatColor.AQUA + "" + ChatColor.BOLD + "BubbleNetwork" +
-            ChatColor.BLUE + "] " + ChatColor.GRAY;
+            ChatColor.BLUE + "] " + ChatColor.RESET;
     private static String chatFormat = "{prefix}{name}{suffix}{message}";
     public int FINALID;
     private ServerType type;
     private int id;
     private P plugin;
-    private CommandPlugin commandPlugin;
     private XServer proxy;
     private BubbleAddon assigned;
     private BubbleListener listener = new BubbleListener(this);
@@ -199,15 +197,12 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
 
         file = getPlugin().getFile();
         registerListener(getListener());
-        commandPlugin.register(getPlugin());
         EnchantGlow.getGlow();
         getPacketHub().registerListener(this);
         plugman = new BukkitPlugman(getPlugin().getServer());
     }
 
     public void onBubbleLoad() {
-        commandPlugin = new CommandPlugin();
-
         getLogger().log(Level.INFO, "Loading the plugin...");
 
         if (!getPlugin().getDataFolder().exists()) {

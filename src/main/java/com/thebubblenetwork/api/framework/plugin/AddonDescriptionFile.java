@@ -68,7 +68,6 @@ public final class AddonDescriptionFile {
     private String description = null;
     private List<String> authors = null;
     private String prefix = null;
-    private short priority = LoadPriority.NORMAL;
 
     public AddonDescriptionFile(InputStream stream) throws InvalidDescriptionException {
         this.loadMap(this.asMap(((Yaml) YAML.get()).load(stream)));
@@ -168,10 +167,6 @@ public final class AddonDescriptionFile {
             this.description = map.get("description").toString();
         }
 
-        if (map.get("priority") != null) {
-            this.priority = Byte.parseByte(map.get("priority").toString());
-        }
-
         Object ex4;
         if (map.get("authors") != null) {
             com.google.common.collect.ImmutableList.Builder ex2 = ImmutableList.builder();
@@ -234,11 +229,6 @@ public final class AddonDescriptionFile {
             throw new InvalidDescriptionException(object + " is not properly structured.");
         }
     }
-
-    public short getPriority() {
-        return priority;
-    }
-
 
     @Deprecated
     public String getRawName() {

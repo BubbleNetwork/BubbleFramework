@@ -422,7 +422,7 @@ public class GameListener implements Listener {
             @Override
             public void run() {
                 if(p.isOnline()) {
-                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(u);
+                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
                     if (player != null) {
                         for(GameBoard other: GameBoard.getBoards()){
                             other.applyRank(player.getRank(),p);
