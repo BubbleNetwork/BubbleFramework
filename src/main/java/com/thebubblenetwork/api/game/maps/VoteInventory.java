@@ -36,7 +36,7 @@ public class VoteInventory extends Menu {
     }
 
     public static void reset() {
-
+        inventory = null;
     }
 
     private static VoteInventory inventory;
@@ -47,16 +47,15 @@ public class VoteInventory extends Menu {
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
     }
 
-    @Override
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (itemStack != null && slot < GameMap.getMaps().size()) {
             GameMap map = GameMap.getMaps().get(slot);
             if (BubbleGameAPI.getInstance().getVotes().containsKey(player.getUniqueId()) && BubbleGameAPI.getInstance().getVotes().get(player.getUniqueId()).getMap().equals(map)) {
                 BubbleGameAPI.getInstance().resetVotes(player.getUniqueId());
-                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your voted for ").withColor(ChatColor.BLUE).append(map.getName()).withColor(ChatColor.GRAY).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GOLD).join(map.getDescription())))).build());
+                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" +ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
             } else {
                 BubbleGameAPI.getInstance().addVote(player.getUniqueId(), map);
-                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You have voted for ").withColor(ChatColor.BLUE).append(map.getName()).withColor(ChatColor.GRAY).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GOLD).join(map.getDescription())))).build());
+                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You have voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
             }
             player.playSound(player.getLocation(), click, 1f, 1f);
             update();
@@ -68,7 +67,7 @@ public class VoteInventory extends Menu {
         Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
         int i = 0;
         for (GameMap map : GameMap.getMaps()) {
-            is[i] = builder.clone().withName(map.getName()).withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore(map.getDescription()).build();
+            is[i] = builder.clone().withName(map.getName()).withLore("\n").withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore("\n").withLore(Joiner.on("\n" + ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())).build();
             i++;
         }
         return is;

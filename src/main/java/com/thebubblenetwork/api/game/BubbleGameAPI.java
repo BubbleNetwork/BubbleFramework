@@ -81,12 +81,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
             api.teleportPlayers(api.chosenmap, api.chosen);
             for (Player p : Bukkit.getOnlinePlayers()) {
-                PlayerInventory inventory = p.getInventory();
                 Kit k = KitSelection.getSelection(p).getKit();
                 BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
-                int level = k.getLevel(player);
-                inventory.setContents(k.getInventorypreset(level));
-                inventory.setArmorContents(k.getArmorpreset(level));
+                k.apply(player);
             }
             api.timer = new GameTimer(20, 5) {
                 public void run(int seconds) {

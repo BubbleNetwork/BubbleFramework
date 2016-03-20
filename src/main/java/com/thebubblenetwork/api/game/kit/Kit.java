@@ -4,6 +4,7 @@ import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.chat.ChatColorAppend;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,37 +16,25 @@ import java.util.List;
  */
 public class Kit {
     private final String name;
-    private final int maxlevel;
     private Material display;
-    private ItemStack[][] inventorypreset;
-    private ItemStack[][] armorpreset;
+    private List<ItemStack[]> inventorypreset;
     private String[] description;
     private int price;
     private KitBuyInventory buyInventory;
 
-    public Kit(Material display, List<ItemStack[]> inventorypreset, List<ItemStack[]> armorpreset, String name, String[] description, int maxlevel, int price) {
-        if (maxlevel < 1) {
-            throw new IllegalArgumentException("Maxlevel too low");
-        }
-        if (inventorypreset.size() != maxlevel || armorpreset.size() != maxlevel) {
-            throw new IllegalArgumentException("Invalid levels");
-        }
+    public Kit(Material display, List<ItemStack[]> inventorypreset, String name, String[] description, int price) {
+        Validate.notEmpty(inventorypreset);
+        Validate.noNullElements(inventorypreset);
         this.display = display;
-        this.inventorypreset = new ItemStack[maxlevel][];
+        this.inventorypreset = inventorypreset;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.maxlevel = maxlevel;
-        this.armorpreset = new ItemStack[maxlevel][];
         buyInventory = new KitBuyInventory(this);
-        for (int i = 0; i < maxlevel; i++) {
-            this.inventorypreset[i] = inventorypreset.get(i);
-            this.armorpreset[i] = armorpreset.get(i);
-        }
     }
 
     public int getMaxlevel() {
-        return maxlevel;
+        return inventorypreset.size();
     }
 
     public boolean isOwned(BukkitBubblePlayer player) {
@@ -62,10 +51,10 @@ public class Kit {
 
     public int getLevelUpcost(BukkitBubblePlayer player) {
         int level = getLevel(player);
-        if (level == maxlevel) {
+        if (level == getMaxlevel()) {
             return -1;
         }
-        return (price * (level + 1)) / (maxlevel - level);
+        return (price * (level + 1)) / (getMaxlevel() - level);
     }
 
     public void apply(BukkitBubblePlayer p) {
@@ -73,7 +62,6 @@ public class Kit {
         int level = getLevel(p);
         bukkitPlayer.getInventory().clear();
         bukkitPlayer.getInventory().setArmorContents(new ItemStack[4]);
-        bukkitPlayer.getInventory().setArmorContents(getArmorpreset(level));
         bukkitPlayer.getInventory().setContents(getInventorypreset(level));
     }
 
@@ -99,19 +87,11 @@ public class Kit {
     }
 
     public ItemStack[] getInventorypreset(int level) {
-        return inventorypreset[level - 1];
-    }
-
-    public ItemStack[] getArmorpreset(int level) {
-        return armorpreset[level - 1];
+        return inventorypreset.get(level-1);
     }
 
     public void setInventorypreset(ItemStack[] inventorypreset, int level) {
-        this.inventorypreset[level - 1] = inventorypreset;
-    }
-
-    public void setInventorypreset(ItemStack[][] inventorypreset) {
-        this.inventorypreset = inventorypreset;
+        this.inventorypreset.set(level-1,inventorypreset);
     }
 
     public Material getDisplay() {

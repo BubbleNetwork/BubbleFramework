@@ -2,10 +2,7 @@ package com.thebubblenetwork.api.framework.util.mc.chat;
 
 import com.google.common.collect.Iterables;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,55 +24,77 @@ public class MessageUtil {
         return textComponents;
     }
 
-    public static class MessageBuilder implements Cloneable {
-        private final List<BaseComponent> components = new ArrayList<>();
-
-        private MessageBuilder() {
-
+    public static class MessageBuilder extends ComponentBuilder implements Cloneable {
+        public MessageBuilder(ComponentBuilder original) {
+            super(original);
         }
 
-        public MessageBuilder(String s) {
-            components.add(new TextComponent(s));
+        public MessageBuilder(String text) {
+            super(text);
+        }
+        @Override
+        public MessageBuilder reset() {
+            return (MessageBuilder)super.reset();
         }
 
-        private BaseComponent getFirst() {
-            return Iterables.getLast(components);
+        @Override
+        public MessageBuilder retain(FormatRetention retention) {
+            return (MessageBuilder)super.retain(retention);
         }
 
-        public MessageBuilder withEvent(HoverEvent event) {
-            getFirst().setHoverEvent(event);
-            return this;
+        @Override
+        public MessageBuilder event(HoverEvent hoverEvent) {
+            return (MessageBuilder)super.event(hoverEvent);
         }
 
-        public MessageBuilder withEvent(ClickEvent event) {
-            getFirst().setClickEvent(event);
-            return this;
+        @Override
+        public MessageBuilder event(ClickEvent clickEvent) {
+            return (MessageBuilder)super.event(clickEvent);
         }
 
-        public MessageBuilder withColor(ChatColor color) {
-            getFirst().setColor(color);
-            return this;
+        @Override
+        public MessageBuilder obfuscated(boolean obfuscated) {
+            return (MessageBuilder)super.obfuscated(obfuscated);
         }
 
-        public MessageBuilder append(String s) {
-            components.add(new TextComponent(s));
-            return this;
+        @Override
+        public MessageBuilder underlined(boolean underlined) {
+            return (MessageBuilder)super.underlined(underlined);
         }
 
-        public MessageBuilder withExtra(BaseComponent component, BaseComponent... components) {
-            this.components.add(component);
-            this.components.addAll(Arrays.asList(components));
-            return this;
+        @Override
+        public MessageBuilder strikethrough(boolean strikethrough) {
+            return (MessageBuilder)super.strikethrough(strikethrough);
         }
 
-        public BaseComponent[] build() {
-            return components.toArray(new BaseComponent[0]);
+        @Override
+        public MessageBuilder italic(boolean italic) {
+            return (MessageBuilder)super.italic(italic);
         }
 
-        public MessageBuilder clone() {
-            MessageBuilder instance = new MessageBuilder();
-            instance.components.addAll(components);
-            return instance;
+        @Override
+        public MessageBuilder bold(boolean bold) {
+            return (MessageBuilder)super.bold(bold);
+        }
+
+        @Override
+        public MessageBuilder color(ChatColor color) {
+            return (MessageBuilder)super.color(color);
+        }
+
+        @Override
+        public MessageBuilder append(String text) {
+            return (MessageBuilder)super.append(text);
+        }
+
+        @Override
+        public MessageBuilder append(String text, FormatRetention retention) {
+            return (MessageBuilder)super.append(text, retention);
+        }
+
+        @Override
+        public MessageBuilder clone(){
+            return new MessageBuilder(this);
         }
     }
 }

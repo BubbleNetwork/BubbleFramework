@@ -9,6 +9,7 @@ import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -48,7 +49,6 @@ public class KitSelection extends Menu {
                     BubbleNetwork.getInstance().unregisterMenu(menuMap.get(e.getPlayer().getUniqueId()));
                 }
                 catch (Exception ex){
-
                 }
             }
         });
@@ -63,8 +63,8 @@ public class KitSelection extends Menu {
     }
 
     private static Sound selectkit = Sound.LEVEL_UP, buykit = Sound.NOTE_BASS, noaccess = Sound.BLAZE_DEATH;
-    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ").withColor(ChatColor.BLUE);
-    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").withColor(ChatColor.RED);
+    private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ").color(ChatColor.BLUE);
+    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").color(ChatColor.RED);
     private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
     private static Map<UUID, Menu> menuMap = new HashMap<>();
     private UUID uuid;
@@ -159,18 +159,18 @@ public class KitSelection extends Menu {
             Kit k = KitManager.getKits().get(slot);
             BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
             if (type == ClickType.LEFT) {
-                MessageUtil.MessageBuilder description = new MessageUtil.MessageBuilder(k.getName()).append("\n").append("\n");
+                ComponentBuilder description = new ComponentBuilder(k.getName()).append("\n").append("\n");
                 for (String s : k.getDescription()) {
-                    description.append(s).withColor(ChatColor.GRAY).append("\n");
+                    description.append(s).color(ChatColor.GRAY).italic(true).append("\n");
                 }
                 if (k.isOwned(bubblePlayer)) {
                     player.playSound(player.getLocation().getBlock().getLocation(), selectkit, 1f, 1f);
                     this.kit = k;
-                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                     update();
                 } else {
                     player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
-                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).withEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.build())).build());
+                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                 }
             } else if (type == ClickType.RIGHT) {
                 player.playSound(player.getLocation().getBlock().getLocation(), buykit, 1f, 1f);
