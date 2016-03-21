@@ -183,6 +183,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 }
             }
 
+            //Removing timer
+            api.timer = null;
+
             //Removing chosen gamemap
             api.chosen = null;
             api.chosenmap = null;
