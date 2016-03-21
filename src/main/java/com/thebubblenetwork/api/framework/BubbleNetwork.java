@@ -349,10 +349,14 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         getLogger().log(Level.INFO, "Disabling addon : " + getAssigned().getName());
         try {
             getAssigned().getLoader().close();
-        } catch (IOException e) {
-            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin");
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin", e);
         }
-        getAssigned().onDisable();
+        try{
+            getAssigned().onDisable();
+        } catch (Exception e) {
+            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin", e);
+        }
         unregisterListener();
         unregisterTasks();
         unregisterMenus();
