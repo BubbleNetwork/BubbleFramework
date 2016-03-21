@@ -77,6 +77,8 @@ public class KitLevelUpInventory extends BuyInventory {
     public void onAllow(Player player) {
         BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
         getKit().level(bubblePlayer, getLevel());
+        KitSelection.getSelection(player).update();
+        player.closeInventory();
         KitSelection.openMenu(player);
         player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
     }

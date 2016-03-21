@@ -42,7 +42,7 @@ public class Kit {
     }
 
     public int getLevel(BukkitBubblePlayer player) {
-        int level = player.getKit(BubbleGameAPI.getInstance().getName(),getName());
+        int level = player.getKit(BubbleGameAPI.getInstance().getName(),getNameClear());
         if(level > 0){
             return level;
         }
@@ -71,7 +71,6 @@ public class Kit {
 
     public void level(BukkitBubblePlayer player, int level) {
         player.setKit(BubbleGameAPI.getInstance().getName(), getNameClear(), level);
-        player.save();
     }
 
     public KitBuyInventory getBuyInventory() {
