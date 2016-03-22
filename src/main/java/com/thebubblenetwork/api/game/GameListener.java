@@ -528,14 +528,16 @@ public class GameListener implements Listener {
                     return;
                 }
             }
-            if (e.getEntity() instanceof Player) {
-                if (canDefault()) {
+        }
+        if (e.getEntity() instanceof Player) {
+            if (canDefault()) {
+                e.setCancelled(true);
+            } else {
+                final Player p = (Player) e.getEntity();
+                if (isSpectating(p)) {
                     e.setCancelled(true);
-                } else {
-                    final Player p = (Player) e.getEntity();
-                    if (isSpectating(p)) {
-                        e.setCancelled(true);
-                    }
+                }
+                else {
                     BubbleGameAPI.getInstance().runTask(new Runnable() {
                         public void run() {
                             if (p.isOnline() && !isSpectating(p)) {
