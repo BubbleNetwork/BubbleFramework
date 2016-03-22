@@ -174,11 +174,17 @@ public class KitSelection extends Menu {
                 }
             } else if (type == ClickType.RIGHT) {
                 player.playSound(player.getLocation().getBlock().getLocation(), buykit, 1f, 1f);
-                if (k.isOwned(bubblePlayer)) {
-                    KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
-                    kitLevelUpInventory.show(player);
+                if (k.isOwned(bubblePlayer) && k.getLevel(bubblePlayer) <= k.getMaxlevel()) {
+                    if(bubblePlayer.canAfford(k.getLevelUpcost(bubblePlayer))) {
+                        KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
+                        kitLevelUpInventory.show(player);
+                    }
+                    else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
                 } else {
-                    k.getBuyInventory().show(player);
+                    if(bubblePlayer.canAfford(kit.getPrice())) {
+                        k.getBuyInventory().show(player);
+                    }
+                    else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
                 }
             }
         }

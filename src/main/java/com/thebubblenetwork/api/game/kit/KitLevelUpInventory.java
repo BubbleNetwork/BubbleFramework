@@ -76,10 +76,14 @@ public class KitLevelUpInventory extends BuyInventory {
 
     public void onAllow(Player player) {
         BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
-        getKit().level(bubblePlayer, getLevel());
-        KitSelection.getSelection(player).update();
-        player.closeInventory();
-        KitSelection.openMenu(player);
-        player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
+        if(bubblePlayer.canAfford(getCost())) {
+            bubblePlayer.setTokens(bubblePlayer.getTokens() - cost);
+            getKit().level(bubblePlayer, getLevel());
+            KitSelection.getSelection(player).update();
+            player.closeInventory();
+            KitSelection.openMenu(player);
+            player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
+        }
+        else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
     }
 }

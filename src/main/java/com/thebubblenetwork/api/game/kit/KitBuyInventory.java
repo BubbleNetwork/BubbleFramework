@@ -34,11 +34,15 @@ public class KitBuyInventory extends BuyInventory {
 
     public void onAllow(Player player) {
         BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
-        getKit().buy(bubblePlayer);
-        KitSelection.getSelection(player).update();
-        player.closeInventory();
-        KitSelection.openMenu(player);
-        player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
+        if(bubblePlayer.canAfford(getKit().getPrice())) {
+            bubblePlayer.setTokens(bubblePlayer.getTokens() - getKit().getPrice());
+            getKit().buy(bubblePlayer);
+            KitSelection.getSelection(player).update();
+            player.closeInventory();
+            KitSelection.openMenu(player);
+            player.playSound(player.getLocation().getBlock().getLocation(), BUYKIT, 1f, 1f);
+        }
+        else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
     }
 
     public Kit getKit() {
