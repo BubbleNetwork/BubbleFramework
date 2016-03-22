@@ -85,7 +85,7 @@ public abstract class GameMap {
         FileUTIL.deleteDir(folder);
     }
 
-    private static void extractMap(GameMap map) {
+    public static void extractMap(GameMap map) {
         File mapto = new File(map.getName());
         if (mapto.exists()) {
             FileUTIL.deleteDir(mapto);
@@ -110,7 +110,7 @@ public abstract class GameMap {
         }
     }
 
-    private static World setupMap(GameMap map) {
+    public static World setupMap(GameMap map) {
         World world = Bukkit.getWorld(map.getName());
         if (world != null) {
             return world;

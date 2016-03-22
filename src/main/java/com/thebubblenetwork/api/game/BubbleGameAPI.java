@@ -70,15 +70,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if (newstate == State.PREGAME) {
             api.chosenmap = calculateMap(api);
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
-            for (World w : Bukkit.getWorlds()) {
-                if (!w.getName().equals("world") && !w.getName().equals(lobbyworld) && !w.getName().equals(api.chosenmap.getName())) {
-                    File file = w.getWorldFolder();
-                    Bukkit.unloadWorld(w, false);
-                    if (!file.delete()) {
-                        file.deleteOnExit();
-                    }
-                }
-            }
             api.teleportPlayers(api.chosenmap, api.chosen);
             for (Player p : Bukkit.getOnlinePlayers()) {
                 Kit k = KitSelection.getSelection(p).getKit();
@@ -158,8 +149,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             GameMap.doMaps();
             //Start lobby phase
             api.setState(State.LOBBY);
-            //Setting up vote inventory
-            api.voteInventory = new VoteInventory(GameMap.getMaps().size());
         }
 
         if (newstate == State.RESTARTING) {
@@ -168,17 +157,14 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 p.teleport(getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
             }
 
-            //Don't want a spare inventory floating around
-            BubbleNetwork.getInstance().unregisterMenu(api.getVoteInventory());
-
             //Any cleanup tasks
             api.cleanup();
 
-            //Unloading all worlds
-            for(World w:Bukkit.getWorlds()){
-                if(!w.getName().equals("world") && !w.getName().equals(lobbyworld)){
-                    File folder = w.getWorldFolder();
-                    Bukkit.unloadWorld(w,false);
+            if(api.getChosen() != null){
+                World chosen = api.getChosen();
+                File folder = chosen.getWorldFolder();
+                Bukkit.unloadWorld(chosen, false);
+                if(folder.exists()){
                     FileUTIL.deleteDir(folder);
                 }
             }
@@ -211,6 +197,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
                 p.setGameMode(GameMode.SURVIVAL);
             }
+            api.cancelWaiting();
 
             //After 10 seconds we check whether we can start the game again
             new BubbleRunnable(){
@@ -478,8 +465,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
 
             public void end() {
+                GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);
-                setState(State.LOADING);
+                GameMap.extractMap(chosen);
+                GameMap.setupMap(chosen);
+                setState(State.LOBBY);
             }
         };
         p.setAllowFlight(true);
