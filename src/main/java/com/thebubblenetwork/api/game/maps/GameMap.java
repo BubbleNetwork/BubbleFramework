@@ -82,7 +82,6 @@ public abstract class GameMap {
         for (GameMap m : getMaps()) {
             extractMap(m);
         }
-        FileUTIL.deleteDir(folder);
     }
 
     public static void extractMap(GameMap map) {
@@ -122,7 +121,7 @@ public abstract class GameMap {
         return w;
     }
 
-    private static List<GameMap> maps = new ArrayList<GameMap>();
+    private static List<GameMap> maps = new ArrayList<>();
     private static File folder = new File("Maps");
     private File yml, zip;
     private MapData data;
