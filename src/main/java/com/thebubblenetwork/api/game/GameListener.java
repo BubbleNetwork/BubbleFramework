@@ -471,7 +471,7 @@ public class GameListener implements Listener {
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
                 if (slot == MAPSLOT) {
-                    VoteInventory.getVoteInventory().show(p);
+                    BubbleGameAPI.getInstance().getVoteInventory().show(p);
                 } else if (slot == KITSLOT) {
                     KitSelection.openMenu(p);
                 } else if (slot == LOBBYSLOT) {

@@ -28,19 +28,6 @@ public class VoteInventory extends Menu {
     private static final Sound click = Sound.SUCCESSFUL_HIT;
     private static final ItemStackBuilder builder = new ItemStackBuilder(Material.EMPTY_MAP);
 
-    public static VoteInventory getVoteInventory() {
-        if (inventory == null) {
-            inventory = new VoteInventory(GameMap.getMaps().size());
-        }
-        return inventory;
-    }
-
-    public static void reset() {
-        inventory = null;
-    }
-
-    private static VoteInventory inventory;
-
     public VoteInventory(int gamemaps) {
         super(display, getRoundedInventorySize(gamemaps));
         update();

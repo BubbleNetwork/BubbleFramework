@@ -147,6 +147,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if (newstate == State.LOADING) {
             //Load maps
             GameMap.doMaps();
+
+            api.voteInventory = new VoteInventory(GameMap.getMaps().size());
             //Start lobby phase
             api.setState(State.LOBBY);
         }
@@ -182,9 +184,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         if (newstate == State.LOBBY) {
+            Location spawn = getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld));
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.teleport(getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
-                p.setGameMode(GameMode.SURVIVAL);
+                p.teleport(spawn);
                 p.getInventory().setContents(GameListener.generateSpawnInventory(4 * 9));
                 p.getInventory().setArmorContents(new ItemStack[4]);
                 p.setHealth(20.0D);
@@ -353,7 +355,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         Bukkit.unloadWorld(lobbyworld, false);
         FileUTIL.deleteDir(new File(lobbyworld));
         KitSelection.unregister();
-        VoteInventory.reset();
         setInstance(null);
     }
 
