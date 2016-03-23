@@ -518,7 +518,7 @@ public class GameListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDamage(EntityDamageEvent e) {
         if (e instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent damageByEntityEvent = (EntityDamageByEntityEvent) e;
