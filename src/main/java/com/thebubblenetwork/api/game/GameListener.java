@@ -17,9 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -141,15 +139,9 @@ public class GameListener implements Listener {
             return;
         }
         spectators.add(p.getUniqueId());
-        Entity temp = null;
         p.setGameMode(GameMode.ADVENTURE);
-        for (Iterator<Entity> iterator = p.getNearbyEntities(100d, 100d, 100d).iterator(); iterator.hasNext(); temp = iterator.next()) {
-            if (temp != null && temp instanceof Creature) {
-                Creature c = (Creature) temp;
-                if (c.getTarget() == p) {
-                    c.setTarget(null);
-                }
-            }
+        for(Monster e:p.getWorld().getEntitiesByClass(Monster.class)){
+            if(e.getTarget() == p)e.setTarget(null);
         }
         for (Player target : Bukkit.getOnlinePlayers()) {
             if (isSpectating(target)) {
