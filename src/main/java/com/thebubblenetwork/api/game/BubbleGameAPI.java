@@ -111,7 +111,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
             //Downloading
             try {
-                DownloadUtil.download(tempzip, LOBBYMAP);
+                DownloadUtil.download(tempzip, LOBBYMAP, BubbleNetwork.getInstance().getFTP());
             } catch (Exception e) {
                 BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not download lobby", e);
                 break Change;

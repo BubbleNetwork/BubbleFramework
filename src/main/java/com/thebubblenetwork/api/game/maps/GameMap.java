@@ -65,8 +65,8 @@ public abstract class GameMap {
             File zip = new File(downloadto + ".zip");
             File yml = new File(downloadto + ".yml");
             try {
-                DownloadUtil.download(zip, data.getValue().getZip());
-                DownloadUtil.download(yml, data.getValue().getYaml());
+                DownloadUtil.download(zip, data.getValue().getZip(), BubbleNetwork.getInstance().getFTP());
+                DownloadUtil.download(yml, data.getValue().getYaml(), BubbleNetwork.getInstance().getFTP());
             } catch (Exception e) {
                 BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not download map", e);
             }
