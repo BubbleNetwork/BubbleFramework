@@ -6,7 +6,6 @@ import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
 import com.thebubblenetwork.api.game.kit.KitSelection;
-import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
@@ -44,8 +43,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.bukkit.util.*;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -328,28 +325,28 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
-        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked()))) {
+        if (e.getWhoClicked() instanceof Player && (canDefault(true) || isSpectating((Player) e.getWhoClicked()))) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        if (e.getWhoClicked() instanceof Player && (canDefault() || isSpectating((Player) e.getWhoClicked()))) {
+        if (e.getWhoClicked() instanceof Player && (canDefault(true) || isSpectating((Player) e.getWhoClicked()))) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onPlayerPickupItem(PlayerPickupItemEvent e) {
-        if (canDefault() || isSpectating(e.getPlayer())) {
+        if (canDefault(false) || isSpectating(e.getPlayer())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent e) {
-        if (canDefault() || isSpectating(e.getPlayer())) {
+        if (canDefault(false) || isSpectating(e.getPlayer())) {
             e.setCancelled(true);
         }
     }
@@ -357,7 +354,7 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onBlockCanBuild(BlockCanBuildEvent e) {
-        if (canDefault()) {
+        if (canDefault(false)) {
             e.setBuildable(false);
         } else {
             Block b = e.getBlock();
@@ -456,17 +453,21 @@ public class GameListener implements Listener {
         }.start();
     }
 
-    public boolean canDefault() {
-        return (BubbleGameAPI.getInstance().getState() != BubbleGameAPI.State.INGAME);
+    public boolean canDefault(boolean pregame) {
+        return (BubbleGameAPI.getInstance().getState() != BubbleGameAPI.State.INGAME && (!pregame || BubbleGameAPI.getInstance().getState() != BubbleGameAPI.State.PREGAME));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
-        if (canDefault()) {
-            e.setCancelled(true);
-            e.setUseInteractedBlock(Event.Result.DENY);
-            e.setUseItemInHand(Event.Result.DENY);
+        if (canDefault(false)) {
+            if(canDefault(true)){
+                e.setCancelled(true);
+            }
+            else {
+                e.setUseInteractedBlock(Event.Result.DENY);
+                e.setUseItemInHand(Event.Result.ALLOW);
+            }
             if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY &&
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
@@ -530,7 +531,7 @@ public class GameListener implements Listener {
             }
         }
         if (e.getEntity() instanceof Player) {
-            if (canDefault()) {
+            if (canDefault(true)) {
                 e.setCancelled(true);
             } else {
                 final Player p = (Player) e.getEntity();
@@ -552,14 +553,14 @@ public class GameListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onBlockDamage(BlockDamageEvent e) {
-        if (canDefault() || isSpectating(e.getPlayer())) {
+        if (canDefault(true) || isSpectating(e.getPlayer())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerFoodChange(FoodLevelChangeEvent e) {
-        if (e.getEntity() instanceof Player && (canDefault() || isSpectating((Player) e.getEntity()))) {
+        if (e.getEntity() instanceof Player && (canDefault(true) || isSpectating((Player) e.getEntity()))) {
             e.setFoodLevel(20);
         }
     }
