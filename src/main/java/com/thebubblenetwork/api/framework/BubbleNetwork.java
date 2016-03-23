@@ -17,7 +17,9 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerMoveTypeRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
+import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
+import com.thebubblenetwork.api.global.file.SSLUtil;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.plugin.BubbleHub;
 import com.thebubblenetwork.api.global.ranks.Rank;
@@ -30,6 +32,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -49,8 +52,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
     private static final Random random = new Random();
     private static final int VERSION = 9;
 
-    protected static Map<AddonDescriptionFile, File> loaderList = new HashMap<>();
-
     public static String getChatFormat() {
         return chatFormat;
     }
@@ -67,27 +68,8 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         return random;
     }
 
-    public static Map<AddonDescriptionFile, File> getLoaderList() {
-        return loaderList;
-    }
-
     public static BubbleNetwork getInstance() {
         return instance;
-    }
-
-    public static BubbleAddonLoader register(AddonDescriptionFile plugin) {
-        if (plugin == null) {
-            throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        File file = getLoaderList().get(plugin);
-        if (file == null) {
-            throw new IllegalArgumentException("Could not find file");
-        }
-        try {
-            return new BubbleAddonLoader(file, plugin);
-        } catch (Throwable throwable) {
-            throw new IllegalArgumentException(throwable);
-        }
     }
 
     private static BubbleNetwork instance;
@@ -211,22 +193,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         }
 
         getLogger().log(Level.INFO, "Finding addons...");
-
-        if (!getPlugin().getDataFolder().isDirectory()) {
-            endSetup("Addon folder is not a directory");
-        }
-
-        for (File f : getPlugin().getDataFolder().listFiles()) {
-            if (f.getName().endsWith(".jar")) {
-                try {
-                    AddonDescriptionFile file = BubbleAddonLoader.getPluginDescription(f);
-                    getLoaderList().put(file, f);
-                } catch (Throwable ex) {
-                    getLogger().log(Level.WARNING, "Error whilst finding addon " + f.getName(), ex);
-                }
-            }
-        }
-        getLogger().log(Level.INFO, "Finished finding addons");
     }
 
     public void onBubbleDisable() {
@@ -333,15 +299,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         return Logger.getLogger("Minecraft","BubbleNetwork");
     }
 
-    public AddonDescriptionFile getPlugin(String s) {
-        for (AddonDescriptionFile bubblePlugin : getLoaderList().keySet()) {
-            if (bubblePlugin.getName().equalsIgnoreCase(s)) {
-                return bubblePlugin;
-            }
-        }
-        return null;
-    }
-
     public void disableAddon() {
         if (getAssigned() == null) {
             throw new IllegalArgumentException("No addon found");
@@ -360,39 +317,67 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         unregisterListener();
         unregisterTasks();
         unregisterMenus();
+        File jar = assigned.getLoader().getJar();
+        if(!jar.delete()){
+            jar.deleteOnExit();
+        }
         assigned = null;
     }
 
-    public void enableAddon(AddonDescriptionFile addonfile) {
+    public boolean enableAddon(ServerType type) {
         if (getAssigned() != null) {
             disableAddon();
         }
-        if (addonfile == null) {
-            endSetup("Could not find assigned addon");
+        try {
+            SSLUtil.allowAnySSL();
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Error allowing all SSL connections", e);
         }
-        BubbleAddonLoader loader = register(addonfile);
-        if (loader == null) {
-            endSetup("Could not find assigned addon");
-            return;
+        if(!getPlugin().getDataFolder().exists()){
+            getPlugin().getDataFolder().mkdir();
+        }
+        File jar = new File(getPlugin().getDataFolder(),type.getName() + ".jar");
+        try{
+            DownloadUtil.download(jar, type.getDownload());
+        }
+        catch (Exception ex){
+            getLogger().log(Level.WARNING, "Error downloading addon", ex);
+            return false;
+        }
+        AddonDescriptionFile file;
+        try {
+            file = BubbleAddonLoader.getPluginDescription(jar);
+        } catch (InvalidDescriptionException e) {
+            getLogger().log(Level.WARNING, "Error getting addon description file", e);
+            return false;
+        }
+        BubbleAddonLoader loader;
+        try{
+            loader = new BubbleAddonLoader(jar, file);
+        }
+        catch (Exception ex){
+            getLogger().log(Level.WARNING, "Failed to load addon", ex);
+            return false;
         }
         BubbleAddon plugin = loader.getPlugin();
         plugin.__init__(loader);
-        getLogger().log(Level.INFO, "{0} has been selected",addonfile.getName());
+        getLogger().log(Level.INFO, "{0} has been selected", file.getName());
         assigned = plugin;
         try {
             getAssigned().onLoad();
         } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Error whilst loading " + addonfile.getName(), e);
-            return;
+            getLogger().log(Level.WARNING, "Error whilst loading " + file.getName(), e);
+            return false;
         }
-        getLogger().log(Level.INFO, "{0} is loaded", addonfile.getName());
+        getLogger().log(Level.INFO, "{0} is loaded", file.getName());
         try {
             getAssigned().onEnable();
         } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Error whilst enabling " + addonfile.getName(), e);
-            return;
+            getLogger().log(Level.WARNING, "Error whilst enabling " + file.getName(), e);
+            return false;
         }
-        getLogger().log(Level.INFO, "{0} is enabled", addonfile.getName());
+        getLogger().log(Level.INFO, "{0} is enabled", file.getName());
+        return true;
     }
 
     public void onMessage(PacketInfo info, IPluginMessage message) {
@@ -410,8 +395,10 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
                 getLogger().log(Level.WARNING, "Could not send assign message", e);
                 endSetup("Could not send assign message");
             }
-            AddonDescriptionFile addonfile = getPlugin(getType().getName());
-            enableAddon(addonfile);
+            if(!enableAddon(type)){
+                if(getAssigned() != null)disableAddon();
+                endSetup("Could not setup addon");
+            }
         } else if (message instanceof RankDataUpdate) {
             RankDataUpdate rankDataUpdate = (RankDataUpdate) message;
             Rank.loadRank(rankDataUpdate.getName(), rankDataUpdate.getData());
@@ -420,7 +407,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
             PlayerDataResponse dataResponse = (PlayerDataResponse) message;
             Player player = Bukkit.getPlayer(dataResponse.getName());
             if (player != null) {
-                BubblePlayer<Player> bukkitBubblePlayer;
+                BukkitBubblePlayer bukkitBubblePlayer;
                 if ((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
                     getLogger().log(Level.WARNING, "Received data for a player which is not online " + dataResponse.getName());
                 } else {
