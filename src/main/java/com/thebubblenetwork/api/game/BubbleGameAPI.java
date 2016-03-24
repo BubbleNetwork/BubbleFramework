@@ -48,7 +48,7 @@ import java.util.logging.Level;
  * Created by Jacob on 12/12/2015.
  */
 public abstract class BubbleGameAPI extends BubbleAddon {
-    private static final String LOBBYMAP = "https://www.dropbox.com/s/0f6o78rpvd2oka3/world.zip?dl=1";
+    private static final String LOBBYMAP = "world.zip";
 
     public static Vector getLobbySpawn() {
         return new Vector(0D, 50D, 0D);
