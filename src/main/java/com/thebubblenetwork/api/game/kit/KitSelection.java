@@ -46,7 +46,7 @@ public class KitSelection extends Menu {
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent e) {
                 try {
-                    BubbleNetwork.getInstance().unregisterMenu(menuMap.get(e.getPlayer().getUniqueId()));
+                    BubbleNetwork.getInstance().unregisterMenu(menuMap.remove(e.getPlayer().getUniqueId()));
                 }
                 catch (Exception ex){
                 }
@@ -55,18 +55,19 @@ public class KitSelection extends Menu {
     }
 
     public static KitSelection getSelection(Player p) {
-        KitSelection k = (KitSelection) menuMap.get(p.getUniqueId());
-        if (k == null) {
-            k = new KitSelection(p);
+        if(!menuMap.containsKey(p.getUniqueId())){
+            KitSelection selection = new KitSelection(p);
+            menuMap.put(p.getUniqueId(), selection);
+            return selection;
         }
-        return k;
+        return menuMap.get(p.getUniqueId());
     }
 
     private static Sound selectkit = Sound.LEVEL_UP, buykit = Sound.NOTE_BASS, noaccess = Sound.BLAZE_DEATH;
     private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ").color(ChatColor.BLUE);
     private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").color(ChatColor.RED);
     private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
-    private static Map<UUID, Menu> menuMap = new HashMap<>();
+    private static Map<UUID, KitSelection> menuMap = new HashMap<>();
     private UUID uuid;
     private BukkitBubblePlayer player;
     private Kit kit = BubbleGameAPI.getInstance().getDefaultKit();
