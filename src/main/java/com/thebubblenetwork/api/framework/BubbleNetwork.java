@@ -27,6 +27,7 @@ import com.thebubblenetwork.api.global.type.ServerType;
 import de.mickare.xserver.XServerPlugin;
 import de.mickare.xserver.net.XServer;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.CitizensPlugin;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -36,6 +37,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -183,8 +185,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         registerListener(getListener());
         EnchantGlow.getGlow();
         plugman = new BukkitPlugman(getPlugin().getServer());
-
-        CitizensAPI.getNPCRegistry().deregisterAll();
         getPacketHub().registerListener(this);
     }
 
