@@ -184,9 +184,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             api.chosen = null;
             api.chosenmap = null;
 
-            //Resetting votes & maps
+            //Resetting votes
             api.getVotes().clear();
-            GameMap.getMaps().clear();
         }
 
         if (newstate == State.LOBBY) {
@@ -378,6 +377,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         cosmeticsManager.clearUp();
 
         KitSelection.unregister();
+        //Safe
+        GameMap.getMaps().clear();
         setInstance(null);
     }
 
