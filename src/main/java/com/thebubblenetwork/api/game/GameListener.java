@@ -53,15 +53,17 @@ public class GameListener implements Listener {
         is[MAPSLOT] = mapselection.build();
         is[KITSLOT] = kitselection.build();
         is[LOBBYSLOT] = LOBBYITEM.build();
+        is[COSMETICSSLOT] = cosmetics.build();
         return is;
     }
 
-    private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER).withName(ChatColor.DARK_AQUA + "Maps").withLore(ChatColor.GRAY + "Click to vote for a map").withAmount(1);
-    private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE).withName(ChatColor.DARK_AQUA + "Kits").withLore(ChatColor.GRAY + "Click to select or buy a kit").withAmount(1);
+    private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER).withName(ChatColor.DARK_AQUA + "Maps").withLore(ChatColor.GRAY + "Click to vote for a map");
+    private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE).withName(ChatColor.DARK_AQUA + "Kits").withLore(ChatColor.GRAY + "Click to select or buy a kit");
+    private static ItemStackBuilder cosmetics = new ItemStackBuilder(Material.BLAZE_POWDER).withName(ChatColor.AQUA + "Cosmetics").withLore(ChatColor.GRAY + "Click to open the cosmetics menu");
     private static String ghostteam = "GHOST";
-    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
-    private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR).withName(ChatColor.DARK_RED + "Go back to the lobby").withLore(ChatColor.RED + "Click this to go back to the lobby").withAmount(1).withGlow();
-    private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS).withName(ChatColor.DARK_AQUA + "Spectator menu").withLore(ChatColor.GRAY + "Click this to open the spectator menu").withAmount(1);
+    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8,COSMETICSSLOT = 7;
+    private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR).withName(ChatColor.DARK_RED + "Go back to the lobby").withLore(ChatColor.RED + "Click to go back to the lobby").withAmount(1).withGlow();
+    private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS).withName(ChatColor.DARK_AQUA + "Spectator menu").withLore(ChatColor.GRAY + "Click to open the spectator menu").withAmount(1);
     private List<UUID> spectators = Collections.synchronizedList(new ArrayList<UUID>());
     private Map<Location, Inventory> chests = new HashMap<>();
 
@@ -469,6 +471,8 @@ public class GameListener implements Listener {
                     KitSelection.openMenu(p);
                 } else if (slot == LOBBYSLOT) {
                     BubbleGameAPI.getInstance().getHubInventory().show(p);
+                } else if(slot == COSMETICSSLOT){
+                    BubbleGameAPI.getInstance().getCosmeticsManager().unsafe().create().openMenu(p);
                 }
             }
         } else if (isSpectating(p)) {
@@ -491,7 +495,7 @@ public class GameListener implements Listener {
                                 if (chests.containsKey(l)) {
                                     inventory = chests.get(l);
                                 } else {
-                                    inventory = Bukkit.createInventory(chest, chest.getInventory().getSize(), chest.getInventory().getName());
+                                    inventory = Bukkit.createInventory(chest, chest.getInventory().getType());
                                     inventory.setContents(chest.getInventory().getContents());
                                     chests.put(l, inventory);
                                 }

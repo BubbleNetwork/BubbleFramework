@@ -501,6 +501,10 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         p.setFlying(true);
     }
 
+    public CosmeticsManager getCosmeticsManager() {
+        return cosmeticsManager;
+    }
+
     public ServerType getType() {
         return ServerType.getType(type);
     }
