@@ -3,6 +3,7 @@ package com.thebubblenetwork.api.game;
 import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.cosmetics.CosmeticsManager;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
@@ -68,6 +69,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
         }
         if (newstate == State.PREGAME) {
+            api.cosmeticsManager.disable();
             api.chosenmap = calculateMap(api);
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             api.teleportPlayers(api.chosenmap, api.chosen);
@@ -143,6 +145,10 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             FileUTIL.deleteDir(temp);
             FileUTIL.setPermissions(worldfolder,true,true,true);
             new WorldCreator(BubbleGameAPI.lobbyworld).generateStructures(false).generator(VoidWorldGenerator.getGenerator()).createWorld();
+
+            //Getting ultracosmetics
+            api.cosmeticsManager.download();
+            api.cosmeticsManager.load();
         }
         if (newstate == State.LOADING) {
             //Load maps
@@ -184,6 +190,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         if (newstate == State.LOBBY) {
+            api.cosmeticsManager.enable();
             Location spawn = getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld));
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.teleport(spawn);
@@ -264,6 +271,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private String defaultkit;
     private String type;
     private int minplayers;
+    private CosmeticsManager cosmeticsManager = new CosmeticsManager(BubbleNetwork.getInstance());
 
     public BubbleGameAPI(String type, GameMode defaultgamemode, String defaultkit, int minplayers) {
         super();
@@ -354,6 +362,21 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         setState(State.RESTARTING);
         Bukkit.unloadWorld(lobbyworld, false);
         FileUTIL.deleteDir(new File(lobbyworld));
+
+        //Getting rid of cosmetics
+        if(Bukkit.getPluginManager().isPluginEnabled("UltraCosmetics")) {
+            cosmeticsManager.disable();
+        }
+
+        //We don't want anything being thrown here
+        try{
+            cosmeticsManager.unload();
+        }
+        catch (Exception ex){
+        }
+
+        cosmeticsManager.clearUp();
+
         KitSelection.unregister();
         setInstance(null);
     }
