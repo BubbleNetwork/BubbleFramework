@@ -1,9 +1,11 @@
 package com.thebubblenetwork.api.framework.player;
 
+import com.thebubblenetwork.api.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
@@ -49,5 +51,13 @@ public class BukkitBubblePlayer extends BubblePlayer<Player> {
     @Override
     public void update() {
         save();
+        //Call event - Async
+        new Thread(){
+            @Override
+            public void run() {
+                //Doesn't change before & after but nothing can be done
+                Bukkit.getServer().getPluginManager().callEvent(new PlayerDataReceivedEvent(getPlayer(), getData()));
+            }
+        }.start();
     }
 }

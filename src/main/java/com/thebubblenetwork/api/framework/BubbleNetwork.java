@@ -410,17 +410,22 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
             Rank.loadRank(rankDataUpdate.getName(), rankDataUpdate.getData());
             getLogger().log(Level.INFO, "Loaded rank: " + rankDataUpdate.getName());
         } else if (message instanceof PlayerDataResponse) {
-            PlayerDataResponse dataResponse = (PlayerDataResponse) message;
-            Player player = Bukkit.getPlayer(dataResponse.getName());
+            final PlayerDataResponse dataResponse = (PlayerDataResponse) message;
+            final Player player = Bukkit.getPlayer(dataResponse.getName());
             if (player != null) {
-                BukkitBubblePlayer bukkitBubblePlayer;
+                final BukkitBubblePlayer bukkitBubblePlayer;
                 if ((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
                     getLogger().log(Level.WARNING, "Received data for a player which is not online " + dataResponse.getName());
                 } else {
-                    //Call event
-                    PlayerDataReceivedEvent event = new PlayerDataReceivedEvent(player, new PlayerData(dataResponse.getData()));
-                    getPlugin().getServer().getPluginManager().callEvent(event);
-                    bukkitBubblePlayer.setData(event.getData().getRaw());
+                    //Call event Async
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            PlayerDataReceivedEvent event = new PlayerDataReceivedEvent(player, new PlayerData(dataResponse.getData()));
+                            getPlugin().getServer().getPluginManager().callEvent(event);
+                            bukkitBubblePlayer.setData(event.getData().getRaw());
+                        }
+                    }.start();
                 }
             } else {
                 DataRequestTask.setData(dataResponse.getName(), dataResponse.getData());
