@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.listener;
 
+import com.thebubblenetwork.api.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
@@ -574,5 +575,11 @@ public class GameListener implements Listener {
                 }
             });
         }
+    }
+
+    @EventHandler
+    public void onPlayerDataReceived(PlayerDataReceivedEvent e){
+        GameBoard board = GameBoard.getBoard(e.getPlayer());
+        if(board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
     }
 }
