@@ -2,7 +2,6 @@ package com.thebubblenetwork.api.event;
 
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.global.data.PlayerData;
-import com.thebubblenetwork.api.global.player.BubblePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -13,11 +12,13 @@ public class PlayerDataReceivedEvent extends Event{
 
     private Player player;
     private PlayerData data;
+    private PlayerData before;
 
     public PlayerDataReceivedEvent(Player player, PlayerData data) {
         super(true);
         this.player = player;
         this.data = data;
+        this.before = BukkitBubblePlayer.getObject(player.getUniqueId()).getData();
     }
 
     public Player getPlayer() {
@@ -28,8 +29,13 @@ public class PlayerDataReceivedEvent extends Event{
         return data;
     }
 
-    public BubblePlayer getFake(){
+    public BukkitBubblePlayer getAfter(){
         return new BukkitBubblePlayer(getPlayer().getUniqueId(), getData());
+    }
+
+    public BukkitBubblePlayer getBefore(){
+        //Make sure this cannot be modified
+        return new BukkitBubblePlayer(getPlayer().getUniqueId(), new PlayerData(before.getRaw()));
     }
 
     public HandlerList getHandlers() {
