@@ -2,19 +2,22 @@ package com.thebubblenetwork.api.game;
 
 import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.cosmetics.CosmeticsManager;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
-import com.thebubblenetwork.api.framework.plugin.BubbleRunnable;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
+import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardModule;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardScore;
+import com.thebubblenetwork.api.framework.util.mc.timer.GameTimer;
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
+import com.thebubblenetwork.api.game.inventory.LobbyInventory;
 import com.thebubblenetwork.api.game.kit.Kit;
 import com.thebubblenetwork.api.game.kit.KitManager;
 import com.thebubblenetwork.api.game.kit.KitSelection;
+import com.thebubblenetwork.api.game.listener.GameListener;
 import com.thebubblenetwork.api.game.maps.GameMap;
 import com.thebubblenetwork.api.game.maps.MapData;
 import com.thebubblenetwork.api.game.maps.Vote;
@@ -30,11 +33,9 @@ import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
@@ -69,7 +70,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
         }
         if (newstate == State.PREGAME) {
-            api.cosmeticsManager.disable();
+
             api.chosenmap = calculateMap(api);
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             api.teleportPlayers(api.chosenmap, api.chosen);
@@ -149,6 +150,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             //Getting ultracosmetics
             api.cosmeticsManager.download();
             api.cosmeticsManager.load();
+            api.cosmeticsManager.enable();
         }
         if (newstate == State.LOADING) {
             //Load maps
@@ -189,7 +191,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         if (newstate == State.LOBBY) {
-            api.cosmeticsManager.enable();
             Location spawn = getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld));
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.teleport(spawn);
@@ -338,13 +339,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Finding map table");
             if (!SQLUtil.tableExists(connection, MapData.maptable)) {
                 BubbleNetwork.getInstance().getLogger().log(Level.INFO, "Map table not found, creating new");
-                //TODO - dynamic table creation
                 SQLUtil.createTable(connection, MapData.maptable, new ImmutableMap.Builder<String, Map.Entry<SQLUtil.SQLDataType, Integer>>().put("map", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, 32)).put("key", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).put("value", new AbstractMap.SimpleImmutableEntry<>(SQLUtil.SQLDataType.TEXT, -1)).build());
-                BubbleNetwork.getInstance().endSetup("Created map table");
-                return;
+                throw new IllegalArgumentException("Could not get map table");
             }
         } catch (Exception e) {
-            BubbleNetwork.getInstance().endSetup("Could not get map table");
+            throw new IllegalArgumentException("Could not get map table");
         }
         KitSelection.register(this);
         listener = new GameListener();
@@ -359,12 +358,21 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public void onDisable() {
         setState(State.RESTARTING);
-        Bukkit.unloadWorld(lobbyworld, false);
-        FileUTIL.deleteDir(new File(lobbyworld));
+        World w;
+        if((w = Bukkit.getWorld(lobbyworld)) != null) {
+            File folder = w.getWorldFolder();
+            Bukkit.unloadWorld(w, false);
+            FileUTIL.deleteDir(folder);
+        }
 
         //Getting rid of cosmetics
         if(Bukkit.getPluginManager().isPluginEnabled("UltraCosmetics")) {
-            cosmeticsManager.disable();
+            try {
+                cosmeticsManager.disable();
+            }
+            catch (Exception ex){
+                //Silent
+            }
         }
 
         //We don't want anything being thrown here
@@ -372,13 +380,16 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             cosmeticsManager.unload();
         }
         catch (Exception ex){
+            //Silent
         }
 
         cosmeticsManager.clearUp();
 
-        KitSelection.unregister();
-        //Safe
+        //Next addon may use gameapi
         GameMap.getMaps().clear();
+        KitManager.getKits().clear();
+        KitSelection.getMenuMap().clear();
+
         setInstance(null);
     }
 
@@ -461,8 +472,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         timer = new GameTimer(5, 60) {
             public void run(int left) {
                 if (!p.isOnline()) {
-                    cancel();
-                    end();
                     return;
                 }
                 getChosen().spigot().playEffect(p.getLocation(), Effect.FLAME);
@@ -490,6 +499,10 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
 
             public void end() {
+                if(p.isOnline()){
+                    p.setAllowFlight(false);
+                    p.setFlying(false);
+                }
                 GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);
                 GameMap.extractMap(chosen);
@@ -499,6 +512,24 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         };
         p.setAllowFlight(true);
         p.setFlying(true);
+    }
+
+    public void endGame(){
+        setState(BubbleGameAPI.State.ENDGAME);
+        new GameTimer(20, 15){
+            public void run(int i) {
+                if(i % 5 == 0 || i < 5)Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
+            }
+
+            public void end(){
+                GameMap chosen = getChosenGameMap();
+
+                setState(State.RESTARTING);
+                GameMap.extractMap(chosen);
+                GameMap.setupMap(chosen);
+                setState(State.LOBBY);
+            }
+        };
     }
 
     public CosmeticsManager getCosmeticsManager() {

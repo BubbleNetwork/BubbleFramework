@@ -1,5 +1,7 @@
-package com.thebubblenetwork.api.game;
+package com.thebubblenetwork.api.framework.util.mc.timer;
 
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
+import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.TimeUnit;
@@ -11,7 +13,7 @@ public abstract class GameTimer {
     private BukkitTask runnable;
     private int left;
 
-    public GameTimer(int interval, int times) {
+    public GameTimer(int interval, int times, BubbleAddon addon) {
         left = times;
         Runnable r = new Runnable() {
             public void run() {
@@ -24,8 +26,12 @@ public abstract class GameTimer {
                 left--;
             }
         };
-        runnable = BubbleGameAPI.getInstance().runTaskTimer(r, TimeUnit.MILLISECONDS, interval * 50);
+        runnable = addon.runTaskTimer(r, TimeUnit.MILLISECONDS, interval * 50);
         r.run();
+    }
+
+    public GameTimer(int interval, int times){
+        this(interval, times, BubbleGameAPI.getInstance());
     }
 
     public int getLeft() {

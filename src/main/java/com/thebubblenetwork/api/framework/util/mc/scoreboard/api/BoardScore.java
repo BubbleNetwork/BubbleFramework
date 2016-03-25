@@ -1,5 +1,6 @@
-package com.thebubblenetwork.api.framework.util.mc.scoreboard;
+package com.thebubblenetwork.api.framework.util.mc.scoreboard.api;
 
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.bufferutil.ObjectiveUpdate;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Team;

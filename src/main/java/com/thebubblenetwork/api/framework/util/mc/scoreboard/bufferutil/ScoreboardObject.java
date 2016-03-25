@@ -1,15 +1,16 @@
-package com.thebubblenetwork.api.framework.util.mc.scoreboard;
+package com.thebubblenetwork.api.framework.util.mc.scoreboard.bufferutil;
 
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Created by Jacob on 13/12/2015.
  */
-public abstract class ScoreboardObject {
+public abstract class ScoreboardObject implements Callable<Object> {
     private Scoreboard board;
     private Map<DisplaySlot, Objective> buffer, objective;
 

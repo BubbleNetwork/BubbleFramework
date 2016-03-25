@@ -1,10 +1,12 @@
 package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
-import com.thebubblenetwork.api.framework.plugin.AddonDescriptionFile;
+import com.thebubblenetwork.api.framework.listener.BubbleListener;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.plugin.loader.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
-import com.thebubblenetwork.api.framework.plugin.BubbleAddonLoader;
-import com.thebubblenetwork.api.framework.plugin.BukkitPlugman;
+import com.thebubblenetwork.api.framework.plugin.loader.BubbleAddonLoader;
+import com.thebubblenetwork.api.framework.plugin.manage.BukkitPlugman;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.global.bubblepackets.PacketInfo;
@@ -27,8 +29,6 @@ import com.thebubblenetwork.api.global.type.ServerType;
 import de.mickare.xserver.XServerPlugin;
 import de.mickare.xserver.net.XServer;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.CitizensPlugin;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,7 +37,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -174,7 +173,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         listeners.clear();
     }
 
-    protected Set<Menu> listMenu() {
+    public Set<Menu> listMenu() {
         return new HashSet<>(registeredMenus);
     }
 

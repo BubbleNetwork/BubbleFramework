@@ -1,5 +1,6 @@
-package com.thebubblenetwork.api.framework;
+package com.thebubblenetwork.api.framework.player;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;

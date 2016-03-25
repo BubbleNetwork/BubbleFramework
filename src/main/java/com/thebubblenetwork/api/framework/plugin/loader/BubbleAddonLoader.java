@@ -1,6 +1,7 @@
-package com.thebubblenetwork.api.framework.plugin;
+package com.thebubblenetwork.api.framework.plugin.loader;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;

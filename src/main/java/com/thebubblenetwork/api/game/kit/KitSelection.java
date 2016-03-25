@@ -1,7 +1,7 @@
 package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.util.mc.chat.MessageUtil;
 import com.thebubblenetwork.api.framework.util.mc.items.EnchantGlow;
@@ -31,10 +31,6 @@ public class KitSelection extends Menu {
         return inventoryname;
     }
 
-    public static void unregister() {
-        menuMap.clear();
-    }
-
     public static KitSelection openMenu(Player p) {
         KitSelection k = getSelection(p);
         k.show(p);
@@ -52,6 +48,10 @@ public class KitSelection extends Menu {
                 }
             }
         });
+    }
+
+    public static Map<UUID, KitSelection> getMenuMap() {
+        return menuMap;
     }
 
     public static KitSelection getSelection(Player p) {

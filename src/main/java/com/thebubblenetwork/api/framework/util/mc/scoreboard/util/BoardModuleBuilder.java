@@ -1,6 +1,6 @@
 package com.thebubblenetwork.api.framework.util.mc.scoreboard.util;
 
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardModule;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardModule;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.scoreboard.DisplaySlot;
 

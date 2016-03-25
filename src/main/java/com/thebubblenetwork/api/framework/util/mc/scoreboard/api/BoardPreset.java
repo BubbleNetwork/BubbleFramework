@@ -1,4 +1,4 @@
-package com.thebubblenetwork.api.framework.util.mc.scoreboard;
+package com.thebubblenetwork.api.framework.util.mc.scoreboard.api;
 
 import java.util.ArrayList;
 import java.util.List;

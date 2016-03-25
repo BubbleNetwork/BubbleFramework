@@ -1,10 +1,11 @@
-package com.thebubblenetwork.api.game;
+package com.thebubblenetwork.api.game.listener;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
+import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.global.player.BubblePlayer;

@@ -1,17 +1,8 @@
 package com.thebubblenetwork.api.game.scoreboard;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
-import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.SingleBubbleBoard;
-import com.thebubblenetwork.api.game.BubbleGameAPI;
-import com.thebubblenetwork.api.global.player.BubblePlayer;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.board.SingleBubbleBoard;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.DisplaySlot;
 
 import java.util.*;

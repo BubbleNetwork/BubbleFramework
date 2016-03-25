@@ -2,8 +2,10 @@ package com.thebubblenetwork.api.framework.plugin;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.P;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.plugin.loader.AddonDescriptionFile;
+import com.thebubblenetwork.api.framework.plugin.loader.BubbleAddonLoader;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
-import com.thebubblenetwork.api.global.plugin.updater.FileUpdater;
 import de.mickare.xserver.net.XServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -18,15 +20,11 @@ import java.util.logging.Level;
 /**
  * Created by Jacob on 09/12/2015.
  */
-public abstract class BubbleAddon implements FileUpdater {
+public abstract class BubbleAddon{
     private AddonDescriptionFile descriptionFile;
     private File file;
     private BubbleAddonLoader loader;
-
-    public BubbleAddon() {
-        BubbleNetwork.getInstance().addUpdater(this);
-    }
-
+    
     public org.bukkit.plugin.PluginDescriptionFile getDescription() {
         return AddonDescriptionFile.asMirror(descriptionFile);
     }
@@ -142,5 +140,9 @@ public abstract class BubbleAddon implements FileUpdater {
     public void updateTaskBefore() {
         BubbleNetwork network = BubbleNetwork.getInstance();
         network.disableAddon();
+    }
+
+    public void onUpdate(BukkitBubblePlayer player){
+
     }
 }

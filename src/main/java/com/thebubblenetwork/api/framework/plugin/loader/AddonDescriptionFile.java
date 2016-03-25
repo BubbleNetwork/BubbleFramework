@@ -1,4 +1,4 @@
-package com.thebubblenetwork.api.framework.plugin;
+package com.thebubblenetwork.api.framework.plugin.loader;
 
 /**
  * Created by Jacob on 12/12/2015.

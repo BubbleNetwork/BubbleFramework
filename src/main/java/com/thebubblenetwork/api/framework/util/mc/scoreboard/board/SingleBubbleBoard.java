@@ -1,5 +1,6 @@
-package com.thebubblenetwork.api.framework.util.mc.scoreboard;
+package com.thebubblenetwork.api.framework.util.mc.scoreboard.board;
 
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BubbleBoardAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 

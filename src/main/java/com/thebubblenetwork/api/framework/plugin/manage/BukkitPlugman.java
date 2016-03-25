@@ -1,4 +1,4 @@
-package com.thebubblenetwork.api.framework.plugin;
+package com.thebubblenetwork.api.framework.plugin.manage;
 
 import com.thebubblenetwork.api.global.plugin.Plugman;
 import org.bukkit.Server;

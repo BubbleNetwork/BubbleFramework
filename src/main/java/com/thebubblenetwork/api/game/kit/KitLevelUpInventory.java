@@ -1,7 +1,7 @@
 package com.thebubblenetwork.api.game.kit;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.ChatColor;

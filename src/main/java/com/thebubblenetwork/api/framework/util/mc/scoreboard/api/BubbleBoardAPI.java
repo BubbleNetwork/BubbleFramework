@@ -1,6 +1,8 @@
-package com.thebubblenetwork.api.framework.util.mc.scoreboard;
+package com.thebubblenetwork.api.framework.util.mc.scoreboard.api;
 
 import com.thebubblenetwork.api.framework.util.mc.chat.RandomColorCombo;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.bufferutil.ObjectiveUpdate;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.bufferutil.ScoreboardObject;
 import com.thebubblenetwork.api.global.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,6 +39,7 @@ public abstract class BubbleBoardAPI {
     private String name;
     private Map<String,Team> rankteams = new HashMap<>();
     private Map<BoardPreset, Map<BoardModule, BoardScore>> modules = new HashMap<>();
+    private BoardPreset currentpreset = null;
 
     public BubbleBoardAPI(final String name, Map<DisplaySlot, String> displaynames) {
         this.name = name;
@@ -48,6 +51,10 @@ public abstract class BubbleBoardAPI {
                     map.put(slot, o);
                 }
                 return map;
+            }
+
+            public Object call(){
+                return BubbleBoardAPI.this;
             }
 
             public Scoreboard createScoreboard() {
@@ -95,6 +102,7 @@ public abstract class BubbleBoardAPI {
     }
 
     public void enable(BoardPreset preset) {
+        currentpreset = preset;
         List<ObjectiveUpdate> updateList = new ArrayList<>();
         for (Map.Entry<BoardPreset, Map<BoardModule, BoardScore>> presetEntry : getModules().entrySet()) {
             boolean b = presetEntry.getKey() == preset;
@@ -113,6 +121,10 @@ public abstract class BubbleBoardAPI {
         }
         getObject().update(updateList);
         preset.onEnable(this);
+    }
+
+    public BoardPreset getCurrentpreset() {
+        return currentpreset;
     }
 
     public BoardScore getScore(BoardPreset preset, BoardModule module) {

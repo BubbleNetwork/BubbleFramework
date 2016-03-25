@@ -1,6 +1,7 @@
-package com.thebubblenetwork.api.framework.plugin;
+package com.thebubblenetwork.api.framework.plugin.util;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.concurrent.TimeUnit;

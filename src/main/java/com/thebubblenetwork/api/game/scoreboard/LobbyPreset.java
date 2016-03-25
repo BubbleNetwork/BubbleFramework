@@ -1,9 +1,9 @@
 package com.thebubblenetwork.api.game.scoreboard;
 
-import com.thebubblenetwork.api.framework.BukkitBubblePlayer;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardPreset;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BoardScore;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.BubbleBoardAPI;
+import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardScore;
+import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BubbleBoardAPI;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.util.BoardModuleBuilder;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.global.ranks.Rank;

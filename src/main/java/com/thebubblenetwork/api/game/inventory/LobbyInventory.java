@@ -1,4 +1,4 @@
-package com.thebubblenetwork.api.game;
+package com.thebubblenetwork.api.game.inventory;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.menu.BuyInventory;
