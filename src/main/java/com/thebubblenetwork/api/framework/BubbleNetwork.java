@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.framework;
 
+import com.thebubblenetwork.api.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.listener.BubbleListener;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
@@ -19,6 +20,7 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerMoveTypeRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
+import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
 import com.thebubblenetwork.api.global.file.SSLUtil;
@@ -415,7 +417,10 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
                 if ((bukkitBubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId())) == null) {
                     getLogger().log(Level.WARNING, "Received data for a player which is not online " + dataResponse.getName());
                 } else {
-                    bukkitBubblePlayer.setData(dataResponse.getData());
+                    //Call event
+                    PlayerDataReceivedEvent event = new PlayerDataReceivedEvent(player, new PlayerData(dataResponse.getData()));
+                    getPlugin().getServer().getPluginManager().callEvent(event);
+                    bukkitBubblePlayer.setData(event.getData().getRaw());
                 }
             } else {
                 DataRequestTask.setData(dataResponse.getName(), dataResponse.getData());

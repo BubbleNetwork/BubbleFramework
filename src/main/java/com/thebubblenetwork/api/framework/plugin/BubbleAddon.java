@@ -141,8 +141,4 @@ public abstract class BubbleAddon{
         BubbleNetwork network = BubbleNetwork.getInstance();
         network.disableAddon();
     }
-
-    public void onUpdate(BukkitBubblePlayer player){
-
-    }
 }
