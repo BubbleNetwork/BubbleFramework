@@ -1,6 +1,6 @@
 package com.thebubblenetwork.api.game.listener;
 
-import com.thebubblenetwork.api.event.PlayerDataReceivedEvent;
+import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;

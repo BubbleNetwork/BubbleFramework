@@ -1,4 +1,4 @@
-package com.thebubblenetwork.api.event;
+package com.thebubblenetwork.api.framework.event;
 
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.global.data.PlayerData;

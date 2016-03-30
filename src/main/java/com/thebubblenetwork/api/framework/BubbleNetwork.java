@@ -1,6 +1,6 @@
 package com.thebubblenetwork.api.framework;
 
-import com.thebubblenetwork.api.event.PlayerDataReceivedEvent;
+import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.listener.BubbleListener;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;

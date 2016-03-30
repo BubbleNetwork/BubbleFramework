@@ -2,6 +2,7 @@ package com.thebubblenetwork.api.game;
 
 import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
+import com.thebubblenetwork.api.framework.anticheat.NCPManager;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.cosmetics.CosmeticsManager;
 import com.thebubblenetwork.api.framework.messages.Messages;
@@ -272,6 +273,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private String type;
     private int minplayers;
     private CosmeticsManager cosmeticsManager = new CosmeticsManager(BubbleNetwork.getInstance());
+    private NCPManager cheatmanager = new NCPManager(BubbleNetwork.getInstance());
 
     public BubbleGameAPI(String type, GameMode defaultgamemode, String defaultkit, int minplayers) {
         super();
@@ -354,6 +356,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.LOADING);
             }
         });
+        cheatmanager.download();
+        cheatmanager.enable();
     }
 
     public void onDisable() {
@@ -384,6 +388,10 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         cosmeticsManager.clearUp();
+
+        cheatmanager.disable();
+        cheatmanager.unload();
+        cheatmanager.clearUp();
 
         //Next addon may use gameapi
         GameMap.getMaps().clear();
