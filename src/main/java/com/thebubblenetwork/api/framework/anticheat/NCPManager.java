@@ -26,8 +26,8 @@ public class NCPManager extends AbstractPluginDownloader{
             directory.mkdir();
         }
         try {
-            DownloadUtil.download(config, "ncpconfig.yml", getNetwork().getFTP());
-        } catch (IOException e) {
+            DownloadUtil.download(config, "ncpconfig.yml", getNetwork().getFileConnection());
+        } catch (Exception e) {
             getNetwork().getLogger().log(Level.WARNING, "Failed to download AntiCheat configuration", e);
         }
         super.load();

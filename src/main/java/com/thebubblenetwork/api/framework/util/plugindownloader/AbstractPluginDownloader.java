@@ -31,7 +31,7 @@ public class AbstractPluginDownloader {
             network.getLogger().log(Level.WARNING, "Could not allow any SSL", e);
         }
         try {
-            DownloadUtil.download(jar, pluginURL, BubbleNetwork.getInstance().getFTP());
+            DownloadUtil.download(jar, pluginURL, BubbleNetwork.getInstance().getFileConnection());
         } catch (Exception e) {
             network.getLogger().log(Level.WARNING, "Could not download UltraCosmetics");
         }

@@ -344,7 +344,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         }
         File jar = new File(getPlugin().getDataFolder(),type.getName() + ".jar");
         try{
-            DownloadUtil.download(jar, type.getDownload(), getFTP());
+            DownloadUtil.download(jar, type.getDownload(), getFileConnection());
         }
         catch (Exception ex){
             getLogger().log(Level.WARNING, "Error downloading addon", ex);

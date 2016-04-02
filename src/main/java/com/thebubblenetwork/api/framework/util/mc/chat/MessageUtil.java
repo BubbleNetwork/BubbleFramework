@@ -1,12 +1,7 @@
 package com.thebubblenetwork.api.framework.util.mc.chat;
 
-import com.google.common.collect.Iterables;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by Administrator on 24/12/2015.
