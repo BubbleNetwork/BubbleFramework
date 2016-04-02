@@ -247,7 +247,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
 
         getLogger().log(Level.INFO, "Creating xserver files");
 
-        File xserverfolder = new File("plugins" + File.separator + "Xserver");
+        File xserverfolder = new File("plugins" + File.separator + "XServer");
 
         if (!xserverfolder.exists()) {
             xserverfolder.mkdir();
