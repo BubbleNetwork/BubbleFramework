@@ -26,7 +26,7 @@ public class VoteInventory extends Menu {
     private static final String chance = ChatColor.BLUE + "Chance " + ChatColor.AQUA + "%chance%" + "%";
     private static final DecimalFormat format = new DecimalFormat("0.00");
     private static final Sound click = Sound.SUCCESSFUL_HIT;
-    private static final ItemStackBuilder builder = new ItemStackBuilder(Material.EMPTY_MAP);
+    private static final ItemStackBuilder builder = new ItemStackBuilder(Material.PAPER);
 
     public VoteInventory(int gamemaps) {
         super(display, getRoundedInventorySize(gamemaps));
