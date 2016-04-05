@@ -15,7 +15,7 @@ public class NCPManager extends AbstractPluginDownloader{
     private File config;
 
     public NCPManager(BubbleNetwork network) {
-        super(network, "NoCheatPlus", new File(network.getPlugin().getDataFolder().getParent(), "NoCheatPlus.jar"));
+        super(network, "NoCheatPlus.jar", new File(network.getPlugin().getDataFolder().getParent(), "NoCheatPlus.jar"));
         directory = new File(getJar().getParent(), "NoCheatPlus");
         config = new File(directory, "config.yml");
     }
