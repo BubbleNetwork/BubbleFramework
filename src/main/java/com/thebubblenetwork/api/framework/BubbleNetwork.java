@@ -334,11 +334,6 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         if (getAssigned() != null) {
             disableAddon();
         }
-        try {
-            SSLUtil.allowAnySSL();
-        } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Error allowing all SSL connections", e);
-        }
         if(!getPlugin().getDataFolder().exists()){
             getPlugin().getDataFolder().mkdir();
         }

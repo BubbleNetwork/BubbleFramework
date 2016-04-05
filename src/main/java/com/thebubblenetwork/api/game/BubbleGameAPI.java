@@ -357,6 +357,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
         });
         cheatmanager.download();
+        cheatmanager.load();
         cheatmanager.enable();
     }
 
