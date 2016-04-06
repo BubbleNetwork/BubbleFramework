@@ -351,9 +351,18 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.LOADING);
             }
         });
-        cheatmanager.download();
-        cheatmanager.load();
-        cheatmanager.enable();
+        try {
+            cheatmanager.download();
+        } catch (Exception e) {
+        }
+        try {
+            cheatmanager.load();
+        } catch (Exception e) {
+        }
+        try {
+            cheatmanager.enable();
+        } catch (Exception e) {
+        }
     }
 
     public void onDisable() {
@@ -369,6 +378,20 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         GameMap.getMaps().clear();
         KitManager.getKits().clear();
         KitSelection.getMenuMap().clear();
+
+        try {
+            cheatmanager.disable();
+        } catch (Exception e) {
+        }
+
+        try{
+            cheatmanager.unload();
+        }
+        catch (Exception e){
+
+        }
+
+        cheatmanager.clearUp();
 
         setInstance(null);
     }
