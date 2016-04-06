@@ -54,7 +54,11 @@ public class VoteInventory extends Menu {
         Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
         int i = 0;
         for (GameMap map : GameMap.getMaps()) {
-            is[i] = builder.clone().withName(map.getName()).withLore("\n").withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore("\n").withLore(Joiner.on("\n" + ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())).build();
+            ItemStackBuilder builder = VoteInventory.builder.clone().withName(map.getName()).withLore("").withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore("");
+            for(String s: map.getDescription()){
+                builder.withLore(ChatColor.GRAY + ChatColor.ITALIC.toString() + s);
+            }
+            is[i] = builder.build();
             i++;
         }
         return is;
