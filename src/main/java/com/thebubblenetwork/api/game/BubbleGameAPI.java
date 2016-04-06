@@ -160,6 +160,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if (newstate == State.RESTARTING) {
             //Sending players to spawn
             for (Player p : Bukkit.getOnlinePlayers()) {
+                api.getGame().setSpectating(p, false);
                 p.teleport(getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
             }
 

@@ -48,10 +48,10 @@ public class PlayersList extends Menu implements Listener {
         if (slot < slots.size()) {
             Player p = Bukkit.getPlayer(slots.get(slot));
             if (p != null) {
-                if (type == ClickType.LEFT) {
+                if (type == ClickType.LEFT || type == ClickType.SHIFT_LEFT) {
                     player.teleport(p);
                     player.closeInventory();
-                } else if (type == ClickType.RIGHT) {
+                } else if (type == ClickType.RIGHT || type == ClickType.SHIFT_RIGHT) {
                     player.openInventory(p.getInventory());
                 }
             }
@@ -74,7 +74,7 @@ public class PlayersList extends Menu implements Listener {
             }
         }
         if (getInventory().getSize() - 9 > is.length || getInventory().getSize() + 9 < is.length) {
-            inventory = Bukkit.createInventory(null, is.length, ChatColor.BLUE + "Playing");
+            inventory = Bukkit.createInventory(this, is.length, ChatColor.BLUE + "Playing");
         }
         return is;
     }

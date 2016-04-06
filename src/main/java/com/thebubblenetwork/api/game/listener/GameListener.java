@@ -4,6 +4,7 @@ import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
+import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
@@ -435,7 +436,7 @@ public class GameListener implements Listener {
             BubbleGameAPI.getInstance().cancelWaiting();
         }
         GameBoard.removeBoard(p);
-        new Thread(){
+        new BubbleRunnable(){
             @Override
             public void run(){
                 for(GameBoard other:GameBoard.getBoards()){
@@ -444,7 +445,7 @@ public class GameListener implements Listener {
                     }
                 }
             }
-        }.start();
+        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
     }
 
     public boolean canDefault(boolean pregame) {
