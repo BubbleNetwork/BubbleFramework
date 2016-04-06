@@ -50,11 +50,13 @@ public class PlayersList extends Menu implements Listener {
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (slots.containsKey(slot)) {
             Player p = Bukkit.getPlayer(slots.get(slot));
-            if (p.isOnline() && !p.isDead() && (type == ClickType.LEFT || type == ClickType.SHIFT_LEFT)) {
-                player.teleport(p);
-                player.closeInventory();
-            } else if (type == ClickType.RIGHT || type == ClickType.SHIFT_RIGHT) {
-                player.openInventory(p.getInventory());
+            if(p.isOnline() && !p.isDead()) {
+                if (type == ClickType.LEFT || type == ClickType.SHIFT_LEFT) {
+                    player.teleport(p);
+                    player.closeInventory();
+                } else if (type == ClickType.RIGHT || type == ClickType.SHIFT_RIGHT) {
+                    player.openInventory(p.getInventory());
+                }
             }
         }
     }
