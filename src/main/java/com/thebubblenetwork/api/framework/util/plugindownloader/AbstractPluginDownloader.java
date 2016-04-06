@@ -2,7 +2,7 @@ package com.thebubblenetwork.api.framework.util.plugindownloader;
 
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
-import com.thebubblenetwork.api.global.file.SSLUtil;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -36,19 +36,42 @@ public class AbstractPluginDownloader {
         if (!jar.exists()) {
             throw new IllegalArgumentException("Jar doesn't exist");
         }
-        plugin = network.getPlugman().load(jar);
+        try {
+            plugin = network.getPlugman().load(jar);
+        }
+        catch (Exception ex){
+            getNetwork().getLogger().log(Level.WARNING, "Could not load " + jar + " ", ex);
+            for(Plugin plugin: network.getPlugin().getServer().getPluginManager().getPlugins()){
+                if(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().getFile().equals(jar)){
+                    this.plugin = (JavaPlugin) plugin;
+                    break;
+                }
+            }
+        }
     }
 
     public void enable() {
-        network.getPlugman().enable(plugin);
+        try {
+            network.getPlugman().enable(plugin);
+        } catch (Exception ex) {
+            getNetwork().getLogger().log(Level.WARNING, "Could not enable " + jar + " ", ex);
+        }
     }
 
     public void disable() {
-        network.getPlugman().disable(plugin);
+        try {
+            network.getPlugman().disable(plugin);
+        } catch (Exception ex) {
+            getNetwork().getLogger().log(Level.WARNING, "Could not disable " + jar + " ", ex);
+        }
     }
 
     public void unload() {
-        network.getPlugman().unload(plugin);
+        try {
+            network.getPlugman().unload(plugin);
+        } catch (Exception ex) {
+            getNetwork().getLogger().log(Level.WARNING, "Could not unload " + jar + " ", ex);
+        }
         plugin = null;
     }
 

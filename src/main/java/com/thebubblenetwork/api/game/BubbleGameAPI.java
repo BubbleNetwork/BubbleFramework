@@ -147,11 +147,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             FileUTIL.deleteDir(temp);
             FileUTIL.setPermissions(worldfolder,true,true,true);
             new WorldCreator(BubbleGameAPI.lobbyworld).generateStructures(false).generator(VoidWorldGenerator.getGenerator()).createWorld();
-
-            //Getting ultracosmetics
-            api.cosmeticsManager.download();
-            api.cosmeticsManager.load();
-            api.cosmeticsManager.enable();
         }
         if (newstate == State.LOADING) {
             //Load maps
@@ -272,7 +267,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private String defaultkit;
     private String type;
     private int minplayers;
-    private CosmeticsManager cosmeticsManager = new CosmeticsManager(BubbleNetwork.getInstance());
     private NCPManager cheatmanager = new NCPManager(BubbleNetwork.getInstance());
 
     public BubbleGameAPI(String type, GameMode defaultgamemode, String defaultkit, int minplayers) {
@@ -369,30 +363,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             Bukkit.unloadWorld(w, false);
             FileUTIL.deleteDir(folder);
         }
-
-        //Getting rid of cosmetics
-        if(Bukkit.getPluginManager().isPluginEnabled("UltraCosmetics")) {
-            try {
-                cosmeticsManager.disable();
-            }
-            catch (Exception ex){
-                //Silent
-            }
-        }
-
-        //We don't want anything being thrown here
-        try{
-            cosmeticsManager.unload();
-        }
-        catch (Exception ex){
-            //Silent
-        }
-
-        cosmeticsManager.clearUp();
-
-        cheatmanager.disable();
-        cheatmanager.unload();
-        cheatmanager.clearUp();
 
         //Next addon may use gameapi
         GameMap.getMaps().clear();
@@ -539,10 +509,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.LOBBY);
             }
         };
-    }
-
-    public CosmeticsManager getCosmeticsManager() {
-        return cosmeticsManager;
     }
 
     public ServerType getType() {
