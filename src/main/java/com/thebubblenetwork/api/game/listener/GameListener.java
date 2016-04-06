@@ -112,9 +112,7 @@ public class GameListener implements Listener {
         if (t != null) {
             t.unregister();
         }
-        ;
         t = board.registerNewTeam(ghostteam);
-        t.setPrefix(ChatColor.RED.toString());
         t.setCanSeeFriendlyInvisibles(true);
         t.setAllowFriendlyFire(false);
         for (Player other : Bukkit.getOnlinePlayers()) {
