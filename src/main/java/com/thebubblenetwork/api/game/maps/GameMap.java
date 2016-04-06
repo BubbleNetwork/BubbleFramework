@@ -51,12 +51,6 @@ public abstract class GameMap {
     }
 
     public static void loadMaps() throws SQLException, ClassNotFoundException {
-        try {
-            SSLUtil.allowAnySSL();
-        } catch (Exception ex) {
-            BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not allow any SSL", ex);
-        }
-
         if (!folder.exists()) {
             folder.mkdir();
         }
