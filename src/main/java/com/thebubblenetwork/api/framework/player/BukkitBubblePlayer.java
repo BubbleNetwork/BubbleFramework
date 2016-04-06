@@ -7,6 +7,7 @@ import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -33,31 +34,32 @@ public class BukkitBubblePlayer extends BubblePlayer<Player> {
     }
 
     public BukkitBubblePlayer(UUID u, PlayerData data) {
-        super(u, data);
+        super(u, data.getRaw());
     }
 
     public String getName() {
         return getPlayer().getName();
     }
 
+    public boolean isOnline(){
+        return getPlayer() != null && getPlayer().isOnline();
+    }
+
     public void save() {
+        throw new UnsupportedOperationException("Server-side cannot save");
+    }
+
+    protected void update() {
         try {
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getData().getRaw()));
+            new BukkitRunnable(){
+                public void run() {
+                    //Doesn't change before & after but nothing can be done
+                    Bukkit.getServer().getPluginManager().callEvent(new PlayerDataReceivedEvent(getPlayer(), getData()));
+                }
+            }.runTaskAsynchronously(BubbleNetwork.getInstance().getPlugin());
         } catch (IOException e) {
             BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Failed to send data update: ", e);
         }
-    }
-
-    @Override
-    public void update() {
-        save();
-        //Call event - Async
-        new Thread(){
-            @Override
-            public void run() {
-                //Doesn't change before & after but nothing can be done
-                Bukkit.getServer().getPluginManager().callEvent(new PlayerDataReceivedEvent(getPlayer(), getData()));
-            }
-        }.start();
     }
 }

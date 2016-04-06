@@ -531,4 +531,11 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
     public BukkitPlugman getPlugman() {
         return plugman;
     }
+
+    public BukkitBubblePlayer getBubblePlayer(UUID uuid) {
+        if(BukkitBubblePlayer.getPlayerObjectMap().containsKey(uuid)){
+            return BukkitBubblePlayer.getObject(uuid);
+        }
+        throw new UnsupportedOperationException("Server side cannot get offline bubbleplayers");
+    }
 }
