@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,8 @@ import java.util.UUID;
  * Project: BubbleFramework
  */
 public class PlayersList extends Menu implements Listener {
+    private static DecimalFormat health = new DecimalFormat("#.#");
+
     private Map<String, ItemStack> skulls = new HashMap<>();
     private Map<UUID, Integer> index;
     private Map<Integer, UUID> slots;
@@ -73,7 +76,7 @@ public class PlayersList extends Menu implements Listener {
                 i++;
             }
         }
-        if (getInventory().getSize() - 9 > is.length || getInventory().getSize() + 9 < is.length) {
+        if (getInventory().getSize() != is.length) {
             inventory = Bukkit.createInventory(this, is.length, ChatColor.BLUE + "Playing");
         }
         return is;
@@ -90,7 +93,7 @@ public class PlayersList extends Menu implements Listener {
     protected ItemStack generate(Player p) {
         ItemStack is = generateSkull(p.getName());
         withName(is, ChatColor.AQUA + p.getName());
-        withLore(is, ChatColor.DARK_RED + "Health: " + ChatColor.GRAY + String.valueOf(p.getHealth()) + "/" + String.valueOf(p.getMaxHealth()), ChatColor.YELLOW + "Hunger: " + ChatColor.GRAY + String.valueOf(p.getFoodLevel()) + "/20", "", ChatColor.DARK_PURPLE + "Left Click -> Spectate", ChatColor.DARK_AQUA + "Right Click -> View inventory");
+        withLore(is, ChatColor.DARK_RED + "Health: " + ChatColor.GRAY + health.format(p.getHealth()) + "/" + String.valueOf(p.getMaxHealth()), ChatColor.YELLOW + "Hunger: " + ChatColor.GRAY + String.valueOf(p.getFoodLevel()) + "/20", "", ChatColor.DARK_PURPLE + "Left Click -> Spectate", ChatColor.DARK_AQUA + "Right Click -> View inventory");
         return is;
     }
 
