@@ -37,8 +37,8 @@ public class PlayersList extends Menu implements Listener {
     private static DecimalFormat health = new DecimalFormat("#.#");
 
     private Map<String, ItemStack> skulls = new HashMap<>();
-    private Map<UUID, Integer> index;
-    private Map<Integer, UUID> slots;
+    private Map<UUID, Integer> index = new HashMap<>();
+    private Map<Integer, UUID> slots = new HashMap<>();
 
     public PlayersList() {
         super(ChatColor.BLUE + "Playing", 9);
@@ -48,15 +48,13 @@ public class PlayersList extends Menu implements Listener {
 
     @Override
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
-        if (slot < slots.size()) {
+        if (slots.containsKey(slot)) {
             Player p = Bukkit.getPlayer(slots.get(slot));
-            if (p != null) {
-                if (type == ClickType.LEFT || type == ClickType.SHIFT_LEFT) {
-                    player.teleport(p);
-                    player.closeInventory();
-                } else if (type == ClickType.RIGHT || type == ClickType.SHIFT_RIGHT) {
-                    player.openInventory(p.getInventory());
-                }
+            if (p.isOnline() && !p.isDead() && (type == ClickType.LEFT || type == ClickType.SHIFT_LEFT)) {
+                player.teleport(p);
+                player.closeInventory();
+            } else if (type == ClickType.RIGHT || type == ClickType.SHIFT_RIGHT) {
+                player.openInventory(p.getInventory());
             }
         }
     }
@@ -65,8 +63,8 @@ public class PlayersList extends Menu implements Listener {
     @Override
     public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getRoundedInventorySize(Bukkit.getOnlinePlayers().size() - BubbleGameAPI.getInstance().getGame().getSpectatorList().size())];
-        index = new HashMap<>();
-        slots = new HashMap<>();
+        index.clear();
+        slots.clear();
         int i = 0;
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!BubbleGameAPI.getInstance().getGame().isSpectating(p)) {
@@ -77,7 +75,7 @@ public class PlayersList extends Menu implements Listener {
             }
         }
         if (getInventory().getSize() != is.length) {
-            inventory = Bukkit.createInventory(this, is.length, ChatColor.BLUE + "Playing");
+            inventory = Bukkit.createInventory(this, is.length == 0 ? 9: is.length, ChatColor.BLUE + "Playing");
         }
         return is;
     }
@@ -99,14 +97,14 @@ public class PlayersList extends Menu implements Listener {
 
     private ItemStack generateSkull(String name) {
         if (skulls.containsKey(name)) {
-            return skulls.get(name);
+            return skulls.get(name).clone();
         }
-        ItemStack is = new ItemStack(Material.SKULL_ITEM);
+        ItemStack is = new ItemStack(Material.SKULL_ITEM, 1, (byte)3);
         SkullMeta meta = (SkullMeta) is.getItemMeta();
         meta.setOwner(name);
         is.setItemMeta(meta);
         skulls.put(name, is);
-        return is;
+        return is.clone();
     }
 
     private ItemStack withLore(ItemStack is, String... lore) {
