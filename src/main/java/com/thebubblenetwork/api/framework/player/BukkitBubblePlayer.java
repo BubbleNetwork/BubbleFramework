@@ -4,6 +4,7 @@ import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
+import com.thebubblenetwork.api.global.data.PunishmentData;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -33,8 +34,8 @@ public class BukkitBubblePlayer extends BubblePlayer<Player> {
         return (BukkitBubblePlayer) getPlayerObjectMap().get(u);
     }
 
-    public BukkitBubblePlayer(UUID u, PlayerData data) {
-        super(u, data.getRaw());
+    public BukkitBubblePlayer(UUID u, PlayerData data, PunishmentData punishmentData) {
+        super(u, data.getRaw(), punishmentData.getRaw());
     }
 
     public String getName() {
@@ -52,10 +53,11 @@ public class BukkitBubblePlayer extends BubblePlayer<Player> {
     protected void update() {
         try {
             BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getData().getRaw()));
+            BubbleNetwork.getInstance().getPacketHub().sendMessage(BubbleNetwork.getInstance().getProxy(), new PlayerDataResponse(getName(), getPunishmentData().getRaw()));
             new BukkitRunnable(){
                 public void run() {
                     //Doesn't change before & after but nothing can be done
-                    Bukkit.getServer().getPluginManager().callEvent(new PlayerDataReceivedEvent(getPlayer(), getData()));
+                    Bukkit.getServer().getPluginManager().callEvent(new PlayerDataReceivedEvent(getPlayer(), getData(), getPunishmentData()));
                 }
             }.runTaskAsynchronously(BubbleNetwork.getInstance().getPlugin());
         } catch (IOException e) {

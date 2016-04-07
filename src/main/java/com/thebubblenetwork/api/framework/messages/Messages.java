@@ -1,6 +1,7 @@
 package com.thebubblenetwork.api.framework.messages;
 
-import com.sun.istack.internal.Nullable;
+
+import javax.annotation.Nullable;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.messages.titlemanager.ActionType;
 import com.thebubblenetwork.api.framework.messages.titlemanager.NMSTitles;
