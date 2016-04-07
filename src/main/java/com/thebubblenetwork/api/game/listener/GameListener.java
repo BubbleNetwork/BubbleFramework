@@ -585,6 +585,11 @@ public class GameListener implements Listener {
     @EventHandler
     public void onPlayerDataReceived(PlayerDataReceivedEvent e){
         GameBoard board = GameBoard.getBoard(e.getPlayer());
-        if(board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
+        new BubbleRunnable(){
+            public void run() {
+                if(e.getPlayer().isOnline() && board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
+
+            }
+        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
     }
 }
