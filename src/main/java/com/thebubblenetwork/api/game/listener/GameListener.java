@@ -9,6 +9,7 @@ import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.game.kit.KitSelection;
+import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
@@ -443,7 +444,11 @@ public class GameListener implements Listener {
         if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
             BubbleGameAPI.getInstance().cancelWaiting();
         }
+        else if(Bukkit.getOnlinePlayers().size() == getSpectatorList().size() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME){
+            BubbleGameAPI.getInstance().endGame();
+        }
         GameBoard.removeBoard(p);
+        VoteMenu.removeMenu(p);
         new BubbleRunnable(){
             @Override
             public void run(){
@@ -475,7 +480,7 @@ public class GameListener implements Listener {
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
                 if (slot == MAPSLOT) {
-                    BubbleGameAPI.getInstance().getVoteInventory().show(p);
+                    VoteMenu.getMenu(p).show(p);
                 } else if (slot == KITSLOT) {
                     KitSelection.openMenu(p);
                 } else if (slot == LOBBYSLOT) {

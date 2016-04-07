@@ -20,7 +20,7 @@ import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.listener.GameListener;
 import com.thebubblenetwork.api.game.maps.GameMap;
 import com.thebubblenetwork.api.game.maps.MapData;
-import com.thebubblenetwork.api.game.maps.VoteInventory;
+import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
@@ -146,12 +146,13 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             //Load maps
             GameMap.doMaps();
 
-            api.voteInventory = new VoteInventory(GameMap.getMaps().size());
             //Start lobby phase
             api.setState(State.LOBBY);
         }
 
         if (newstate == State.RESTARTING) {
+            VoteMenu.wipeClean();
+
             //Sending players to spawn
             for (Player p : Bukkit.getOnlinePlayers()) {
                 api.getGame().setSpectating(p, false);
@@ -177,8 +178,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             api.chosen = null;
             api.chosenmap = null;
 
-            //Resetting votes
-            api.getVotes().clear();
         }
 
         if (newstate == State.LOBBY) {
@@ -245,7 +244,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     private static Map<GameMap, Double> calculatePercentages(BubbleGameAPI api) {
         Map<GameMap, Double> maps = new HashMap<>();
-        final double votesize = api.getVotes().size();
+        final double votesize = VoteMenu.getAmountOfVotes();
         final double mapsize = GameMap.getMaps().size();
         for (Map.Entry<GameMap, Integer> entry : calculateScores(api).entrySet()) {
             maps.put(entry.getKey(), ((double) entry.getValue() + 1.0D) / (votesize + mapsize));
@@ -258,7 +257,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         for (GameMap map : GameMap.getMaps()) {
             maps.put(map, 0);
         }
-        for (GameMap v : api.getVotes().values()) {
+        for (GameMap v : VoteMenu.getVotes()) {
             if (maps.containsKey(v)) {
                 maps.put(v, maps.get(v) + 1);
             }
@@ -271,9 +270,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private LobbyPreset preset = new LobbyPreset();
     private World chosen = null;
     private GameMap chosenmap = null;
-    private Map<UUID, GameMap> votes = new HashMap<UUID, GameMap>();
     private GameListener listener;
-    private VoteInventory voteInventory;
     private GameTimer timer;
     private LobbyInventory hubInventory;
     private PlayersList list;
@@ -297,10 +294,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public GameListener getGame() {
         return listener;
-    }
-
-    public VoteInventory getVoteInventory() {
-        return voteInventory;
     }
 
     public GameMap getChosenGameMap() {
@@ -458,18 +451,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     public abstract void cleanup();
-
-    public Map<UUID, GameMap> getVotes() {
-        return votes;
-    }
-
-    public void resetVotes(UUID u) {
-        getVotes().remove(u);
-    }
-
-    public void addVote(UUID u, GameMap vote) {
-        getVotes().put(u, vote);
-    }
 
     public void win(final Player p) {
         if (getState() != State.INGAME) {

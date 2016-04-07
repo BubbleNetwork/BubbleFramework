@@ -27,9 +27,10 @@ public class EnchantGlow extends EnchantmentWrapper {
         return glow;
     }
 
-    public static void addGlow(ItemStack var0) {
+    public static ItemStack addGlow(ItemStack var0) {
         Enchantment var1 = getGlow();
         var0.addEnchantment(var1, 1);
+        return var0;
     }
 
     private static Enchantment glow;
