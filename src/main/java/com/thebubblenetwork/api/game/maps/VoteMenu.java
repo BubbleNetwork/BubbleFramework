@@ -124,6 +124,7 @@ public class VoteMenu extends Menu{
     }
 
     public ItemStack[] generate() {
+        if(contents == null)contents = generateInventory();
         ItemStack[] generate = contents.clone();
         if(uuid != null && votes.containsKey(uuid)){
             int slot = slotMap.get(votes.get(uuid));
