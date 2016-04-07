@@ -104,6 +104,7 @@ public class GameListener implements Listener {
         } else {
             disableSpectate(p);
         }
+        BukkitBubblePlayer.getObject(p.getUniqueId()).setSpectating(spectating);
     }
 
     private void startGhost(Player p) {
