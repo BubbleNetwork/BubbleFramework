@@ -16,7 +16,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Jacob on 26/12/2015.
@@ -37,7 +37,7 @@ public class VoteInventory extends Menu {
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (itemStack != null && slot < GameMap.getMaps().size()) {
             GameMap map = GameMap.getMaps().get(slot);
-            if (BubbleGameAPI.getInstance().getVotes().containsKey(player.getUniqueId()) && BubbleGameAPI.getInstance().getVotes().get(player.getUniqueId()).getMap().equals(map)) {
+            if (BubbleGameAPI.getInstance().getVotes().containsKey(player.getUniqueId()) && BubbleGameAPI.getInstance().getVotes().get(player.getUniqueId()).equals(map)) {
                 BubbleGameAPI.getInstance().resetVotes(player.getUniqueId());
                 player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" +ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
             } else {
@@ -52,8 +52,15 @@ public class VoteInventory extends Menu {
     public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getInventory().getSize()];
         Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
+        List<GameMap> mapList = new ArrayList<>(chancemap.keySet());
+        Collections.sort(mapList, new Comparator<GameMap>() {
+            @Override
+            public int compare(GameMap o1, GameMap o2) {
+                return (int)((chancemap.get(o2) - chancemap.get(o1))*100);
+            }
+        });
         int i = 0;
-        for (GameMap map : GameMap.getMaps()) {
+        for (GameMap map : mapList) {
             ItemStackBuilder builder = VoteInventory.builder.clone().withName(map.getName()).withLore("").withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore("");
             for(String s: map.getDescription()){
                 builder.withLore(ChatColor.GRAY + ChatColor.ITALIC.toString() + s);

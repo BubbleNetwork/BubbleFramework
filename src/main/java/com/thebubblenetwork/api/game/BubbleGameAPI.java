@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.anticheat.NCPManager;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
-import com.thebubblenetwork.api.framework.cosmetics.CosmeticsManager;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
@@ -21,7 +20,6 @@ import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.listener.GameListener;
 import com.thebubblenetwork.api.game.maps.GameMap;
 import com.thebubblenetwork.api.game.maps.MapData;
-import com.thebubblenetwork.api.game.maps.Vote;
 import com.thebubblenetwork.api.game.maps.VoteInventory;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
@@ -260,10 +258,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         for (GameMap map : GameMap.getMaps()) {
             maps.put(map, 0);
         }
-        GameMap temp;
-        for (Vote v : api.getVotes().values()) {
-            if ((temp = v.getMap()) != null && maps.containsKey(temp)) {
-                maps.put(temp, maps.get(temp) + 1);
+        for (GameMap v : api.getVotes().values()) {
+            if (maps.containsKey(v)) {
+                maps.put(v, maps.get(v) + 1);
             }
         }
         return maps;
@@ -274,7 +271,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private LobbyPreset preset = new LobbyPreset();
     private World chosen = null;
     private GameMap chosenmap = null;
-    private Map<UUID, Vote> votes = new HashMap<UUID, Vote>();
+    private Map<UUID, GameMap> votes = new HashMap<UUID, GameMap>();
     private GameListener listener;
     private VoteInventory voteInventory;
     private GameTimer timer;
@@ -462,7 +459,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public abstract void cleanup();
 
-    public Map<UUID, Vote> getVotes() {
+    public Map<UUID, GameMap> getVotes() {
         return votes;
     }
 
@@ -471,9 +468,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     public void addVote(UUID u, GameMap vote) {
-        if (getVotes().containsKey(u)) {
-            getVotes().get(u).setVote(vote);
-        }
+        getVotes().put(u, vote);
     }
 
     public void win(final Player p) {
