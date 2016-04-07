@@ -29,6 +29,7 @@ import com.thebubblenetwork.api.game.spectator.PlayersList;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.FileUTIL;
 import com.thebubblenetwork.api.global.file.SSLUtil;
+import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
@@ -198,6 +199,21 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(lobbyworld)));
                 p.setGameMode(GameMode.SURVIVAL);
             }
+            new BubbleRunnable(){
+                public void run() {
+                    for(BubblePlayer player: BukkitBubblePlayer.getPlayerObjectMap().values()){
+                        Player realplayer = (Player)player.getPlayer();
+                        if (realplayer != null && realplayer.isOnline()) {
+                            for(GameBoard other:GameBoard.getBoards()){
+                                other.applyRank(player.getRank(),realplayer);
+                            }
+                        }
+                    }
+                }
+            }.runTaskAsynchonrously(api);
+
+
+
             api.cancelWaiting();
 
             //After 10 seconds we check whether we can start the game again
