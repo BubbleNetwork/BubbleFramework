@@ -48,7 +48,9 @@ public class VoteMenu extends Menu{
     }
 
     public static void removeMenu(Player p){
-        cached.remove(p.getUniqueId()).deregister();
+        if(cached.containsKey(p.getUniqueId())) {
+            cached.remove(p.getUniqueId()).deregister();
+        }
     }
 
     public static int getAmountOfVotes(){
@@ -97,7 +99,7 @@ public class VoteMenu extends Menu{
     }
 
     private VoteMenu() {
-        super(display, mapList.size());
+        super(display, Menu.getRoundedInventorySize(GameMap.getMaps().size()));
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
     }
 
