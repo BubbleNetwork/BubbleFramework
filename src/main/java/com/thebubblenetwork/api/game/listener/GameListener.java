@@ -395,7 +395,7 @@ public class GameListener implements Listener {
         p.setSaturation(600);
         Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), null);
         if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
-            p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld("world")));
+            p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
             p.setGameMode(GameMode.SURVIVAL);
             if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers()) {
                 BubbleGameAPI.getInstance().startWaiting();

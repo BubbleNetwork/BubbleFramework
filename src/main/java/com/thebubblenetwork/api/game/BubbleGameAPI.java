@@ -65,11 +65,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     }
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
-        if (newstate.getPreset() != null) {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                GameBoard.getBoard(p).enable(newstate.getPreset());
-            }
-        }
         if (newstate == State.PREGAME) {
 
             api.chosenmap = calculateMap(api);
@@ -213,6 +208,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                     }
                 }
             }.runTaskLater(api,TimeUnit.SECONDS,10);
+        }
+        if (newstate.getPreset() != null) {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                GameBoard.getBoard(p).enable(newstate.getPreset());
+            }
         }
     }
 
