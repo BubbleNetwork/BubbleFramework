@@ -4,10 +4,12 @@ import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
+import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
 import com.thebubblenetwork.api.framework.util.mc.items.ItemStackBuilder;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.game.kit.KitSelection;
+import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
@@ -103,6 +105,7 @@ public class GameListener implements Listener {
         } else {
             disableSpectate(p);
         }
+        BukkitBubblePlayer.getObject(p.getUniqueId()).setSpectating(spectating);
     }
 
     private void startGhost(Player p) {
@@ -111,10 +114,9 @@ public class GameListener implements Listener {
         if (t != null) {
             t.unregister();
         }
-        ;
         t = board.registerNewTeam(ghostteam);
-        t.setPrefix(ChatColor.RED.toString());
         t.setCanSeeFriendlyInvisibles(true);
+        t.setPrefix(ChatColor.GRAY + "[SPEC]");
         t.setAllowFriendlyFire(false);
         for (Player other : Bukkit.getOnlinePlayers()) {
             if (isSpectating(other)) {
@@ -197,7 +199,7 @@ public class GameListener implements Listener {
         BubbleGameAPI.getInstance().getPlayerList().update();
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onSpectatorJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         for (Player t : Bukkit.getOnlinePlayers()) {
@@ -373,7 +375,7 @@ public class GameListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         final Player p = e.getPlayer();
         BukkitBubblePlayer player = BukkitBubblePlayer.getObject(e.getPlayer().getUniqueId());
@@ -395,7 +397,7 @@ public class GameListener implements Listener {
         p.setSaturation(600);
         Messages.sendMessageTitle(p, "", ChatColor.AQUA + "Welcome to " + ChatColor.BLUE + BubbleGameAPI.getInstance().getName(), null);
         if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
-            p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld("world")));
+            p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
             p.setGameMode(GameMode.SURVIVAL);
             if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers()) {
                 BubbleGameAPI.getInstance().startWaiting();
@@ -409,7 +411,7 @@ public class GameListener implements Listener {
                 }
             });
         }
-        new Thread(){
+        new BubbleRunnable(){
             @Override
             public void run() {
                 if(p.isOnline()) {
@@ -422,9 +424,17 @@ public class GameListener implements Listener {
                     for(BubblePlayer other:BukkitBubblePlayer.getPlayerObjectMap().values()){
                         scoreboard.applyRank(other.getRank(),(Player)other.getPlayer());
                     }
+                    if(isSpectating(p)){
+                        new BubbleRunnable(){
+                            public void run() {
+                                setSpectating(p, false);
+                                setSpectating(p, true);
+                            }
+                        }.runTask(BubbleGameAPI.getInstance());
+                    }
                 }
             }
-        }.start();
+        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
     }
 
     @EventHandler
@@ -434,8 +444,12 @@ public class GameListener implements Listener {
         if (Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getMinPlayers() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY) {
             BubbleGameAPI.getInstance().cancelWaiting();
         }
+        else if(Bukkit.getOnlinePlayers().size() == getSpectatorList().size() && BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME){
+            BubbleGameAPI.getInstance().endGame();
+        }
         GameBoard.removeBoard(p);
-        new Thread(){
+        VoteMenu.removeMenu(p);
+        new BubbleRunnable(){
             @Override
             public void run(){
                 for(GameBoard other:GameBoard.getBoards()){
@@ -444,7 +458,7 @@ public class GameListener implements Listener {
                     }
                 }
             }
-        }.start();
+        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
     }
 
     public boolean canDefault(boolean pregame) {
@@ -466,7 +480,7 @@ public class GameListener implements Listener {
                     e.getAction() != Action.LEFT_CLICK_AIR && e.getAction() != Action.LEFT_CLICK_BLOCK) {
                 int slot = p.getInventory().getHeldItemSlot();
                 if (slot == MAPSLOT) {
-                    BubbleGameAPI.getInstance().getVoteInventory().show(p);
+                    VoteMenu.getMenu(p).show(p);
                 } else if (slot == KITSLOT) {
                     KitSelection.openMenu(p);
                 } else if (slot == LOBBYSLOT) {
@@ -576,6 +590,11 @@ public class GameListener implements Listener {
     @EventHandler
     public void onPlayerDataReceived(PlayerDataReceivedEvent e){
         GameBoard board = GameBoard.getBoard(e.getPlayer());
-        if(board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
+        new BubbleRunnable(){
+            public void run() {
+                if(e.getPlayer().isOnline() && board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
+
+            }
+        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
     }
 }
