@@ -37,7 +37,7 @@ public class Kit {
     }
 
     public boolean isOwned(BukkitBubblePlayer player) {
-        return this == BubbleGameAPI.getInstance().getDefaultKit() || getLevel(player) > 0;
+        return getLevel(player) > 0;
     }
 
     public int getLevel(BukkitBubblePlayer player) {
@@ -50,8 +50,8 @@ public class Kit {
 
     public int getLevelUpcost(BukkitBubblePlayer player) {
         int level = getLevel(player);
-        if (level == getMaxlevel()) {
-            return -1;
+        if (level >= getMaxlevel()) {
+            throw new IllegalArgumentException("Cannot level up");
         }
         return (price * (level + 1)) / (getMaxlevel() - level);
     }
@@ -85,11 +85,7 @@ public class Kit {
     }
 
     public ItemStack[] getInventorypreset(int level) {
-        return inventorypreset.get(level-1);
-    }
-
-    public void setInventorypreset(ItemStack[] inventorypreset, int level) {
-        this.inventorypreset.set(level-1,inventorypreset);
+        return inventorypreset.get(level-1).clone();
     }
 
     public Material getDisplay() {
