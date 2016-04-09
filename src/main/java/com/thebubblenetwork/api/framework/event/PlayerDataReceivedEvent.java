@@ -14,16 +14,12 @@ public class PlayerDataReceivedEvent extends Event{
     private Player player;
     private PlayerData data;
     private PlayerData before;
-    private PunishmentData punishmentData;
-    private PunishmentData beforeUpdate;
 
-    public PlayerDataReceivedEvent(Player player, PlayerData data, PunishmentData punishmentData) {
+    public PlayerDataReceivedEvent(Player player, PlayerData data) {
         super(true);
         this.player = player;
         this.data = data;
-        this.punishmentData = punishmentData;
         this.before = BukkitBubblePlayer.getObject(player.getUniqueId()).getData();
-        this.beforeUpdate = BukkitBubblePlayer.getObject(player.getUniqueId()).getPunishmentData();
     }
 
     public Player getPlayer() {
@@ -34,17 +30,13 @@ public class PlayerDataReceivedEvent extends Event{
         return data;
     }
 
-    public PunishmentData getPunishmentData() {
-        return punishmentData;
-    }
-
     public BukkitBubblePlayer getAfter(){
-        return new BukkitBubblePlayer(getPlayer().getUniqueId(), getData(), getPunishmentData());
+        return new BukkitBubblePlayer(getPlayer().getUniqueId(), getData());
     }
 
     public BukkitBubblePlayer getBefore(){
         //Make sure this cannot be modified
-        return new BukkitBubblePlayer(getPlayer().getUniqueId(), new PlayerData(before.getRaw()), new PunishmentData(beforeUpdate.getRaw()));
+        return new BukkitBubblePlayer(getPlayer().getUniqueId(), new PlayerData(before.getRaw()));
     }
 
     public HandlerList getHandlers() {

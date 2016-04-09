@@ -69,15 +69,24 @@ public class VoteMenu extends Menu{
     }
 
     public static ItemStack[] generateInventory() {
+        //If it has been reset we can add
+        if(mapList.isEmpty()){
+            mapList.addAll(GameMap.getMaps());
+            Collections.shuffle(mapList);
+        }
         Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
-        mapList.clear();
-        slotMap.clear();
+
+        //Sort the maps into correct order based on votes
         Collections.sort(mapList, new Comparator<GameMap>() {
             public int compare(GameMap o1, GameMap o2) {
                 return (int)((chancemap.get(o2) - chancemap.get(o1))*1000);
             }
         });
+
         ItemStack[] is = new ItemStack[Menu.getRoundedInventorySize(mapList.size())];
+
+        //Clear all the slots
+        slotMap.clear();
         int i = 0;
         for (GameMap map : mapList) {
             ItemStackBuilder builder = VoteMenu.builder.clone().withName(map.getName()).withLore("").withLore(chance.replace("%chance%", format.format(chancemap.get(map) * 100))).withLore("");
@@ -101,6 +110,7 @@ public class VoteMenu extends Menu{
     private VoteMenu() {
         super(display, Menu.getRoundedInventorySize(GameMap.getMaps().size()));
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
+        if(contents == null)contents = generateInventory();
     }
 
     public void deregister(){
@@ -108,7 +118,6 @@ public class VoteMenu extends Menu{
     }
 
     private UUID uuid = null;
-
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (slot < mapList.size()) {
             GameMap map = mapList.get(slot);
@@ -125,8 +134,8 @@ public class VoteMenu extends Menu{
         }
     }
 
+    @Override
     public ItemStack[] generate() {
-        if(contents == null)contents = generateInventory();
         ItemStack[] generate = contents.clone();
         if(uuid != null && votes.containsKey(uuid)){
             int slot = slotMap.get(votes.get(uuid));
