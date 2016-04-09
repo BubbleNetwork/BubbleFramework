@@ -141,7 +141,7 @@ public class VoteMenu extends Menu{
         if(uuid != null && votes.containsKey(uuid)){
             int slot = slotMap.get(votes.get(uuid));
             ItemStackBuilder replacewith = new ItemStackBuilder(generate[slot].clone());
-            replacewith.withType(Material.EMPTY_MAP);
+            replacewith.withType(Material.BOOK);
             replacewith.withLore("",ChatColor.GOLD + "You have vote for this map");
             generate[slot] = EnchantGlow.addGlow(replacewith.build());
         }

@@ -38,6 +38,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -412,14 +413,16 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
                     getLogger().log(Level.WARNING, "Received data for a player which is not online " + dataResponse.getName());
                 } else {
                     //Call event Async
-                    new Thread(){
+                    new BukkitRunnable(){
                         @Override
                         public void run() {
-                            PlayerDataReceivedEvent event = new PlayerDataReceivedEvent(player, new PlayerData(dataResponse.getData()));
-                            getPlugin().getServer().getPluginManager().callEvent(event);
-                            bukkitBubblePlayer.setData(event.getData().getRaw());
+                            if(player.isOnline() && bukkitBubblePlayer.isOnline()) {
+                                PlayerDataReceivedEvent event = new PlayerDataReceivedEvent(player, new PlayerData(dataResponse.getData()));
+                                getPlugin().getServer().getPluginManager().callEvent(event);
+                                bukkitBubblePlayer.setData(event.getData().getRaw());
+                            }
                         }
-                    }.start();
+                    }.runTaskAsynchronously(getPlugin());
                 }
             } else {
                 DataRequestTask.setData(dataResponse.getName(), dataResponse.getData());
