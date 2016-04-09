@@ -116,7 +116,7 @@ public class GameListener implements Listener {
         }
         t = board.registerNewTeam(ghostteam);
         t.setCanSeeFriendlyInvisibles(true);
-        t.setPrefix(ChatColor.GRAY + "[SPEC]");
+        t.setPrefix(ChatColor.GRAY + "[SPEC] ");
         t.setAllowFriendlyFire(false);
         for (Player other : Bukkit.getOnlinePlayers()) {
             if (isSpectating(other)) {
