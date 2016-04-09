@@ -40,7 +40,7 @@ public class LobbyPreset extends BoardPreset {
         playingValue.getTeam().setSuffix(BubbleGameAPI.getInstance().getName());
         BoardScore rankValue = board.getScore(this, getModule("RankValue"));
         Rank r = player.getRank();
-        rankValue.getTeam().setSuffix(r.isDefault() ? "No rank" : String.valueOf(r.getName().charAt(0)).toUpperCase() + r.getName().substring(1));
+        rankValue.getTeam().setSuffix(r.isDefault() ? "No rank" : String.valueOf(r.getName()));
         BoardScore tokenValue = board.getScore(this, getModule("TokensValue"));
         tokenValue.getTeam().setSuffix(String.valueOf(player.getTokens()));
         BoardScore status = board.getScore(this, getModule("Status"));
