@@ -82,6 +82,7 @@ public class BubbleListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitRemoval(PlayerQuitEvent e) {
         BukkitBubblePlayer.getPlayerObjectMap().remove(e.getPlayer().getUniqueId());
+        e.setQuitMessage(null);
     }
 
     @EventHandler
@@ -111,6 +112,7 @@ public class BubbleListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
+        e.setJoinMessage(null);
         Player p = e.getPlayer();
         if(!data.containsKey(p.getName())){
             p.kickPlayer("Server timed out");

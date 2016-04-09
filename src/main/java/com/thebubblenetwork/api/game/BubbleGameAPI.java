@@ -456,6 +456,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if (getState() != State.INGAME) {
             return;
         }
+        BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
+        //Increase win stats
+        player.incrementStat(getType().getName(), "win", 1);
         p.playSound(p.getLocation().getBlock().getLocation(), Sound.LEVEL_UP, 5F, 5F);
         Messages.broadcastMessageTitle(ChatColor.BLUE + p.getName(), ChatColor.AQUA + " has won the game", new TimingTicks(TimeUnit.SECONDS,1,2,3));
         setState(State.ENDGAME);
