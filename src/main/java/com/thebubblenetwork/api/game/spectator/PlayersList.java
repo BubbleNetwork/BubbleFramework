@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.spectator;
 
+import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.util.mc.menu.Menu;
 import com.thebubblenetwork.api.game.BubbleGameAPI;
 import org.bukkit.Bukkit;
@@ -43,7 +44,7 @@ public class PlayersList extends Menu implements Listener {
     public PlayersList() {
         super(ChatColor.BLUE + "Playing", 9);
         update();
-        BubbleGameAPI.getInstance().registerListener(this);
+        BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
     }
 
     @Override
