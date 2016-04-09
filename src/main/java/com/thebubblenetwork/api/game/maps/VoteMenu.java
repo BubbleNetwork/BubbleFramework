@@ -74,7 +74,7 @@ public class VoteMenu extends Menu{
             mapList.addAll(GameMap.getMaps());
             Collections.shuffle(mapList);
         }
-        Map<GameMap, Double> chancemap = BubbleGameAPI.getInstance().calculatePercentages();
+        Map<GameMap, Double> chancemap = BubbleGameAPI.calculateMapPercentages();
 
         //Sort the maps into correct order based on votes
         Collections.sort(mapList, new Comparator<GameMap>() {
