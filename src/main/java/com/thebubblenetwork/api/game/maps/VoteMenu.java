@@ -110,7 +110,7 @@ public class VoteMenu extends Menu{
     private VoteMenu() {
         super(display, Menu.getRoundedInventorySize(GameMap.getMaps().size()));
         BubbleNetwork.getInstance().registerMenu(BubbleGameAPI.getInstance(), this);
-        if(contents == null)contents = generateInventory();
+        update();
     }
 
     public void deregister(){
@@ -123,7 +123,7 @@ public class VoteMenu extends Menu{
             GameMap map = mapList.get(slot);
             if (votes.get(player.getUniqueId()) == map) {
                 votes.remove(player.getUniqueId());
-                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" +ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
+                player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your vote for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" +ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
             } else {
                 votes.put(player.getUniqueId(), map);
                 player.spigot().sendMessage(new MessageUtil.MessageBuilder("You have voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
@@ -139,7 +139,10 @@ public class VoteMenu extends Menu{
         ItemStack[] generate = contents.clone();
         if(uuid != null && votes.containsKey(uuid)){
             int slot = slotMap.get(votes.get(uuid));
-            generate[slot] = EnchantGlow.addGlow(generate[slot].clone());
+            ItemStackBuilder replacewith = new ItemStackBuilder(generate[slot].clone());
+            replacewith.withType(Material.EMPTY_MAP);
+            replacewith.withLore("",ChatColor.GOLD + "You have vote for this map");
+            generate[slot] = EnchantGlow.addGlow(replacewith.build());
         }
         return generate;
     }
