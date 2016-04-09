@@ -497,7 +497,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.RESTARTING);
                 GameMap.extractMap(chosen);
                 GameMap.setupMap(chosen);
-
+                
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
                     getDefaultKit().apply(player);
