@@ -65,7 +65,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
         if (newstate == State.PREGAME) {
-
             api.chosenmap = calculateMap(api);
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             api.teleportPlayers(api.chosenmap, api.chosen);
@@ -95,14 +94,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
             //Deleting if it already exists
             FileUTIL.deleteDir(worldfolder);
-
-            //Allowing all SSL
-            try {
-                SSLUtil.allowAnySSL();
-            } catch (Exception e) {
-                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Could not allow all SSL", e);
-                break Change;
-            }
 
             //Temp zip file
             File tempzip = new File("temp.zip");
@@ -209,18 +200,28 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 }
             }.runTaskAsynchonrously(api);
 
+            for(GameBoard board: GameBoard.getBoards()){
+                String s;
+                String status;
+                if (Bukkit.getOnlinePlayers().size() < api.getMinPlayers()) {
+                    s = LobbyPreset.PLAYERNEED;
+                    status = String.valueOf(BubbleGameAPI.getInstance().getMinPlayers() - Bukkit.getOnlinePlayers().size());
+                } else {
+                    s = LobbyPreset.STARTING;
+                    status = "Soon";
+                }
+                api.getPreset().setStatus(board, s);
+                api.getPreset().setStatusValue(board, status);
+            }
 
-
-            api.cancelWaiting();
-
-            //After 10 seconds we check whether we can start the game again
+            //After 2 seconds we check whether we can start the game again
             new BubbleRunnable(){
                 public void run() {
                     if (api.getTimer() == null && Bukkit.getOnlinePlayers().size() >= api.getMinPlayers()) {
                         api.startWaiting();
                     }
                 }
-            }.runTaskLater(api,TimeUnit.SECONDS,10);
+            }.runTaskLater(api,TimeUnit.SECONDS,2);
         }
         if (newstate.getPreset() != null) {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -407,19 +408,15 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         if (timer != null) {
             return;
         }
-        BoardModule module = getPreset().getModule("Status");
         for (GameBoard board : GameBoard.getBoards()) {
-            BoardScore score = board.getScore(preset, module);
-            score.getTeam().setSuffix(LobbyPreset.STARTING);
+            getPreset().setStatus(board, LobbyPreset.STARTING);
         }
-        timer = new GameTimer(20, 20) {
+        timer = new GameTimer(20, 60) {
             public void run(int seconds) {
-                BoardModule module = preset.getModule("StatusValue");
                 for (GameBoard board : GameBoard.getBoards()) {
-                    BoardScore score = board.getScore(preset, module);
-                    score.getTeam().setSuffix(String.valueOf(seconds));
+                    getPreset().setStatusValue(board, String.valueOf(seconds));
                 }
-                if (seconds <= 3 || seconds % 5 == 0) {
+                if (seconds <= 3 || (seconds % 5 == 0 && seconds < 30) || seconds % 15 == 0) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), null, null);
                 }
                 for (Player p : Bukkit.getOnlinePlayers()) {
@@ -439,10 +436,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
         timer.cancel();
         timer = null;
-        BoardModule module = getPreset().getModule("Status");
         for (GameBoard board : GameBoard.getBoards()) {
-            BoardScore score = board.getScore(getPreset(), module);
-            score.getTeam().setSuffix(LobbyPreset.PLAYERNEED);
+            getPreset().setStatus(board, LobbyPreset.PLAYERNEED);
         }
     }
 
@@ -472,7 +467,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 if (!p.isOnline()) {
                     return;
                 }
-                getChosen().spigot().playEffect(p.getLocation(), Effect.FLAME);
+                getChosen().spigot().playEffect(p.getLocation(), Effect.MOBSPAWNER_FLAMES);
                 Random r = BubbleNetwork.getRandom();
                 if (left % 20 == 0 || (left % 4 == 0 && left / 4 < 5)) {
                     Messages.broadcastMessageAction(ChatColor.BLUE + "Restarting in " + ChatColor.AQUA + String.valueOf(left / 4));
@@ -521,7 +516,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
             public void end(){
                 GameMap chosen = getChosenGameMap();
-
                 setState(State.RESTARTING);
                 GameMap.extractMap(chosen);
                 GameMap.setupMap(chosen);

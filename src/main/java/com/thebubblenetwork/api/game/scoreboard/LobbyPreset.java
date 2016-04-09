@@ -52,4 +52,20 @@ public class LobbyPreset extends BoardPreset {
             status.getTeam().setSuffix(STARTING);
         }
     }
+
+    public void setTokens(BubbleBoardAPI api, int tokens){
+        api.getScore(this, getModule("TokensValue")).getTeam().setSuffix(String.valueOf(tokens));
+    }
+
+    public void setRank(BubbleBoardAPI api, String name){
+        api.getScore(this, getModule("RankValue")).getTeam().setSuffix(name);
+    }
+
+    public void setStatus(BubbleBoardAPI api, String status){
+        api.getScore(this, getModule("Status")).getTeam().setSuffix(status);
+    }
+
+    public void setStatusValue(BubbleBoardAPI api, String value){
+        api.getScore(this, getModule("StatusValue")).getTeam().setSuffix(value);
+    }
 }

@@ -11,6 +11,7 @@ import com.thebubblenetwork.api.game.BubbleGameAPI;
 import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
+import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
@@ -589,12 +590,17 @@ public class GameListener implements Listener {
 
     @EventHandler
     public void onPlayerDataReceived(PlayerDataReceivedEvent e){
-        GameBoard board = GameBoard.getBoard(e.getPlayer());
-        new BubbleRunnable(){
-            public void run() {
-                if(e.getPlayer().isOnline() && board.getCurrentpreset() != null)board.getCurrentpreset().onEnable(board);
-
+        BukkitBubblePlayer before = e.getBefore();
+        BukkitBubblePlayer after = e.getAfter();
+        boolean tokenchange = before.getTokens() != after.getTokens();
+        boolean rankchange = after.getRank() != before.getRank();
+        if(tokenchange || rankchange) {
+            GameBoard board = GameBoard.getBoard(e.getPlayer());
+            if(board != null) {
+                LobbyPreset preset = BubbleGameAPI.getInstance().getPreset();
+                if (tokenchange) preset.setTokens(board, after.getTokens());
+                if (rankchange) preset.setRank(board, after.getRank().isDefault() ? "No rank": after.getRank().getName());
             }
-        }.runTaskAsynchonrously(BubbleGameAPI.getInstance());
+        }
     }
 }
