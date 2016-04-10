@@ -7,7 +7,6 @@ import com.thebubblenetwork.api.framework.plugin.loader.AddonDescriptionFile;
 import com.thebubblenetwork.api.framework.plugin.loader.BubbleAddonLoader;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
-import com.thebubblenetwork.api.global.ftp.AbstractFileConnection;
 import de.mickare.xserver.net.XServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -144,11 +143,8 @@ public abstract class BubbleAddon{
         network.disableAddon();
     }
 
-    public AbstractFileConnection getFileConnection() {
-        return BubbleNetwork.getInstance().getFileConnection();
-    }
 
     public void downloadFile(File to, String name) throws Exception {
-        DownloadUtil.download(to, name, getFileConnection());
+        DownloadUtil.download(to, name, BubbleNetwork.getInstance().getFileConnection());
     }
 }
