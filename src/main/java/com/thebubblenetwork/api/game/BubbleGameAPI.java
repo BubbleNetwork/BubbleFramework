@@ -27,6 +27,7 @@ import com.thebubblenetwork.api.game.spectator.PlayersList;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.FileUTIL;
 import com.thebubblenetwork.api.global.file.SSLUtil;
+import com.thebubblenetwork.api.global.ftp.AbstractFileConnection;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
@@ -528,5 +529,13 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
             return null;
         }
+    }
+
+    public AbstractFileConnection getFileConnection() {
+        return BubbleNetwork.getInstance().getFileConnection();
+    }
+
+    public void downloadFile(File to, String name) throws Exception {
+        DownloadUtil.download(to, name, getFileConnection());
     }
 }
