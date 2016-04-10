@@ -531,11 +531,4 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
     }
 
-    public AbstractFileConnection getFileConnection() {
-        return BubbleNetwork.getInstance().getFileConnection();
-    }
-
-    public void downloadFile(File to, String name) throws Exception {
-        DownloadUtil.download(to, name, getFileConnection());
-    }
 }
