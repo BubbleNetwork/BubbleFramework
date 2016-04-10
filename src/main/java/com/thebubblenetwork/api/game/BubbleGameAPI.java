@@ -65,7 +65,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
         if (newstate == State.PREGAME) {
-            api.chosenmap = calculateMap();
+            api.chosenmap = VoteMenu.calculateMap();
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             api.teleportPlayers(api.chosenmap, api.chosen);
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -228,42 +228,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 GameBoard.getBoard(p).enable(newstate.getPreset());
             }
         }
-    }
-
-    private static GameMap calculateMap() {
-        final double chance = BubbleNetwork.getRandom().nextDouble()*100;
-        double current = 0;
-        for (Map.Entry<GameMap, Double> entry : calculateMapPercentages().entrySet()) {
-            current += entry.getValue();
-            if (current <= chance) {
-                return entry.getKey();
-            }
-        }
-        //Hopefully shouldn't go past this point
-        return GameMap.getMaps().get(0);
-    }
-
-    public static Map<GameMap, Double> calculateMapPercentages() {
-        Map<GameMap, Double> maps = new HashMap<>();
-        final double votesize = VoteMenu.getAmountOfVotes();
-        final double mapsize = GameMap.getMaps().size();
-        for (Map.Entry<GameMap, Integer> entry : calculateScores().entrySet()) {
-            maps.put(entry.getKey(), ((double) entry.getValue() + 1.0D) / (votesize + mapsize));
-        }
-        return maps;
-    }
-
-    private static Map<GameMap, Integer> calculateScores() {
-        Map<GameMap, Integer> maps = new HashMap<>();
-        for (GameMap map : GameMap.getMaps()) {
-            maps.put(map, 0);
-        }
-        for (GameMap v : VoteMenu.getVotes()) {
-            if (maps.containsKey(v)) {
-                maps.put(v, maps.get(v) + 1);
-            }
-        }
-        return maps;
     }
 
     private static BubbleGameAPI instance;
