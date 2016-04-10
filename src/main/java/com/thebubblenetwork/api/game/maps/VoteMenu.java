@@ -154,6 +154,10 @@ public class VoteMenu extends Menu{
                 votesbymap.put(map, votesbymap.get(map) - 1);
                 player.spigot().sendMessage(new MessageUtil.MessageBuilder("You cancelled your vote for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" +ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
             } else {
+                if(votes.containsKey(player.getUniqueId())){
+                    GameMap last = votes.get(player.getUniqueId());
+                    if(mapList.contains(last))votesbymap.put(last, votesbymap.get(last) - 1);
+                }
                 votes.put(player.getUniqueId(), map);
                 votesbymap.put(map, votesbymap.get(map) + 1);
                 player.spigot().sendMessage(new MessageUtil.MessageBuilder("You have voted for ").color(ChatColor.BLUE).append(map.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(Joiner.on("\n" + ChatColor.GRAY + ChatColor.ITALIC.toString()).join(map.getDescription())))).create());
