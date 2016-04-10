@@ -148,7 +148,7 @@ public class VoteMenu extends Menu{
 
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
         if (slotMap.containsValue(slot)) {
-            GameMap map = mapList.get(slot);
+            GameMap map = mapList.get(slot-2);
             if (votes.get(player.getUniqueId()) == map) {
                 votes.remove(player.getUniqueId());
                 votesbymap.put(map, votesbymap.get(map) - 1);
