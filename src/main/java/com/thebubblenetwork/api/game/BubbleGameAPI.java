@@ -377,11 +377,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 for (GameBoard board : GameBoard.getBoards()) {
                     getPreset().setStatusValue(board, String.valueOf(seconds));
                 }
-                if (seconds <= 3 || (seconds % 5 == 0 && seconds < 30) || seconds % 15 == 0) {
+                if (seconds <= 5 || (seconds % 5 == 0 && seconds < 30) || seconds % 15 == 0) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), null, null);
-                }
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                    }
                 }
             }
 
@@ -472,7 +472,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         setState(BubbleGameAPI.State.ENDGAME);
         new GameTimer(20, 15){
             public void run(int i) {
-                if(i % 5 == 0 || i < 5)Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
+                if(i % 5 == 0 || i < 5) {
+                    Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
+                }
             }
 
             public void end(){
