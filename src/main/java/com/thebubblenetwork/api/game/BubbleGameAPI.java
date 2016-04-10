@@ -7,7 +7,6 @@ import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
-import com.thebubblenetwork.api.framework.plugin.manage.BukkitPlugman;
 import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
@@ -497,12 +496,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.RESTARTING);
                 GameMap.extractMap(chosen);
                 GameMap.setupMap(chosen);
-
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
-                    getDefaultKit().apply(player);
-                }
-
                 setState(State.LOBBY);
             }
         };
@@ -516,6 +509,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             public void run(int i) {
                 if(i % 5 == 0 || i < 5)Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
             }
+
             public void end(){
                 GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);
