@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,10 +42,16 @@ public class KitSelection extends Menu {
         plugin.registerListener(new Listener() {
             @EventHandler
             public void onPlayerQuit(PlayerQuitEvent e) {
-                try {
-                    BubbleNetwork.getInstance().unregisterMenu(menuMap.remove(e.getPlayer().getUniqueId()));
-                }
-                catch (Exception ex){
+                Player p = e.getPlayer();
+                if(menuMap.containsKey(p.getUniqueId()))BubbleNetwork.getInstance().unregisterMenu(menuMap.remove(e.getPlayer().getUniqueId()));
+            }
+
+            @EventHandler
+            public void onPlayerJoin(PlayerJoinEvent e){
+                Player p = e.getPlayer();
+                if(!menuMap.containsKey(p.getUniqueId())){
+                    KitSelection selection = new KitSelection(p);
+                    menuMap.put(p.getUniqueId(), selection);
                 }
             }
         });
@@ -55,11 +62,6 @@ public class KitSelection extends Menu {
     }
 
     public static KitSelection getSelection(Player p) {
-        if(!menuMap.containsKey(p.getUniqueId())){
-            KitSelection selection = new KitSelection(p);
-            menuMap.put(p.getUniqueId(), selection);
-            return selection;
-        }
         return menuMap.get(p.getUniqueId());
     }
 
@@ -86,11 +88,6 @@ public class KitSelection extends Menu {
     public Kit getKit() {
         return kit;
     }
-
-    public void setKit(Kit kit) {
-        this.kit = kit;
-    }
-
 
     public ItemStack[] generate() {
         ItemStack[] is = new ItemStack[getInventory().getSize()];

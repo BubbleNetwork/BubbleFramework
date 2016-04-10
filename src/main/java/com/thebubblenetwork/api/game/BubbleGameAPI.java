@@ -370,11 +370,12 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public void onDisable() {
         setState(State.RESTARTING);
-        World w;
-        if((w = Bukkit.getWorld(lobbyworld)) != null) {
-            File folder = w.getWorldFolder();
-            Bukkit.unloadWorld(w, false);
-            FileUTIL.deleteDir(folder);
+        for(World w:Bukkit.getWorlds()){
+            if(!w.getName().equals("world")) {
+                File folder = w.getWorldFolder();
+                Bukkit.unloadWorld(w, false);
+                FileUTIL.deleteDir(folder);
+            }
         }
 
         //Next addon may use gameapi
@@ -476,14 +477,14 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                     }
                     meta.addEffect(FireworkEffect.builder().flicker(r.nextBoolean()).trail(r.nextBoolean()).withColor(colorSet).build());
                     firework.setFireworkMeta(meta);
-                    firework.setVelocity(p.getLocation().getDirection().multiply(2 + r.nextInt(2)));
+                    firework.setVelocity(p.getLocation().getDirection());
                     new BubbleRunnable() {
                         public void run() {
                             if (!firework.isDead()) {
                                 firework.detonate();
                             }
                         }
-                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS, 2 + r.nextInt(3));
+                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS, 1 + r.nextInt(2));
                 }
             }
 
