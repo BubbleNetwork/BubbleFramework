@@ -7,7 +7,6 @@ import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
 import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
-import com.thebubblenetwork.api.framework.plugin.manage.BukkitPlugman;
 import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
@@ -66,7 +65,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     private static void stateChange(final BubbleGameAPI api, State oldstate, State newstate) {
         if (newstate == State.PREGAME) {
-            api.chosenmap = calculateMap();
+            api.chosenmap = VoteMenu.calculateMap();
             api.chosen = Bukkit.getWorld(api.chosenmap.getName());
             api.teleportPlayers(api.chosenmap, api.chosen);
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -231,42 +230,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
     }
 
-    private static GameMap calculateMap() {
-        final double chance = BubbleNetwork.getRandom().nextDouble()*100;
-        double current = 0;
-        for (Map.Entry<GameMap, Double> entry : calculateMapPercentages().entrySet()) {
-            current += entry.getValue();
-            if (current <= chance) {
-                return entry.getKey();
-            }
-        }
-        //Hopefully shouldn't go past this point
-        return GameMap.getMaps().get(0);
-    }
-
-    public static Map<GameMap, Double> calculateMapPercentages() {
-        Map<GameMap, Double> maps = new HashMap<>();
-        final double votesize = VoteMenu.getAmountOfVotes();
-        final double mapsize = GameMap.getMaps().size();
-        for (Map.Entry<GameMap, Integer> entry : calculateScores().entrySet()) {
-            maps.put(entry.getKey(), ((double) entry.getValue() + 1.0D) / (votesize + mapsize));
-        }
-        return maps;
-    }
-
-    private static Map<GameMap, Integer> calculateScores() {
-        Map<GameMap, Integer> maps = new HashMap<>();
-        for (GameMap map : GameMap.getMaps()) {
-            maps.put(map, 0);
-        }
-        for (GameMap v : VoteMenu.getVotes()) {
-            if (maps.containsKey(v)) {
-                maps.put(v, maps.get(v) + 1);
-            }
-        }
-        return maps;
-    }
-
     private static BubbleGameAPI instance;
     public static String lobbyworld = "Lobby";
     private LobbyPreset preset = new LobbyPreset();
@@ -371,11 +334,12 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
     public void onDisable() {
         setState(State.RESTARTING);
-        World w;
-        if((w = Bukkit.getWorld(lobbyworld)) != null) {
-            File folder = w.getWorldFolder();
-            Bukkit.unloadWorld(w, false);
-            FileUTIL.deleteDir(folder);
+        for(World w:Bukkit.getWorlds()){
+            if(!w.getName().equals("world")) {
+                File folder = w.getWorldFolder();
+                Bukkit.unloadWorld(w, false);
+                FileUTIL.deleteDir(folder);
+            }
         }
 
         //Next addon may use gameapi
@@ -413,11 +377,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 for (GameBoard board : GameBoard.getBoards()) {
                     getPreset().setStatusValue(board, String.valueOf(seconds));
                 }
-                if (seconds <= 3 || (seconds % 5 == 0 && seconds < 30) || seconds % 15 == 0) {
+                if (seconds <= 5 || (seconds % 5 == 0 && seconds < 30) || seconds % 15 == 0) {
                     Messages.broadcastMessageTitle(ChatColor.BLUE + String.valueOf(seconds), null, null);
-                }
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        p.playSound(p.getLocation().getBlock().getLocation(), Sound.NOTE_BASS, 1f, 1f);
+                    }
                 }
             }
 
@@ -477,14 +441,14 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                     }
                     meta.addEffect(FireworkEffect.builder().flicker(r.nextBoolean()).trail(r.nextBoolean()).withColor(colorSet).build());
                     firework.setFireworkMeta(meta);
-                    firework.setVelocity(p.getLocation().getDirection().multiply(2 + r.nextInt(2)));
+                    firework.setVelocity(p.getLocation().getDirection());
                     new BubbleRunnable() {
                         public void run() {
                             if (!firework.isDead()) {
                                 firework.detonate();
                             }
                         }
-                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS, 2 + r.nextInt(3));
+                    }.runTaskLater(BubbleGameAPI.this, TimeUnit.SECONDS, 1 + r.nextInt(2));
                 }
             }
 
@@ -497,12 +461,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.RESTARTING);
                 GameMap.extractMap(chosen);
                 GameMap.setupMap(chosen);
-
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    BukkitBubblePlayer player = BukkitBubblePlayer.getObject(p.getUniqueId());
-                    getDefaultKit().apply(player);
-                }
-
                 setState(State.LOBBY);
             }
         };
@@ -514,8 +472,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         setState(BubbleGameAPI.State.ENDGAME);
         new GameTimer(20, 15){
             public void run(int i) {
-                if(i % 5 == 0 || i < 5)Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
+                if(i % 5 == 0 || i < 5) {
+                    Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Restarting in " + ChatColor.AQUA + i);
+                }
             }
+
             public void end(){
                 GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);

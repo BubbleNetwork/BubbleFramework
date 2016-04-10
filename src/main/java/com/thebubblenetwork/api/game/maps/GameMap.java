@@ -110,6 +110,9 @@ public abstract class GameMap {
         }
         World w = new WorldCreator(map.getName()).generator(VoidWorldGenerator.getGenerator()).generateStructures(false).createWorld();
         w.setAutoSave(false);
+        w.setKeepSpawnInMemory(false);
+        w.setThundering(false);
+        w.setStorm(false);
         w.setDifficulty(Difficulty.NORMAL);
         w.setFullTime(0L);
         return w;
