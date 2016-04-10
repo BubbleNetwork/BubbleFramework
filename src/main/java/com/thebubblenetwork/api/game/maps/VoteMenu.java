@@ -88,6 +88,9 @@ public class VoteMenu extends Menu{
             for(int i = 0; i < size; i++){
                 mapList.add(GameMap.getMaps().get(i));
             }
+            for(GameMap map: mapList){
+                votesbymap.put(map, 0);
+            }
         }
 
         //Sort the maps into correct order based on votes
