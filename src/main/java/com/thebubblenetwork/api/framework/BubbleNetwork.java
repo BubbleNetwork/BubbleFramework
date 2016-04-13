@@ -1,6 +1,7 @@
 package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
+import com.thebubblenetwork.api.framework.event.ServerListUpdateEvent;
 import com.thebubblenetwork.api.framework.interaction.DataRequestTask;
 import com.thebubblenetwork.api.framework.listener.BubbleListener;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
@@ -20,6 +21,7 @@ import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerMoveTypeRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.ServerShutdownRequest;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.PlayerDataResponse;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.response.ServerListResponse;
 import com.thebubblenetwork.api.global.data.PlayerData;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.PropertiesFile;
@@ -444,6 +446,9 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
             } else {
                 getLogger().log(Level.WARNING, "Player not found for data request " + request.getName());
             }
+        } else if(message instanceof ServerListResponse){
+            ServerListResponse response = (ServerListResponse)message;
+            getPlugin().getServer().getPluginManager().callEvent(new ServerListUpdateEvent(response.getServertype(), response.getServerList()));
         } else {
             getLogger().log(Level.WARNING, "Unsupported message " + message.getType().getName());
         }
