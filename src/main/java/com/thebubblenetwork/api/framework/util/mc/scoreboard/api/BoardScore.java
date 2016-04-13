@@ -27,11 +27,7 @@ public class BoardScore {
         if (team == null) {
             team = api.getObject().getBoard().registerNewTeam(name);
         } else {
-            if (name.length() > 6) {
-                name = name.substring(6);
-            }
-            team = api.getObject().getBoard().registerNewTeam(name + api.getColorCombo().getRandomColorCombo() +
-                    ChatColor.RESET);
+            team = api.getObject().getBoard().registerNewTeam(api.getColorCombo().getRandomColorCombo());
         }
         team.addPlayer(module.getPlayer());
     }
