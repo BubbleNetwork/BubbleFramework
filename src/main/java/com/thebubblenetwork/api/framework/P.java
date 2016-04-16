@@ -40,12 +40,12 @@ public class P extends JavaPlugin {
     }
 
     public void onDisable() {
-        network.onDisable();
         try {
             DownloadUtil.download(getFile(), "BubbleFramework.jar", network.getFileConnection());
         } catch (Exception e) {
             getLogger().log(Level.WARNING, "Could not update ", e);
         }
+        network.onDisable();
     }
 
     public ChunkGenerator getDefaultWorldGenerator(String s1, String s2) {
