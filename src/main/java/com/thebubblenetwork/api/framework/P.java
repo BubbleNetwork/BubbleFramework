@@ -1,10 +1,12 @@
 package com.thebubblenetwork.api.framework;
 
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
+import com.thebubblenetwork.api.global.file.DownloadUtil;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.logging.Level;
 
 /**
  * Copyright Statement
@@ -39,6 +41,11 @@ public class P extends JavaPlugin {
 
     public void onDisable() {
         network.onDisable();
+        try {
+            DownloadUtil.download(getFile(), "BubbleFramework.jar", network.getFileConnection());
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Could not update ", e);
+        }
     }
 
     public ChunkGenerator getDefaultWorldGenerator(String s1, String s2) {
