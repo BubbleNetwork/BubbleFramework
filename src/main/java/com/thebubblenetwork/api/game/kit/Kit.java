@@ -53,7 +53,7 @@ public class Kit {
         if (level >= getMaxlevel()) {
             throw new IllegalArgumentException("Cannot level up");
         }
-        return (price * (level + 1)) / (getMaxlevel() - level);
+        return price + ((price * (level + 1)) / (getMaxlevel() - level));
     }
 
     public void apply(BukkitBubblePlayer p) {
