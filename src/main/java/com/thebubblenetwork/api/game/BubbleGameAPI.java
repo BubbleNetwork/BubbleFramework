@@ -8,9 +8,7 @@ import com.thebubblenetwork.api.framework.messages.Messages;
 import com.thebubblenetwork.api.framework.messages.titlemanager.types.TimingTicks;
 import com.thebubblenetwork.api.framework.plugin.BubbleAddon;
 import com.thebubblenetwork.api.framework.plugin.util.BubbleRunnable;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardModule;
 import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardPreset;
-import com.thebubblenetwork.api.framework.util.mc.scoreboard.api.BoardScore;
 import com.thebubblenetwork.api.framework.util.mc.timer.GameTimer;
 import com.thebubblenetwork.api.framework.util.mc.world.VoidWorldGenerator;
 import com.thebubblenetwork.api.game.inventory.LobbyInventory;
@@ -24,14 +22,15 @@ import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
+import com.thebubblenetwork.api.global.bubblepackets.PacketHub;
+import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerMoveTypeRequest;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
 import com.thebubblenetwork.api.global.file.FileUTIL;
-import com.thebubblenetwork.api.global.file.SSLUtil;
-import com.thebubblenetwork.api.global.ftp.AbstractFileConnection;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.sql.SQLConnection;
 import com.thebubblenetwork.api.global.sql.SQLUtil;
 import com.thebubblenetwork.api.global.type.ServerType;
+import de.mickare.xserver.net.XServer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.entity.Firework;
@@ -143,7 +142,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         if (newstate == State.RESTARTING) {
-            VoteMenu.wipeClean();
 
             //Sending players to spawn
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -161,7 +159,10 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 if(folder.exists()){
                     FileUTIL.deleteDir(folder);
                 }
+                GameMap.getMaps().remove(api.getChosenGameMap());
             }
+
+            VoteMenu.wipeClean();
 
             //Removing timer
             api.timer = null;
@@ -201,28 +202,33 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 }
             }.runTaskAsynchonrously(api);
 
-            for(GameBoard board: GameBoard.getBoards()){
-                String s;
-                String status;
-                if (Bukkit.getOnlinePlayers().size() < api.getMinPlayers()) {
-                    s = LobbyPreset.PLAYERNEED;
-                    status = String.valueOf(BubbleGameAPI.getInstance().getMinPlayers() - Bukkit.getOnlinePlayers().size());
-                } else {
-                    s = LobbyPreset.STARTING;
-                    status = "Soon";
-                }
-                api.getPreset().setStatus(board, s);
-                api.getPreset().setStatusValue(board, status);
+            if(GameMap.getMaps().size() <= 5){
+                api.restartGame();
             }
-
-            //After 2 seconds we check whether we can start the game again
-            new BubbleRunnable(){
-                public void run() {
-                    if (api.getTimer() == null && Bukkit.getOnlinePlayers().size() >= api.getMinPlayers()) {
-                        api.startWaiting();
+            else {
+                for (GameBoard board : GameBoard.getBoards()) {
+                    String s;
+                    String status;
+                    if (Bukkit.getOnlinePlayers().size() < api.getMinPlayers()) {
+                        s = LobbyPreset.PLAYERNEED;
+                        status = String.valueOf(BubbleGameAPI.getInstance().getMinPlayers() - Bukkit.getOnlinePlayers().size());
+                    } else {
+                        s = LobbyPreset.STARTING;
+                        status = "Soon";
                     }
+                    api.getPreset().setStatus(board, s);
+                    api.getPreset().setStatusValue(board, status);
                 }
-            }.runTaskLater(api,TimeUnit.SECONDS,2);
+
+                //After 2 seconds we check whether we can start the game again
+                new BubbleRunnable() {
+                    public void run() {
+                        if (api.getTimer() == null && Bukkit.getOnlinePlayers().size() >= api.getMinPlayers()) {
+                            api.startWaiting();
+                        }
+                    }
+                }.runTaskLater(api, TimeUnit.SECONDS, 2);
+            }
         }
         if (newstate.getPreset() != null) {
             for (Player p : Bukkit.getOnlinePlayers()) {
@@ -319,6 +325,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 setState(State.LOADING);
             }
         });
+        /*
         try {
             cheatmanager.download();
         } catch (Exception e) {
@@ -331,6 +338,22 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             cheatmanager.enable();
         } catch (Exception e) {
         }
+        */
+        try{
+            cheatmanager.disable();
+        }
+        catch (Exception ex){
+
+        }
+
+        try{
+            cheatmanager.unload();
+        }
+        catch (Exception ex){
+
+        }
+
+        cheatmanager.clearUp();
     }
 
     public void onDisable() {
@@ -347,6 +370,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         GameMap.getMaps().clear();
         KitManager.getKits().clear();
         KitSelection.getMenuMap().clear();
+
 
         try {
             cheatmanager.disable();
@@ -458,10 +482,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                     p.setAllowFlight(false);
                     p.setFlying(false);
                 }
-                GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);
-                GameMap.extractMap(chosen);
-                GameMap.setupMap(chosen);
                 setState(State.LOBBY);
             }
         };
@@ -479,13 +500,35 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
 
             public void end(){
-                GameMap chosen = getChosenGameMap();
                 setState(State.RESTARTING);
-                GameMap.extractMap(chosen);
-                GameMap.setupMap(chosen);
                 setState(State.LOBBY);
             }
         };
+    }
+
+    public void restartGame(){
+        setState(State.HIDDEN);
+        XServer proxy = BubbleNetwork.getInstance().getProxy();
+        PacketHub hub = BubbleNetwork.getInstance().getPacketHub();
+        for(Player p: Bukkit.getOnlinePlayers()){
+            PlayerMoveTypeRequest moveTypeRequest = new PlayerMoveTypeRequest(p.getName(),ServerType.getType("Lobby"));
+            try {
+                hub.sendMessage(proxy, moveTypeRequest);
+            } catch (IOException e) {
+                BubbleNetwork.getInstance().getLogger().log(Level.WARNING, "Failed to kick player to hub", e);
+                p.kickPlayer(ChatColor.RED + "An internal error occurred");
+            }
+        }
+        new GameTimer(20, 5){
+            public void run(int i) {
+                Messages.broadcastMessageAction(org.bukkit.ChatColor.DARK_AQUA + "Server restarting in " + ChatColor.AQUA + i);
+            }
+
+            public void end(){
+                Bukkit.shutdown();
+            }
+        };
+
     }
 
     public ServerType getType() {
