@@ -261,7 +261,7 @@ public class GameListener implements Listener {
                         p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
                         break;
                     case INGAME:
-                        Bukkit.getServer().getPluginManager().callEvent(new PlayerDeathEvent(p, new ArrayList<>(new ImmutableList.Builder<ItemStack>().addAll(p.getInventory()).build()), 0, null));
+                        p.damage(p.getHealth(), p.getKiller());
                         break;
                     case ENDGAME:
                         //Facing direction, with upward Y
