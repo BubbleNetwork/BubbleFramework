@@ -1,5 +1,6 @@
 package com.thebubblenetwork.api.game.listener;
 
+import com.google.common.collect.ImmutableList;
 import com.thebubblenetwork.api.framework.event.PlayerDataReceivedEvent;
 import com.thebubblenetwork.api.framework.BubbleNetwork;
 import com.thebubblenetwork.api.framework.player.BukkitBubblePlayer;
@@ -30,10 +31,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -255,7 +253,7 @@ public class GameListener implements Listener {
             e.setCancelled(true);
             if(isSpectating(p)){
                 //Facing direction, with upward Y
-                p.setVelocity(p.getLocation().getDirection().multiply(2.0D).setY(5.0D));
+                p.teleport(BubbleGameAPI.getInstance().getChosen().getSpawnLocation());
             }
             else {
                 switch (BubbleGameAPI.getInstance().getState()) {
@@ -263,9 +261,7 @@ public class GameListener implements Listener {
                         p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
                         break;
                     case INGAME:
-                        //Fake Damage cause
-                        p.setLastDamageCause(new EntityDamageEvent(p, EntityDamageEvent.DamageCause.VOID, p.getHealth()));
-                        p.setHealth(0.0D);
+                        Bukkit.getServer().getPluginManager().callEvent(new PlayerDeathEvent(p, new ArrayList<>(new ImmutableList.Builder<ItemStack>().addAll(p.getInventory()).build()), 0, null));
                         break;
                     case ENDGAME:
                         //Facing direction, with upward Y
@@ -370,7 +366,7 @@ public class GameListener implements Listener {
         if (!BubbleGameAPI.getInstance().getState().joinable()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "You cannot join at " +
                     "this time");
-        } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY && Bukkit.getOnlinePlayers().size() == BubbleGameAPI.getInstance().getType().getMaxPlayers()) {
+        } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.LOBBY && Bukkit.getOnlinePlayers().size() >= BubbleGameAPI.getInstance().getType().getMaxPlayers()) {
             e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, BubbleNetwork.getPrefix() + "This game is " +
                     "currently full");
         }
