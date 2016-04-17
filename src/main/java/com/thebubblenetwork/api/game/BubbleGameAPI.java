@@ -202,7 +202,7 @@ public abstract class BubbleGameAPI extends BubbleAddon {
                 }
             }.runTaskAsynchonrously(api);
 
-            if(GameMap.getMaps().size() <= 5){
+            if(GameMap.getMaps().size() < 5){
                 api.restartGame();
             }
             else {
