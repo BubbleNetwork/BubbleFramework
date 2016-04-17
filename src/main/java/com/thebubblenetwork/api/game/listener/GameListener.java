@@ -261,7 +261,7 @@ public class GameListener implements Listener {
                         p.teleport(BubbleGameAPI.getLobbySpawn().toLocation(Bukkit.getWorld(BubbleGameAPI.lobbyworld)));
                         break;
                     case INGAME:
-                        p.damage(p.getHealth(), p.getKiller());
+                        p.damage(100D, p.getKiller());
                         break;
                     case ENDGAME:
                         //Facing direction, with upward Y
