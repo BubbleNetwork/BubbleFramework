@@ -30,7 +30,6 @@ public class VoteMenu extends Menu{
     private static final Sound click = Sound.SUCCESSFUL_HIT;
     private static final ItemStackBuilder builder = new ItemStackBuilder(Material.PAPER);
     private static final List<GameMap> mapList = new ArrayList<>();
-    private static final Map<GameMap, Integer> slotMap = new HashMap<>();
     private static ItemStack[] contents;
     private static final Map<UUID, GameMap> votes = new HashMap<>();
     private static final Map<UUID, VoteMenu> cached = new HashMap<>();
@@ -76,7 +75,6 @@ public class VoteMenu extends Menu{
         votes.clear();
         mapList.clear();
         cached.clear();
-        slotMap.clear();
         votesbymap.clear();
     }
 
@@ -93,19 +91,10 @@ public class VoteMenu extends Menu{
             }
         }
 
-        //Sort the maps into correct order based on votes
-        Collections.sort(mapList, new Comparator<GameMap>() {
-            public int compare(GameMap o1, GameMap o2) {
-                return votesbymap.get(o2) - votesbymap.get(o1);
-            }
-        });
-
         ItemStack[] is = new ItemStack[9];
 
         ItemStackBuilder grayscale = new ItemStackBuilder(Material.STAINED_GLASS_PANE).withColor(DyeColor.GRAY);
 
-        //Clear all the slots
-        slotMap.clear();
         int i = 2;
         for (GameMap map : mapList) {
             ItemStackBuilder builder = VoteMenu.builder.clone().withName(map.getName()).withLore("").withLore(ChatColor.BLUE + "Votes: " + ChatColor.AQUA + votesbymap.get(map)).withLore("");
@@ -113,7 +102,6 @@ public class VoteMenu extends Menu{
                 builder.withLore(ChatColor.GRAY + ChatColor.ITALIC.toString() + s);
             }
             is[i] = builder.build();
-            slotMap.put(map, i);
             i++;
         }
         for(i = 0;i < is.length; i++){
@@ -138,7 +126,9 @@ public class VoteMenu extends Menu{
     public void deregister(){
         if(uuid != null && votes.containsKey(uuid)){
             GameMap map = votes.remove(uuid);
-            if(mapList.contains(map))votesbymap.put(map, votesbymap.get(map) - 1);
+            if(mapList.contains(map)) {
+                votesbymap.put(map, votesbymap.get(map) - 1);
+            }
         }
         BubbleNetwork.getInstance().unregisterMenu(this);
     }
@@ -147,8 +137,8 @@ public class VoteMenu extends Menu{
 
 
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
-        if (slotMap.containsValue(slot)) {
-            GameMap map = mapList.get(slot-2);
+        if (slot >= 2 || slot < mapList.size() + 2) {
+            GameMap map = mapList.get(slot - 2);
             if (votes.get(player.getUniqueId()) == map) {
                 votes.remove(player.getUniqueId());
                 votesbymap.put(map, votesbymap.get(map) - 1);
@@ -156,7 +146,9 @@ public class VoteMenu extends Menu{
             } else {
                 if(votes.containsKey(player.getUniqueId())){
                     GameMap last = votes.get(player.getUniqueId());
-                    if(mapList.contains(last))votesbymap.put(last, votesbymap.get(last) - 1);
+                    if(mapList.contains(last)) {
+                        votesbymap.put(last, votesbymap.get(last) - 1);
+                    }
                 }
                 votes.put(player.getUniqueId(), map);
                 votesbymap.put(map, votesbymap.get(map) + 1);
@@ -170,13 +162,16 @@ public class VoteMenu extends Menu{
 
     @Override
     public ItemStack[] generate() {
-        if(contents == null)contents = generateInventory();
+        if(contents == null) {
+            contents = generateInventory();
+        }
         ItemStack[] generate = contents.clone();
-        if(uuid != null && votes.containsKey(uuid)){
-            int slot = slotMap.get(votes.get(uuid));
+
+        if(uuid != null && votes.containsKey(uuid)) {
+            int slot = mapList.indexOf(votes.get(uuid)) + 2;
             ItemStackBuilder replacewith = new ItemStackBuilder(generate[slot].clone());
             replacewith.withType(Material.BOOK);
-            replacewith.withLore("",ChatColor.GOLD + "You have vote for this map");
+            replacewith.withLore("",ChatColor.GOLD + "You have voted for this map");
             generate[slot] = EnchantGlow.addGlow(replacewith.build());
         }
         return generate;

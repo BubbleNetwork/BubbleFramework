@@ -174,7 +174,8 @@ public class GameListener implements Listener {
         p.setAllowFlight(true);
         p.setFlying(true);
         p.spigot().setCollidesWithEntities(false);
-        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1), false);
+        p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false , false), false);
+        p.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false), false);
         BubbleGameAPI.getInstance().getPlayerList().update();
         Messages.sendMessageTitle(p, "", ChatColor.AQUA + "You are now spectating", null);
     }
@@ -195,7 +196,7 @@ public class GameListener implements Listener {
             target.showPlayer(p);
         }
         p.removePotionEffect(PotionEffectType.INVISIBILITY);
-        BubbleGameAPI.getInstance().getPlayerList().update();
+        p.removePotionEffect(PotionEffectType.SPEED);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -401,6 +402,16 @@ public class GameListener implements Listener {
             }
         } else if (BubbleGameAPI.getInstance().getState() == BubbleGameAPI.State.INGAME) {
             setSpectating(p, true);
+            List<Player> players = new ArrayList<>();
+            for(Player other:Bukkit.getOnlinePlayers()){
+                if(!isSpectating(other)){
+                    players.add(other);
+                }
+            }
+            if(!players.isEmpty()){
+                Collections.shuffle(players);
+                p.teleport(players.get(0));
+            }
         } else {
             BubbleGameAPI.getInstance().runTask(new Runnable() {
                 public void run() {
