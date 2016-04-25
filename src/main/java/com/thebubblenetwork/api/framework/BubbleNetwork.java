@@ -315,12 +315,12 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
         try {
             getAssigned().getLoader().close();
         } catch (Exception e) {
-            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin", e);
+            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin ", e);
         }
         try{
             getAssigned().onDisable();
         } catch (Exception e) {
-            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin", e);
+            getPlugin().getLogger().log(Level.WARNING, "Error while disabling plugin ", e);
         }
         unregisterListener();
         unregisterTasks();
@@ -330,6 +330,7 @@ public class BubbleNetwork extends BubbleHub<JavaPlugin> implements PacketListen
             jar.deleteOnExit();
         }
         assigned = null;
+        endSetup("Server shutdown");
     }
 
     public boolean enableAddon(ServerType type) {

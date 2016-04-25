@@ -39,7 +39,7 @@ public class VoteMenu extends Menu{
         int current = 0;
         GameMap currentmap = null;
         for (Map.Entry<GameMap, Integer> entry : votesbymap.entrySet()) {
-            if(entry.getValue() > current || (entry.getValue() == current && BubbleNetwork.getRandom().nextBoolean())){
+            if(entry.getValue() > current || (entry.getValue() == current)){
                 currentmap = entry.getKey();
                 current = entry.getValue();
             }
@@ -49,7 +49,7 @@ public class VoteMenu extends Menu{
 
     public static VoteMenu getMenu(Player p){
         VoteMenu menu = cached.containsKey(p.getUniqueId()) ? cached.get(p.getUniqueId()) : new VoteMenu();
-        cached.putIfAbsent(p.getUniqueId(), menu);
+        cached.put(p.getUniqueId(), menu);
         return menu;
     }
 

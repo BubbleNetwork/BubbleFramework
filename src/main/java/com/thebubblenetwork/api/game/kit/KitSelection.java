@@ -67,7 +67,9 @@ public class KitSelection extends Menu {
 
     private static Sound selectkit = Sound.LEVEL_UP, buykit = Sound.NOTE_BASS, noaccess = Sound.BLAZE_DEATH;
     private static MessageUtil.MessageBuilder selectkitmsg = new MessageUtil.MessageBuilder("You have selected ").color(ChatColor.BLUE);
-    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").color(ChatColor.RED);
+    private static MessageUtil.MessageBuilder noaccessmsg = new MessageUtil.MessageBuilder("No do not have ").color(ChatColor.BLUE);
+    private static MessageUtil.MessageBuilder afford = new MessageUtil.MessageBuilder("You can't afford ").color(ChatColor.BLUE);
+    private static MessageUtil.MessageBuilder mastered = new MessageUtil.MessageBuilder("You have ").color(ChatColor.BLUE).append("mastered").color(ChatColor.GOLD).bold(true).append(" ").bold(false);
     private static String inventoryname = ChatColor.RED + "" + ChatColor.BOLD + "Kits";
     private static Map<UUID, KitSelection> menuMap = new HashMap<>();
     private UUID uuid;
@@ -95,7 +97,6 @@ public class KitSelection extends Menu {
         for (Kit k : KitManager.getKits()) {
             ItemStackBuilder builder = new ItemStackBuilder(k.getDisplay());
             builder.withName(k.getName());
-            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ");
             if (k == BubbleGameAPI.getInstance().getDefaultKit()) {
                 builder.withLore(ChatColor.GRAY + "" + "      Default Kit");
             }
@@ -130,13 +131,11 @@ public class KitSelection extends Menu {
                 leftclick = null;
                 rightclick += "Buy this kit";
             }
-            builder.withLore(status);
-            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ", "");
-            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ");
+            builder.withLore("",status,"");
             for (String s : k.getDescription()) {
                 builder.withLore(ChatColor.GRAY + "" + ChatColor.ITALIC + s);
             }
-            builder.withLore(ChatColor.DARK_GRAY + "  -=========================-  ", "");
+            builder.withLore("");
             if (leftclick != null) {
                 builder.withLore(leftclick);
             }
@@ -156,19 +155,19 @@ public class KitSelection extends Menu {
         if (slot < KitManager.getKits().size()) {
             Kit k = KitManager.getKits().get(slot);
             BukkitBubblePlayer bubblePlayer = BukkitBubblePlayer.getObject(player.getUniqueId());
+            ComponentBuilder description = new ComponentBuilder(k.getName()).append("\n").append("\n");
+            for (String s : k.getDescription()) {
+                description.append(s).color(ChatColor.GRAY).italic(true).append("\n");
+            }
             if (type == ClickType.LEFT) {
-                ComponentBuilder description = new ComponentBuilder(k.getName()).append("\n").append("\n");
-                for (String s : k.getDescription()) {
-                    description.append(s).color(ChatColor.GRAY).italic(true).append("\n");
-                }
                 if (k.isOwned(bubblePlayer)) {
                     player.playSound(player.getLocation().getBlock().getLocation(), selectkit, 1f, 1f);
                     this.kit = k;
-                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
+                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                     update();
                 } else {
                     player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
-                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
+                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                 }
             } else if (type == ClickType.RIGHT) {
                 player.playSound(player.getLocation().getBlock().getLocation(), buykit, 1f, 1f);
@@ -177,17 +176,18 @@ public class KitSelection extends Menu {
                         if (bubblePlayer.canAfford(k.getLevelUpcost(bubblePlayer))) {
                             KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
                             kitLevelUpInventory.show(player);
-                        } else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
+                        }
+                        else player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append(" You need ").color(ChatColor.BLUE).append(String.valueOf(k.getLevelUpcost(bubblePlayer)- bubblePlayer.getTokens())).color(ChatColor.AQUA).append(" more tokens to upgrade this to Lv").color(ChatColor.BLUE).append(String.valueOf(k.getLevel(bubblePlayer) + 1)).color(ChatColor.AQUA).create());
                     }
                     else{
-                        player.sendMessage(BubbleNetwork.getPrefix() + "You have mastered this kit");
+                        player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
+                        player.spigot().sendMessage(mastered.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                     }
                 } else {
-                    if(bubblePlayer.canAfford(kit.getPrice())) {
+                    if(bubblePlayer.canAfford(k.getPrice())) {
                         k.getBuyInventory().show(player);
                     }
-                    else player.sendMessage(BubbleNetwork.getPrefix() + "You can't afford this");
-                }
+                    player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append(" You need ").color(ChatColor.BLUE).append(String.valueOf(k.getPrice() - bubblePlayer.getTokens())).color(ChatColor.AQUA).append(" more tokens to buy this").color(ChatColor.BLUE).create());                }
             }
         }
     }

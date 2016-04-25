@@ -36,7 +36,7 @@ public class KitLevelUpInventory extends BuyInventory {
     private int level;
 
     public KitLevelUpInventory(Kit k, int cost, int level) {
-        super(ChatColor.GOLD + k.getNameClear() + " Lv" + String.valueOf(level - 1) + " -> Lv" + String.valueOf(level) + " " + ChatColor.RED + String.valueOf(k.getPrice()) + "T");
+        super(ChatColor.GOLD + k.getNameClear() + " Lv" + String.valueOf(level - 1) + " -> Lv" + String.valueOf(level) + " " + ChatColor.RED + String.valueOf(cost) + "T");
         this.k = k;
         this.cost = cost;
         this.level = level;
