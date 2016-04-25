@@ -99,7 +99,7 @@ public class KitSelection extends Menu {
             builder.withName(k.getName());
             builder.withLore("");
             if (k == BubbleGameAPI.getInstance().getDefaultKit()) {
-                builder.withLore(ChatColor.GRAY + "" + "Default Kit","");
+                builder.withLore(ChatColor.GRAY + "  Default Kit","");
             }
             String rightclick = ChatColor.DARK_AQUA + "Right Click -> ";
             String leftclick = ChatColor.DARK_PURPLE + "Left Click -> ";
@@ -124,6 +124,7 @@ public class KitSelection extends Menu {
                 leftclick += "Select this kit";
                 if (k.getLevel(player) < k.getMaxlevel()) {
                     rightclick += "Upgrade this kit";
+                    builder.withLore(ChatColor.GREEN + "  Upgrade Cost: " + ChatColor.GRAY + String.valueOf(k.getLevelUpcost(player)));
                 } else {
                     rightclick = ChatColor.GOLD + "You have mastered this kit";
                 }
