@@ -166,11 +166,11 @@ public class KitSelection extends Menu {
                 if (k.isOwned(bubblePlayer)) {
                     player.playSound(player.getLocation().getBlock().getLocation(), selectkit, 1f, 1f);
                     this.kit = k;
-                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
+                    player.spigot().sendMessage(selectkitmsg.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                     update();
                 } else {
                     player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
-                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
+                    player.spigot().sendMessage(noaccessmsg.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                 }
             } else if (type == ClickType.RIGHT) {
                 player.playSound(player.getLocation().getBlock().getLocation(), buykit, 1f, 1f);
@@ -180,17 +180,17 @@ public class KitSelection extends Menu {
                             KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
                             kitLevelUpInventory.show(player);
                         }
-                        else player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append(" You need ").color(ChatColor.BLUE).append(String.valueOf(k.getLevelUpcost(bubblePlayer)- bubblePlayer.getTokens())).color(ChatColor.AQUA).append(" more tokens to upgrade this to Lv").color(ChatColor.BLUE).append(String.valueOf(k.getLevel(bubblePlayer) + 1)).color(ChatColor.AQUA).create());
+                        else player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").color(ChatColor.BLUE).append(String.valueOf(k.getLevelUpcost(bubblePlayer)- bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append("  to upgrade this to Lv").color(ChatColor.BLUE).append(String.valueOf(k.getLevel(bubblePlayer) + 1)).color(ChatColor.AQUA).create());
                     }
                     else{
                         player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
-                        player.spigot().sendMessage(mastered.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
+                        player.spigot().sendMessage(mastered.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).create());
                     }
                 } else {
                     if(bubblePlayer.canAfford(k.getPrice())) {
                         k.getBuyInventory().show(player);
                     }
-                    player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.BLUE).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append(" You need ").color(ChatColor.BLUE).append(String.valueOf(k.getPrice() - bubblePlayer.getTokens())).color(ChatColor.AQUA).append(" more tokens to buy this").color(ChatColor.BLUE).create());                }
+                    player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").color(ChatColor.BLUE).append(String.valueOf(k.getPrice() - bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append(" to buy this").color(ChatColor.BLUE).create());                }
             }
         }
     }
