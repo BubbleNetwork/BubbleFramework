@@ -358,8 +358,6 @@ public abstract class BubbleGameAPI extends BubbleAddon {
 
         cheatmanager.clearUp();
 
-        //setup the team manager
-        setupTeamManager();
     }
 
     public void onDisable() {
