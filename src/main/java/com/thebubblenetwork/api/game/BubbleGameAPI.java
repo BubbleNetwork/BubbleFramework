@@ -22,6 +22,7 @@ import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
 import com.thebubblenetwork.api.game.spectator.PlayersList;
+import com.thebubblenetwork.api.game.teams.TeamManager;
 import com.thebubblenetwork.api.global.bubblepackets.PacketHub;
 import com.thebubblenetwork.api.global.bubblepackets.messaging.messages.request.PlayerMoveTypeRequest;
 import com.thebubblenetwork.api.global.file.DownloadUtil;
@@ -251,6 +252,8 @@ public abstract class BubbleGameAPI extends BubbleAddon {
     private String type;
     private int minplayers;
     private NCPManager cheatmanager = new NCPManager(BubbleNetwork.getInstance());
+    private boolean teams;
+    private TeamManager teamManager;
 
     public BubbleGameAPI(String type, GameMode defaultgamemode, String defaultkit, int minplayers) {
         super();
@@ -354,6 +357,9 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         }
 
         cheatmanager.clearUp();
+
+        //setup the team manager
+        setupTeamManager();
     }
 
     public void onDisable() {
@@ -387,6 +393,11 @@ public abstract class BubbleGameAPI extends BubbleAddon {
         cheatmanager.clearUp();
 
         setInstance(null);
+
+        //clear the teams
+        if (isTeams()) {
+            getTeamManager().clearTeams();
+        }
     }
 
 
@@ -572,6 +583,24 @@ public abstract class BubbleGameAPI extends BubbleAddon {
             }
             return null;
         }
+    }
+
+    public void setTeams(boolean enable) {
+        teams = enable;
+    }
+
+    public boolean isTeams() {
+        return teams;
+    }
+
+    public void setupTeamManager() {
+        if (isTeams()) {
+            teamManager = new TeamManager();
+        }
+    }
+
+    public TeamManager getTeamManager() {
+        return teamManager;
     }
 
 }
