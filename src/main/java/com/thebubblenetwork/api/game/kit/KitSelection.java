@@ -180,7 +180,7 @@ public class KitSelection extends Menu {
                             KitLevelUpInventory kitLevelUpInventory = new KitLevelUpInventory(k, k.getLevelUpcost(bubblePlayer), k.getLevel(bubblePlayer) + 1);
                             kitLevelUpInventory.show(player);
                         }
-                        else player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").color(ChatColor.BLUE).append(String.valueOf(k.getLevelUpcost(bubblePlayer)- bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append("  to upgrade this to Lv").color(ChatColor.BLUE).append(String.valueOf(k.getLevel(bubblePlayer) + 1)).color(ChatColor.AQUA).create());
+                        else player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").event((HoverEvent) null).color(ChatColor.BLUE).append(String.valueOf(k.getLevelUpcost(bubblePlayer)- bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append("  to upgrade this to ").color(ChatColor.BLUE).append("Lv" + String.valueOf(k.getLevel(bubblePlayer) + 1)).color(ChatColor.AQUA).create());
                     }
                     else{
                         player.playSound(player.getLocation().getBlock().getLocation(), noaccess, 1f, 1f);
@@ -190,7 +190,7 @@ public class KitSelection extends Menu {
                     if(bubblePlayer.canAfford(k.getPrice())) {
                         k.getBuyInventory().show(player);
                     }
-                    player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").color(ChatColor.BLUE).append(String.valueOf(k.getPrice() - bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append(" to buy this").color(ChatColor.BLUE).create());                }
+                    player.spigot().sendMessage(afford.clone().append(k.getName()).color(ChatColor.AQUA).event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, description.create())).append("! You need ").event((HoverEvent) null).color(ChatColor.BLUE).append(String.valueOf(k.getPrice() - bubblePlayer.getTokens())).color(ChatColor.AQUA).append("T").color(ChatColor.AQUA).append(" to buy this").color(ChatColor.BLUE).create());                }
             }
         }
     }
