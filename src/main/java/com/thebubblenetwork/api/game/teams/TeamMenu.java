@@ -74,10 +74,10 @@ public class TeamMenu extends Menu {
     private UUID uuid = null;
 
     public void click(Player player, ClickType type, int slot, ItemStack itemStack) {
-        if (slot == 0) {
-
-        } else if (slot == 1) {
-
+        if (slot == 0 && ChatColor.stripColor(itemStack.getItemMeta().getDisplayName()).equalsIgnoreCase("Red Team")) {
+            BubbleGameAPI.getInstance().getTeamManager().addToTeam(TeamType.RED, player);
+        } else if (slot == 1 && ChatColor.stripColor(itemStack.getItemMeta().getDisplayName()).equalsIgnoreCase("Blue Team")) {
+            BubbleGameAPI.getInstance().getTeamManager().addToTeam(TeamType.BLUE, player);
         }
         player.playSound(player.getLocation(), click, 1f, 1f);
         uuid = player.getUniqueId();
