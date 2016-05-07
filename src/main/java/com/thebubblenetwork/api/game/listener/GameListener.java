@@ -13,6 +13,7 @@ import com.thebubblenetwork.api.game.kit.KitSelection;
 import com.thebubblenetwork.api.game.maps.VoteMenu;
 import com.thebubblenetwork.api.game.scoreboard.GameBoard;
 import com.thebubblenetwork.api.game.scoreboard.LobbyPreset;
+import com.thebubblenetwork.api.game.teams.TeamMenu;
 import com.thebubblenetwork.api.global.player.BubblePlayer;
 import com.thebubblenetwork.api.global.type.ServerType;
 import net.md_5.bungee.api.ChatColor;
@@ -56,15 +57,19 @@ public class GameListener implements Listener {
         is[MAPSLOT] = mapselection.build();
         is[KITSLOT] = kitselection.build();
         is[LOBBYSLOT] = LOBBYITEM.build();
+        if (BubbleGameAPI.getInstance().isTeams()) {
+            is[TEAMSLOT] = TEAMSELECTOR.build();
+        }
         return is;
     }
 
     private static ItemStackBuilder mapselection = new ItemStackBuilder(Material.PAPER).withName(ChatColor.DARK_AQUA + "Maps").withLore(ChatColor.GRAY + "Click to vote for a map");
     private static ItemStackBuilder kitselection = new ItemStackBuilder(Material.IRON_AXE).withName(ChatColor.DARK_AQUA + "Kits").withLore(ChatColor.GRAY + "Click to select or buy a kit");
     private static String ghostteam = "GHOST";
-    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8;
+    private static int SPECTATORLOBBYSLOT = 8, SPECTATORPLAYERSSLOT = 0, MAPSLOT = 1, KITSLOT = 0, LOBBYSLOT = 8, TEAMSLOT = 2;
     private static ItemStackBuilder LOBBYITEM = new ItemStackBuilder(Material.WOOD_DOOR).withName(ChatColor.DARK_RED + "Go back to the lobby").withLore(ChatColor.RED + "Click to go back to the lobby").withAmount(1).withGlow();
     private static ItemStackBuilder PLAYERS = new ItemStackBuilder(Material.COMPASS).withName(ChatColor.DARK_AQUA + "Spectator menu").withLore(ChatColor.GRAY + "Click to open the spectator menu").withAmount(1);
+    private static ItemStackBuilder TEAMSELECTOR = new ItemStackBuilder(Material.FIREBALL).withName(ChatColor.DARK_GREEN + "Team Selector").withLore(ChatColor.GREEN + "Click to open the team selector menu").withAmount(1);
     private List<UUID> spectators = Collections.synchronizedList(new ArrayList<UUID>());
     private Map<Location, Inventory> chests = new HashMap<>();
 
@@ -493,6 +498,8 @@ public class GameListener implements Listener {
                     KitSelection.openMenu(p);
                 } else if (slot == LOBBYSLOT) {
                     BubbleGameAPI.getInstance().getHubInventory().show(p);
+                } else if (slot == TEAMSLOT && BubbleGameAPI.getInstance().isTeams()) {
+                    TeamMenu.getMenu(p).show(p);
                 }
             }
         } else if (isSpectating(p)) {
